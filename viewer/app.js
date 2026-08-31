@@ -750,9 +750,7 @@
     var r = read(flow);
     SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
 
-    seg('pick', F.map(function (x) {
-      return [x.id, x.name + (x.start ? ' \u00b7 ' + x.start : '')];
-    }), S.id, function (v) { S.id = v; save(); paint(); });
+    picker(flow);
     document.getElementById('src').innerHTML = srcLine();
 
     var ax = '';
@@ -837,9 +835,84 @@
     }
   }
 
+  // ── Picking a journey ─────────────────────────────────────────────────────
+  // Eight variants in one row was a list to read rather than a choice to make.
+  // The same eight are three questions: which cut, where it is going, and what
+  // carries it. A question with only one answer is not a question and is not
+  // drawn, which is what keeps the freight toggle off the on-island journeys.
+  // A journey's name carries its facets: Product-Destination-Carrier, so
+  // Lettuce-140-Barge goes to 140 by barge and Lettuce-Pickup has no carrier
+  // to choose. reference.json overrides a name that does not follow that yet;
+  // that table is meant to empty out as the sheet gets renamed.
+  function facets(f) {
+    var over = ((window.REF || {}).journeys || {})[f.name];
+    if (over) return { when: f.start, to: over.to || f.name, by: over.by || '' };
+    var part = String(f.name).split('-');
+    return { when: f.start,
+      to: part.length > 1 ? part[1] : f.name,
+      by: part.length > 2 ? part.slice(2).join('-') : '' };
+  }
+
+  // We cut on the anchor day and the day after, and both feed the same
+  // departure, so the pair is the honest label for the choice.
+  function cutLabel(day) {
+    var i = DOW.indexOf(day);
+    return i < 0 ? day : day + '/' + DOW[(i + 1) % 7];
+  }
+
+  function uniq(list) {
+    var seen = {}, out = [];
+    list.forEach(function (v) {
+      if (v !== '' && !Object.prototype.hasOwnProperty.call(seen, v)) { seen[v] = 1; out.push(v); }
+    });
+    return out;
+  }
+
+  // Answer as much of the wanted combination as exists, giving up the freight
+  // before the destination and the cut before either.
+  function match(want) {
+    var i, x;
+    for (i = 0; i < F.length; i++) {
+      x = facets(F[i]);
+      if (x.when === want.when && x.to === want.to && (!want.by || x.by === want.by)) return F[i];
+    }
+    for (i = 0; i < F.length; i++) {
+      x = facets(F[i]);
+      if (x.when === want.when && x.to === want.to) return F[i];
+    }
+    for (i = 0; i < F.length; i++) {
+      x = facets(F[i]);
+      if (x.to === want.to) return F[i];
+    }
+    return F[0];
+  }
+
+  function picker(flow) {
+    var now = facets(flow);
+    function go(want) {
+      var f = match(want);
+      if (f) { S.id = f.id; save(); paint(); }
+    }
+    seg('pick-when', uniq(F.map(function (f) { return f.start; })).map(function (d) {
+      return [d, cutLabel(d)];
+    }), now.when, function (v) { go({ when: v, to: now.to, by: now.by }); });
+
+    seg('pick-to', uniq(F.map(function (f) { return facets(f).to; })).map(function (t) {
+      return [t, t];
+    }), now.to, function (v) { go({ when: now.when, to: v, by: now.by }); });
+
+    // Only the freight this destination actually offers, and only if it offers
+    // more than one.
+    var by = uniq(F.filter(function (f) { return facets(f).to === now.to; })
+      .map(function (f) { return facets(f).by; }));
+    seg('pick-by', by.length > 1 ? by.map(function (b) { return [b, b]; }) : [],
+      now.by, function (v) { go({ when: now.when, to: now.to, by: v }); });
+  }
+
   function seg(id, opts, sel, cb) {
     var el = document.getElementById(id);
     if (!el) return;
+    el.style.display = opts.length ? '' : 'none';
     el.innerHTML = opts.map(function (o) {
       return '<a data-v="' + esc(o[0]) + '"' + (String(o[0]) === String(sel) ? ' class="on"' : '') +
         '>' + esc(o[1]) + '</a>';

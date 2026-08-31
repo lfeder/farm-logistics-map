@@ -2,7 +2,22 @@
   "_": "Hand-edited. Everything here changes rarely: what a journey is, who is open when, and which boat goes where. The legs themselves live in legs.csv.",
   "legs_sheet": "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv",
   "journeys": {
-    "Costco Kona Lettuce": ""
+    "Lettuce-BI-Costco": {
+      "to": "140",
+      "by": ""
+    },
+    "Lettuce-BI-Pickup": {
+      "to": "Pickup",
+      "by": ""
+    },
+    "Lettuce-Air": {
+      "to": "OffIsland",
+      "by": "Air"
+    },
+    "Lettuce-Barge": {
+      "to": "OffIsland",
+      "by": "Barge"
+    }
   },
   "hours": [
     {
@@ -19,7 +34,7 @@
       "open": "00:00",
       "close": "23:59",
       "after_arrival": 0,
-      "note": "Always open — it is our own cooler."
+      "note": "Always open \u2014 it is our own cooler."
     },
     {
       "place": "Lettuce loading dock",
@@ -51,7 +66,7 @@
       "open": "06:00",
       "close": "17:00",
       "after_arrival": 0,
-      "note": "Aloha Air Cargo counter. Six days — dark Saturday."
+      "note": "Aloha Air Cargo counter. Six days \u2014 dark Saturday."
     },
     {
       "place": "Kawaihae",
@@ -143,7 +158,7 @@
       "departs": "Thu",
       "arrives": "Fri",
       "connects": "the Tuesday sailing",
-      "note": "Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday — level with Oahu."
+      "note": "Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday \u2014 level with Oahu."
     }
   ]
 }

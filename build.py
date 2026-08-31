@@ -198,7 +198,11 @@ for r in REF.get("sailings", []):
 legs_text = open(os.path.join(HERE, "legs.csv")).read()
 
 data = json.load(open(os.path.join(HERE, "orders.json")))
-ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings}
+# journeys says what a journey IS -- where it delivers and what carries it --
+# as against the sheet, which says when it runs. The picker in the viewer is
+# built from whatever values turn up here.
+ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings,
+       "journeys": REF.get("journeys", {})}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell
