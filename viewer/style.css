@@ -266,6 +266,5 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .ln.b0{color:var(--ink)} .ln.b1{color:var(--accent)}
 .ln.b2{color:var(--good)} .ln.b3{color:var(--ink-3)}
 .ln{transform:translate(0,-50%); margin-left:8px}
-.ln.n0{margin-top:-11px} .ln.n1{margin-top:11px} .ln.n2{margin-top:-23px}
-.ln.n3{margin-top:23px} .ln.n4{margin-top:-35px} .ln.n5{margin-top:35px}
+.ln.n0{margin-top:-11px} .ln.n1{margin-top:11px}
 .ln:hover{outline:2px solid var(--accent-soft)}

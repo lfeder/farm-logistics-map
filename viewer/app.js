@@ -229,24 +229,31 @@
 
       // The name sits at the middle of the bar, stepped off it when two names
       // would land on each other.
-      // The name starts at the middle of the bar and runs right, rather than
-      // straddling it, so it never sits on the hour printed at either end.
-      var mx = PCT((p.s + p.e) / 2), my = (y1 + y2) / 2;
+      // The name rides its own bar. When it collides it slides ALONG the leg
+      // rather than jumping vertically -- a label moved a whole lane up reads
+      // as belonging to the leg above it, which is worse than a collision.
       var wpc = (30 + nm.length * 5.6) / PLOT_PX * 100;
-      var lo = mx + 0.6, hi = mx + 0.6 + wpc;
-      // Names dodge the hour labels as well as each other: on a short leg the
-      // middle of the bar is only a few pixels from its own end.
-      var OFF = [-11, 11, -23, 23, -35, 35], slot = 0;
-      for (; slot < OFF.length; slot++) {
-        var ly = my + OFF[slot], free = true;
-        for (var q2 = 0; q2 < taken.length; q2++) {
-          var o = taken[q2];
-          if (Math.abs(o.y - ly) < 12 && lo < o.hi + .4 && o.lo < hi + .4) { free = false; break; }
+      var best = null;
+      for (var k = 0; k < 6 && !best; k++) {
+        var t = 0.5 + k * 0.09;
+        if (t > 0.94) t = 0.94;
+        var cx = PCT(p.s + (p.e - p.s) * t), cy = y1 + (y2 - y1) * t;
+        for (var v = 0; v < 2 && !best; v++) {
+          var off = v === 0 ? -11 : 11;
+          var lo2 = cx + 0.6, hi2 = cx + 0.6 + wpc, ly2 = cy + off, free2 = true;
+          for (var q2 = 0; q2 < taken.length; q2++) {
+            var o = taken[q2];
+            if (Math.abs(o.y - ly2) < 12 && lo2 < o.hi + .4 && o.lo < hi2 + .4) { free2 = false; break; }
+          }
+          if (free2) best = { x: cx, y: cy, off: off, lo: lo2, hi: hi2, ly: ly2 };
         }
-        if (free) break;
       }
-      if (slot >= OFF.length) slot = OFF.length - 1;
-      taken.push({ y: my + OFF[slot], lo: lo, hi: hi });
+      if (!best) {
+        var fx = PCT((p.s + p.e) / 2), fy = (y1 + y2) / 2;
+        best = { x: fx, y: fy, off: -11, lo: fx + 0.6, hi: fx + 0.6 + wpc, ly: fy - 11 };
+      }
+      taken.push({ y: best.ly, lo: best.lo, hi: best.hi });
+      var mx = best.x, my = best.y, slot = best.off < 0 ? 0 : 1;
       dots += '<div class="ln n' + slot + db + '" style="left:' + mx + '%;top:' + my + 'px"' +
         ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
         stamp(p.e) + ', ' + dur(p.e - p.s) + (p.t.note ? '. ' + esc(p.t.note) : '') + '">' +
