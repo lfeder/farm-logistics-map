@@ -267,4 +267,9 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .ln.b2{color:var(--good)} .ln.b3{color:var(--ink-3)}
 .ln{transform:translate(-50%,-50%)}
 .ln.n0{margin-top:-11px} .ln.n1{margin-top:11px}
+.ln.n2{margin-top:-22px} .ln.n3{margin-top:22px}
+/* A moment has no bar to sit on, so its name sits beside the point. */
+.ln.nm0,.ln.nm1,.ln.nm2,.ln.nm3{transform:translate(0,-50%); margin-left:7px}
+.ln.nm0{margin-top:-11px} .ln.nm1{margin-top:11px}
+.ln.nm2{margin-top:-22px} .ln.nm3{margin-top:22px}
 .ln:hover{outline:2px solid var(--accent-soft)}

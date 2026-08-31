@@ -2,8 +2,10 @@
 
 Three files, split by how often they change rather than by what they describe:
 
-    legs.csv        THE schedule. One row per leg of a journey, and the only
-                    thing you edit to change when something happens.
+    legs.csv        THE schedule. One row per leg of a journey. Pulled from the
+                    Google Sheet named in reference.json when that is reachable,
+                    and committed either way so the build works offline and the
+                    diff shows what changed.
     reference.json  Quasi-static and hand-edited: what a journey is, who is open
                     when, which boat goes where. Months between edits.
     orders.json     Pulled, not typed. Cases and pounds on order by destination,
@@ -15,10 +17,12 @@ Three files, split by how often they change rather than by what they describe:
 Touches no network and needs no credentials.
 """
 import csv
+import io
 import json
 import os
 import re
 import sys
+import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -42,6 +46,79 @@ def read(name, need):
 
 
 REF = json.load(open(os.path.join(HERE, "reference.json")))
+
+# ── the sheet ────────────────────────────────────────────────────────────────
+# legs.csv is the committed snapshot; the sheet is where it is edited. Pull on
+# every build so the two cannot drift, fall back to the snapshot when the
+# network is not there, and always write what was pulled so the change shows up
+# in the diff rather than only on the screen.
+SHEET_COLS = {"journey": "journey", "start day": "start_day", "branch": "branch",
+              "leg": "leg", "start location": "start_location", "start dt": "start_dt",
+              "end location": "end_location", "end dt": "end_dt",
+              "icon": "icon", "note": "note"}
+
+
+def pull_sheet(url):
+    with urllib.request.urlopen(url, timeout=20) as fh:
+        body = fh.read().decode("utf-8")
+    rows = [r for r in csv.reader(io.StringIO(body))]
+    # The sheet has its own margins: blank leading columns and blank rows above
+    # the header. Find the header by looking for the row that names a journey.
+    head_i = next((i for i, r in enumerate(rows)
+                   if any((c or "").strip().lower() == "journey" for c in r)), None)
+    if head_i is None:
+        raise ValueError("no header row with a 'Journey' column")
+    head = [(c or "").strip().lower() for c in rows[head_i]]
+    keep = [(i, SHEET_COLS[h]) for i, h in enumerate(head) if h in SHEET_COLS]
+    missing = [v for v in ("journey", "leg", "start_dt", "end_dt") if v not in [k[1] for k in keep]]
+    if missing:
+        raise ValueError("sheet is missing: " + ", ".join(missing))
+    out = []
+    for r in rows[head_i + 1:]:
+        rec = {name: (r[i].strip() if i < len(r) and r[i] else "") for i, name in keep}
+        if rec.get("journey") and rec.get("leg"):
+            out.append(rec)
+    return out
+
+
+# A leg's icon is read off its name rather than typed, so the sheet stays four
+# columns of schedule and a new leg picks up a sensible glyph on its own.
+# Order matters: the first pattern that matches wins, so the specific ones come
+# before the general. "Costco delivery clearance" is a clearance, not a delivery.
+ICON_RULES = [
+    (r"clearance|eligib|submission|paperwork", "depot"),
+    (r"pack", "box"),
+    (r"fl(y|ight)|aloha|air\b", "plane"),
+    (r"sail|barge|boat", "ship"),
+    (r"truck|deliver|pickup|haul|drive|load", "truck"),
+    (r"receiv|store", "store"),
+]
+
+
+def icon_for(name):
+    low = (name or "").lower()
+    for pat, ic in ICON_RULES:
+        if re.search(pat, low):
+            return ic
+    return "clock"
+
+
+sheet_url = (REF.get("legs_sheet") or "").strip()
+if sheet_url:
+    try:
+        pulled = pull_sheet(sheet_url)
+        cols = ["journey", "start_day", "branch", "leg", "start_location",
+                "start_dt", "end_location", "end_dt", "icon", "note"]
+        for r in pulled:
+            r["icon"] = r.get("icon") or icon_for(r.get("leg"))
+        with open(os.path.join(HERE, "legs.csv"), "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+            w.writeheader()
+            for r in pulled:
+                w.writerow({c: r.get(c, "") for c in cols})
+        print("pulled %d legs from the sheet" % len(pulled))
+    except Exception as e:
+        print("sheet unreachable (%s) — using the committed legs.csv" % e)
 
 
 def hhmm(s, f, where):
@@ -153,8 +230,8 @@ for r in read("legs.csv", NEED):
     jn = (r["journey"] or "").strip()
     if not jn:
         continue
-    if jn not in meta:
-        die("legs.csv", "%r has no entry under \"journeys\" in reference.json" % jn)
+    # The sheet names the journeys; reference.json only ever held optional notes
+    # for them, so a journey that has no note is not an error.
     key = (jn, (r["start_day"] or "0").strip())
     if key not in groups:
         groups[key] = []

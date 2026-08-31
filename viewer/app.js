@@ -221,8 +221,22 @@
         if (stamped[k]) return '';
         stamped[k] = 1;
         var w = (clock(h).length * 5.2 + 10) / PLOT_PX * 100, x = PCT(h);
-        taken.push({ y: y, lo: side === 's' ? x - w : x, hi: side === 's' ? x : x + w });
-        return '<div class="lt ' + side + db + '" style="left:' + x + '%;top:' + y + 'px">' +
+        var lo = side === 's' ? x - w : x, hi = side === 's' ? x : x + w;
+        // Two hours close together on one lane would print over each other, so
+        // the later one steps clear -- up if it opens a leg, down if it closes
+        // one, which keeps it on the side its own bar is heading.
+        var dy = 0;
+        for (var v = 0; v < 3; v++) {
+          dy = v === 0 ? 0 : (side === 's' ? -10 : 10) * v;
+          var clash = false;
+          for (var i2 = 0; i2 < taken.length; i2++) {
+            var o = taken[i2];
+            if (Math.abs(o.y - (y + dy)) < 9 && lo < o.hi + .4 && o.lo < hi + .4) { clash = true; break; }
+          }
+          if (!clash) break;
+        }
+        taken.push({ y: y + dy, lo: lo, hi: hi });
+        return '<div class="lt ' + side + db + '" style="left:' + x + '%;top:' + (y + dy) + 'px">' +
           clock(h) + '</div>';
       }
       dots += hourLbl(p.s, y1, 's') + hourLbl(p.e, y2, 'e');
@@ -244,25 +258,33 @@
       // Every anchor is a point ON the leg, so a name can never drift into a
       // lane it does not belong to however crowded the chart gets.
       var wpc = (30 + nm.length * 5.6) / PLOT_PX * 100;
-      var ANCHORS = [[.5, -1], [.5, 1], [.67, -1], [.67, 1],
-                     [.9, -1], [.9, 1], [.33, -1], [.33, 1]];
+      // A leg with no duration is a moment, not a bar: there is nowhere along
+      // it to slide, so its name sits beside the point instead of over it.
+      var moment = p.e - p.s < .08;
+      var ANCHORS = moment
+        ? [[.5, -1], [.5, 1], [.5, -2], [.5, 2]]
+        : [[.5, -1], [.5, 1], [.67, -1], [.67, 1],
+           [.9, -1], [.9, 1], [.33, -1], [.33, 1]];
       var best = null;
       for (var k = 0; k < ANCHORS.length && !best; k++) {
         var t = ANCHORS[k][0], up = ANCHORS[k][1];
         var cx = PCT(p.s + (p.e - p.s) * t), cy = y1 + (y2 - y1) * t;
-        var lo2 = cx - wpc / 2, hi2 = cx + wpc / 2, ly2 = cy + up * 11, free2 = true;
+        var lo2 = moment ? cx + .6 : cx - wpc / 2, hi2 = moment ? cx + .6 + wpc : cx + wpc / 2;
+        var ly2 = cy + (up < 0 ? -1 : 1) * (Math.abs(up) === 2 ? 22 : 11), free2 = true;
         for (var q2 = 0; q2 < taken.length; q2++) {
           var o = taken[q2];
           if (Math.abs(o.y - ly2) < 12 && lo2 < o.hi + .4 && o.lo < hi2 + .4) { free2 = false; break; }
         }
-        if (free2) best = { x: cx, y: cy, up: up, lo: lo2, hi: hi2, ly: ly2 };
+        if (free2) best = { x: cx, y: cy, up: up, lo: lo2, hi: hi2, ly: ly2, moment: moment };
       }
       if (!best) {
         var fx = PCT((p.s + p.e) / 2), fy = (y1 + y2) / 2;
-        best = { x: fx, y: fy, up: -1, lo: fx - wpc / 2, hi: fx + wpc / 2, ly: fy - 11 };
+        best = { x: fx, y: fy, up: -1, lo: fx - wpc / 2, hi: fx + wpc / 2, ly: fy - 11, moment: moment };
       }
       taken.push({ y: best.ly, lo: best.lo, hi: best.hi });
-      var mx = best.x, my = best.y, slot = best.up < 0 ? 0 : 1;
+      var mx = best.x, my = best.y;
+      var slot = (best.moment ? 'm' : '') + (Math.abs(best.up) === 2 ? (best.up < 0 ? '2' : '3')
+                                                                    : (best.up < 0 ? '0' : '1'));
       dots += '<div class="ln n' + slot + db + '" style="left:' + mx + '%;top:' + my + 'px"' +
         ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
         stamp(p.e) + ', ' + dur(p.e - p.s) + (p.t.note ? '. ' + esc(p.t.note) : '') + '">' +
