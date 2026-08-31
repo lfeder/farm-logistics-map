@@ -256,9 +256,12 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pt{fill:var(--card); stroke-width:2}
 .pt.b0{stroke:var(--ink)} .pt.b1{stroke:var(--accent)}
 .pt.b2{stroke:var(--good)} .pt.b3{stroke:var(--ink-3)}
-.ln{position:absolute; display:flex; align-items:center; gap:3px; white-space:nowrap;
-  font-size:10px; font-weight:600; line-height:1; cursor:pointer;
+.ln{position:absolute; display:flex; align-items:center; gap:3px;
+  font-size:10px; font-weight:600; line-height:1.2; cursor:pointer;
   background:var(--card); padding:1px 4px; border-radius:3px}
+/* Wrapped at every word: as wide as the longest word, as tall as it has
+   words. Time is the crowded axis, place is not. */
+.ln .nw{width:min-content}
 .ln.b0{color:var(--ink)} .ln.b1{color:var(--accent)}
 .ln.b2{color:var(--good)} .ln.b3{color:var(--ink-3)}
 /* A name hangs off its leg's start dot, so it is anchored left and centred
