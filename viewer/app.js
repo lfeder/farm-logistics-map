@@ -241,51 +241,32 @@
       }
       dots += hourLbl(p.s, y1, 's') + hourLbl(p.e, y2, 'e');
 
-      // The name sits at the middle of the bar, stepped off it when two names
-      // would land on each other.
       // ── Where a leg's name goes ──────────────────────────────────────
-      // One rule, applied to every leg the same way: try these anchors in
-      // order and take the first that hits nothing already placed. The list is
-      // the preference, so the common case -- a leg with room -- always lands
-      // centred on its own bar, and only a crowded one walks down the list.
+      // The shape of the leg decides it, not the crowding:
       //
-      //   1. centred on the bar, above it
-      //   2. centred, below
-      //   3. two thirds along, above / below
-      //   4. nine tenths along, above / below
-      //   5. one third along, above / below
+      //   sloped -- it changes place  the name sits to the RIGHT of the
+      //                               start dot, on the start dot's own row
+      //   flat   -- it stays put      the name sits just ABOVE the start dot
       //
-      // Every anchor is a point ON the leg, so a name can never drift into a
-      // lane it does not belong to however crowded the chart gets.
+      // Either way it hangs off the start, so a name always reads as the
+      // beginning of its activity rather than the end. If that spot is taken
+      // the name steps up; it never slides along the bar, so it cannot drift
+      // away from the leg it belongs to.
       var wpc = (30 + nm.length * 5.6) / PLOT_PX * 100;
-      // A leg with no duration is a moment, not a bar: there is nowhere along
-      // it to slide, so its name sits beside the point instead of over it.
-      var moment = p.e - p.s < .08;
-      var ANCHORS = moment
-        ? [[.5, -1], [.5, 1], [.5, -2], [.5, 2]]
-        : [[.5, -1], [.5, 1], [.67, -1], [.67, 1],
-           [.9, -1], [.9, 1], [.33, -1], [.33, 1]];
-      var best = null;
-      for (var k = 0; k < ANCHORS.length && !best; k++) {
-        var t = ANCHORS[k][0], up = ANCHORS[k][1];
-        var cx = PCT(p.s + (p.e - p.s) * t), cy = y1 + (y2 - y1) * t;
-        var lo2 = moment ? cx + .6 : cx - wpc / 2, hi2 = moment ? cx + .6 + wpc : cx + wpc / 2;
-        var ly2 = cy + (up < 0 ? -1 : 1) * (Math.abs(up) === 2 ? 22 : 11), free2 = true;
+      var lo = PCT(p.s) + .6, hi = lo + wpc;
+      var STEPS = y1 === y2 ? [-11, -22, -33, 0] : [0, -11, -22, 11];
+      var ly = null;
+      for (var k = 0; k < STEPS.length; k++) {
+        var cand = y1 + STEPS[k], free = true;
         for (var q2 = 0; q2 < taken.length; q2++) {
           var o = taken[q2];
-          if (Math.abs(o.y - ly2) < 12 && lo2 < o.hi + .4 && o.lo < hi2 + .4) { free2 = false; break; }
+          if (Math.abs(o.y - cand) < 12 && lo < o.hi + .4 && o.lo < hi + .4) { free = false; break; }
         }
-        if (free2) best = { x: cx, y: cy, up: up, lo: lo2, hi: hi2, ly: ly2, moment: moment };
+        if (free) { ly = cand; break; }
       }
-      if (!best) {
-        var fx = PCT((p.s + p.e) / 2), fy = (y1 + y2) / 2;
-        best = { x: fx, y: fy, up: -1, lo: fx - wpc / 2, hi: fx + wpc / 2, ly: fy - 11, moment: moment };
-      }
-      taken.push({ y: best.ly, lo: best.lo, hi: best.hi });
-      var mx = best.x, my = best.y;
-      var slot = (best.moment ? 'm' : '') + (Math.abs(best.up) === 2 ? (best.up < 0 ? '2' : '3')
-                                                                    : (best.up < 0 ? '0' : '1'));
-      dots += '<div class="ln n' + slot + db + '" style="left:' + mx + '%;top:' + my + 'px"' +
+      if (ly === null) ly = y1 + STEPS[0];
+      taken.push({ y: ly, lo: lo, hi: hi });
+      dots += '<div class="ln' + db + '" style="left:' + PCT(p.s) + '%;top:' + ly + 'px"' +
         ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
         stamp(p.e) + ', ' + dur(p.e - p.s) + (p.t.note ? '. ' + esc(p.t.note) : '') + '">' +
         ico(p.t.icon) + esc(nm) + '</div>';
