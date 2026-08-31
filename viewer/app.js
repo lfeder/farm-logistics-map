@@ -342,11 +342,14 @@
       });
     });
     // Orders arrive in cases and the harvest is weighed, so both units belong on
-    // every line rather than somebody converting in their head.
+    // every line rather than somebody converting in their head. They share one
+    // column and one type size -- neither is the headline -- and each sits in a
+    // fixed-width slot so both run straight down the page.
     function qty(b, k) {
-      if (!b || !b[k]) return '<u>—</u>';
-      return '<b>' + Math.round(b[k]).toLocaleString() + '</b><s>cs</s>' +
-        '<s class="lb">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + ' lb</s>';
+      if (!b || !b[k]) return '<span class="q"><s class="cs">&mdash;</s><s class="lb"></s></span>';
+      return '<span class="q">' +
+        '<s class="cs">' + Math.round(b[k]).toLocaleString() + '<i>cs</i></s>' +
+        '<s class="lb">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + '<i>lb</i></s></span>';
     }
     var tot = { kona: 0, pickup: 0, off: 0, kona_lb: 0, pickup_lb: 0, off_lb: 0, n: 0 };
     var body = wks.map(function (w) {

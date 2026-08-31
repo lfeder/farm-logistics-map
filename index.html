@@ -206,9 +206,17 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .hint{margin:14px 0 0; font-size:11.5px; color:var(--ink-3); line-height:1.5}
 .hint b{color:var(--ink-2); font-weight:600}
 
-/* Cases lead and pounds follow: the orders come in cases and the harvest is
-   weighed, so a line carrying only one of them makes somebody convert. */
-.otbl td s.lb{display:block; margin:1px 0 0; font-size:10px}
+/* Cases and pounds share a column and a type size. The orders come in cases and
+   the harvest is weighed, so a line carrying only one of them makes somebody
+   convert -- but neither is the headline, so neither gets to be bigger. Fixed
+   slots keep both columns of figures running straight down the page. */
+.q{display:inline-flex; justify-content:flex-end; gap:12px;
+  font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; font-size:11.5px}
+.otbl .q s{text-decoration:none; display:inline-block; text-align:right; color:var(--ink);
+  margin:0; font-size:11.5px}
+.otbl .q s.cs{width:58px}
+.otbl .q s.lb{width:70px}
+.q i{font-style:normal; color:var(--ink-3); font-size:10px; margin-left:4px}
 
 </style>
 </head>
@@ -618,11 +626,14 @@ window.DATA = {"generated_from":"farm-freight-model data.json (sales_po x sales_
       });
     });
     // Orders arrive in cases and the harvest is weighed, so both units belong on
-    // every line rather than somebody converting in their head.
+    // every line rather than somebody converting in their head. They share one
+    // column and one type size -- neither is the headline -- and each sits in a
+    // fixed-width slot so both run straight down the page.
     function qty(b, k) {
-      if (!b || !b[k]) return '<u>—</u>';
-      return '<b>' + Math.round(b[k]).toLocaleString() + '</b><s>cs</s>' +
-        '<s class="lb">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + ' lb</s>';
+      if (!b || !b[k]) return '<span class="q"><s class="cs">&mdash;</s><s class="lb"></s></span>';
+      return '<span class="q">' +
+        '<s class="cs">' + Math.round(b[k]).toLocaleString() + '<i>cs</i></s>' +
+        '<s class="lb">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + '<i>lb</i></s></span>';
     }
     var tot = { kona: 0, pickup: 0, off: 0, kona_lb: 0, pickup_lb: 0, off_lb: 0, n: 0 };
     var body = wks.map(function (w) {
