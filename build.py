@@ -208,7 +208,8 @@ for r in REF.get("sailings", []):
 legs_text = open(os.path.join(HERE, "legs.csv")).read()
 
 data = json.load(open(os.path.join(HERE, "orders.json")))
-ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings}
+ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings,
+       "hold": REF.get("hold", {})}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell

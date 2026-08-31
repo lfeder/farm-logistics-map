@@ -142,5 +142,35 @@
       "connects": "the Tuesday sailing",
       "note": "Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday \u2014 level with Oahu."
     }
-  ]
+  ],
+  "hold": {
+    "_": "Test and hold. The same four steps on every journey, so they are written here once and generated onto each one. The clock starts when packing ends. Branch 2 rows in the sheet are ignored: two definitions of one clock would drift apart.",
+    "branch": "2",
+    "starts_after": [
+      "Packing",
+      "BOL"
+    ],
+    "steps": [
+      {
+        "leg": "Incubate",
+        "hours": 6,
+        "place": "Lab"
+      },
+      {
+        "leg": "Reader",
+        "hours": 1.5,
+        "place": "Lab"
+      },
+      {
+        "leg": "Submit",
+        "hours": 0,
+        "place": "Azzule"
+      },
+      {
+        "leg": "Approval",
+        "hours": 3,
+        "place": "Cleared"
+      }
+    ]
+  }
 }

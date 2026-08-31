@@ -202,6 +202,43 @@
           icon: ICONS.indexOf(ic) < 0 ? iconFor(r.leg) : ic,
           note: r.note || '' });
       });
+      // ── The hold ────────────────────────────────────────────────────
+      // Test and hold is the same chain of steps on every journey, so it is
+      // written once in reference.json and grown onto each one from the
+      // moment packing ends. Branch 2 rows in the sheet are dropped rather
+      // than merged: two definitions of one clock would drift apart, and the
+      // sheet's were already inconsistent about when the clock starts.
+      var hold = (window.REF || {}).hold;
+      if (hold && hold.steps && hold.steps.length) {
+        var hb = String(hold.branch || '2');
+        tasks = tasks.filter(function (t) { return t.branch !== hb; });
+        // The leg the clock hangs off: the last one by that name, since a
+        // journey packs twice and the hold waits for the whole lot. The first
+        // name a journey actually has wins, so a journey that starts at the
+        // paperwork rather than the packhouse still gets its clock.
+        var seed = null;
+        [].concat(hold.starts_after || []).forEach(function (n) {
+          if (seed) return;
+          tasks.forEach(function (t) { if (t.name === n) seed = t; });
+        });
+        if (seed) {
+          if (branches.indexOf(hb) < 0) branches.push(hb);
+          var run = seed.e, was = null;
+          hold.steps.forEach(function (st, n) {
+            var pl = st.place || 'Hold';
+            var ic = String(st.icon || '').toLowerCase();
+            var len = +st.hours || 0;
+            tasks.push({ id: 'h' + n, name: st.leg, branch: hb,
+              from: was === null ? pl : was, place: pl,
+              s: run, e: run + len,
+              icon: ICONS.indexOf(ic) < 0 ? iconFor(st.leg) : ic,
+              note: st.note || '' });
+            run += len;
+            was = pl;
+          });
+        }
+      }
+
       // Within a branch the rows are already in order, and that is the whole
       // dependency story -- nothing needs an "after" column to say what the
       // sheet already says.
