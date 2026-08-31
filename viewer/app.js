@@ -44,10 +44,10 @@
     if (sv) {
       if (F.some(function (f) { return f.id === sv.id; })) S.id = sv.id;
       if (sv.tab) S.tab = sv.tab;
-      if (sv.crop) S.crop = sv.crop;
+      if (sv.rates) S.rates = sv.rates;
     }
   } catch (e) { /* nothing stored, or junk in the slot */ }
-  S.crop = S.crop || 'lettuce';
+  S.rates = S.rates || {};
   function save() {
     try { window.localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {}
   }
@@ -108,12 +108,10 @@
     if (pts.length) start = Math.min.apply(null, pts.map(function (p) { return p.s; }));
     var idle = pts.reduce(function (a, p) { return a + Math.max(0, p.e - p.s); }, 0);
     var moving = 0, still = 0;
-    pts.forEach(function (p, i) {
-      var prev = null;
-      (p.t.after || []).forEach(function (id) {
-        if (byId[id] && (prev === null || num(byId[id].e) > num(byId[prev].e))) prev = id;
-      });
-      p.from = prev && byId[prev] ? (byId[prev].place || 'Somewhere') : p.place;
+    pts.forEach(function (p) {
+      // The leg carries its own origin, so a bar has a real slope rather than
+      // one inferred from whatever happened to come before it.
+      p.from = p.t.from || p.place;
       if (p.from === p.place) still += Math.max(0, p.e - p.s); else moving += Math.max(0, p.e - p.s);
     });
     var edges = [];
@@ -130,11 +128,15 @@
              still: Math.round(still), moving: Math.round(moving),
              days: dayOf(end) - dayOf(start), hrs: Math.round(end - start) };
   }
+  // Every location a leg touches, in the order the journey reaches them, so the
+  // vertical axis reads top to bottom the way the product travels.
   function places(flow) {
     var seen = {}, out = [];
     flow.tasks.forEach(function (t) {
-      var p = t.place || 'Somewhere';
-      if (!seen[p]) { seen[p] = 1; out.push(p); }
+      [t.from, t.place].forEach(function (p) {
+        p = p || 'Somewhere';
+        if (!seen[p]) { seen[p] = 1; out.push(p); }
+      });
     });
     return out;
   }
@@ -206,7 +208,7 @@
         if (still) wait += '<line class="wait" ' + seg + '/>';
         else move += '<line class="move" ' + seg + '/>';
       }
-      svg += '<circle class="tick" cx="' + X(p.s) + '" cy="' + y1 + '" r="2.6"><title>' +
+      svg += '<circle class="tick' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="2.6"><title>' +
         esc(p.t.name) + ' starts ' + stamp(p.s) + '</title></circle>';
       grabs += '<line class="grab" ' + seg + ' data-task="' + esc(p.id) + '"><title>' +
         esc(p.t.name) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
@@ -232,7 +234,8 @@
       }
       lane.push({ lo: lo, hi: hi, slot: slot });
       var fed = feedsOf(flow, p.id);
-      dots += '<div class="dot s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
+      var db = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
+      dots += '<div class="dot' + db + ' s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
         '" style="left:' + x + '%;top:' + yOf[p.place] + 'px" data-task="' + esc(p.id) + '"' +
         ' title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
         (p.t.note ? '. ' + esc(p.t.note) : '') +
@@ -317,82 +320,90 @@
       body + '</div>';
   }
 
-  // ── Orders by destination ─────────────────────────────────────────────────
-  // Three ways an order leaves the farm, off the purchase orders, so it owes
-  // nothing to whether anybody built a pallet for it.
-  var BUCKETS = [['kona', 'Costco Kona'], ['pickup', 'Pick up'], ['off', 'Off-island']];
-  function ordersView() {
-    var c = S.crop, rows = {}, weeks = {};
-    (DATA.sales || []).forEach(function (x) {
-      if (x.crop !== c) return;
-      var k = x.wk + '|' + x.half;
-      var R = rows[k] || (rows[k] = {});
-      R[x.bucket] = (R[x.bucket] || 0) + (x.cases || 0);
-      R[x.bucket + '_lb'] = (R[x.bucket + '_lb'] || 0) + (x.lbs || 0);
-      weeks[x.wk] = 1;
+  // ── What has to be packed, and how long it takes ──────────────────────────
+  // Three case types at three different rates against two destinations, which
+  // is the shape the pack line is actually planned in. Cases only: the pack
+  // line counts cases, and pounds were a second number nobody was using here.
+  var GROUPS = (window.DATA && DATA.pack_groups) || [['LW', 'LW'], ['LF', 'LF'], ['TRAY', 'LR/AR/WR']];
+  var DESTS = [['on', 'On-island'], ['off', 'Off-island']];
+  // Minutes per case, not cases per minute: a tray takes six minutes, it does
+  // not come off the line six at a time.
+  var RATE_DEF = { LW: 8, LF: 6, TRAY: 6 };
+
+  function rates() {
+    var r = {};
+    GROUPS.forEach(function (g) {
+      var v = S.rates && S.rates[g[0]];
+      r[g[0]] = (v === undefined || v === null || v === '' || +v <= 0) ? RATE_DEF[g[0]] : +v;
     });
-    var wks = Object.keys(weeks).sort();
-    var HALF = [['early', 'Sun / Mon'], ['late', 'Wed / Thu']];
-    var best = 0;
-    wks.forEach(function (w) {
-      HALF.forEach(function (h) {
-        var b = rows[w + '|' + h[0]];
-        if (b) best = Math.max(best, (b.kona_lb || 0) + (b.pickup_lb || 0) + (b.off_lb || 0));
+    return r;
+  }
+  function mins(cases, rate) { return cases * rate; }
+  function showMins(m) {
+    if (!m) return '—';
+    if (m < 60) return Math.round(m) + ' min';
+    var h = Math.floor(m / 60), mm = Math.round(m - h * 60);
+    return h + ' h' + (mm ? ' ' + mm : '');
+  }
+
+  function ordersView() {
+    var P = (window.DATA && DATA.packs) || [];
+    if (!P.length) return '<p class="hint">No pack data in data.json.</p>';
+    var R = rates();
+    var tot = {}, n = 0;
+    DESTS.forEach(function (d) { GROUPS.forEach(function (g) { tot[d[0] + g[0]] = 0; }); });
+    P.forEach(function (row) {
+      n++;
+      DESTS.forEach(function (d) {
+        GROUPS.forEach(function (g) { tot[d[0] + g[0]] += (row[d[0]] || {})[g[0]] || 0; });
       });
     });
-    // Orders arrive in cases and the harvest is weighed, so both units belong on
-    // every line rather than somebody converting in their head. They share one
-    // column and one type size -- neither is the headline -- and each sits in a
-    // fixed-width slot so both run straight down the page.
-    // The unit is a property of the column, not of every figure in it, so it is
-    // said once in the header and the cells carry nothing but numbers.
-    function qty(b, k) {
-      if (!b || !b[k]) return '<td class="fig">&mdash;</td><td class="fig">&mdash;</td>';
-      return '<td class="fig">' + Math.round(b[k]).toLocaleString() + '</td>' +
-        '<td class="fig">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + '</td>';
-    }
-    var tot = { kona: 0, pickup: 0, off: 0, kona_lb: 0, pickup_lb: 0, off_lb: 0, n: 0 };
-    var body = wks.map(function (w) {
-      return HALF.map(function (h, hi) {
-        var b = rows[w + '|' + h[0]] || null;
-        if (b) {
-          BUCKETS.forEach(function (k) {
-            tot[k[0]] += b[k[0]] || 0; tot[k[0] + '_lb'] += b[k[0] + '_lb'] || 0;
-          });
-          tot.n++;
-        }
-        var sum = b ? (b.kona_lb || 0) + (b.pickup_lb || 0) + (b.off_lb || 0) : 0;
-        var bar = sum && best ? '<span class="obar" style="width:' + (sum / best * 100).toFixed(1) + '%"></span>' : '';
-        return '<tr class="' + (hi ? '' : 'wkstart') + '">' +
-          (hi ? '' : '<th rowspan="2" class="wk">' + shortDate(w) + '</th>') +
-          '<th class="hf">' + h[1] + '</th>' +
-          BUCKETS.map(function (k) { return qty(b, k[0]); }).join('') +
-          '<td class="barcell">' + bar + '</td></tr>';
-      }).join('');
+
+    var rateRow = '<div class="rates"><span class="lbl">Minutes per case</span>' +
+      GROUPS.map(function (g) {
+        return '<label class="rate">' + esc(g[1]) +
+          '<input type="text" inputmode="numeric" value="' + R[g[0]] +
+          '" data-rate="' + g[0] + '"></label>';
+      }).join('') + '</div>';
+
+    var body = P.map(function (row, i) {
+      var first = i % 2 === 0;
+      return '<tr class="' + (first ? 'wkstart' : '') + '">' +
+        (first ? '<th rowspan="2" class="wk">' + shortDate(row.wk) + '</th>' : '') +
+        '<th class="hf">' + (row.half === 'early' ? 'Sun / Mon' : 'Wed / Thu') + '</th>' +
+        DESTS.map(function (d) {
+          return GROUPS.map(function (g) {
+            var v = (row[d[0]] || {})[g[0]] || 0;
+            return '<td class="fig">' + (v ? v.toLocaleString() : '&mdash;') + '</td>';
+          }).join('');
+        }).join('') + '</tr>';
     }).join('');
-    var mean = {};
-    BUCKETS.forEach(function (k) {
-      mean[k[0]] = tot.n ? tot[k[0]] / tot.n : 0;
-      mean[k[0] + '_lb'] = tot.n ? tot[k[0] + '_lb'] / tot.n : 0;
-    });
-    var avg = '<tr class="grp"><th colspan="9">Per window</th></tr>' +
+
+    var minRow = '<tr class="minrow"><th></th><th class="hf">Minutes</th>' +
+      DESTS.map(function (d) {
+        return GROUPS.map(function (g) {
+          return '<td class="fig">' + showMins(mins(n ? tot[d[0] + g[0]] / n : 0, R[g[0]])) + '</td>';
+        }).join('');
+      }).join('') + '</tr>';
+
+    var avg = '<tr class="grp"><th colspan="8">Per window</th></tr>' +
       '<tr><th></th><th class="hf">Average</th>' +
-      BUCKETS.map(function (k) { return qty(mean, k[0]); }).join('') +
-      '<td class="barcell"></td></tr>';
-    return '<table class="otbl orders"><thead>' +
+      DESTS.map(function (d) {
+        return GROUPS.map(function (g) {
+          return '<td class="fig">' + Math.round(n ? tot[d[0] + g[0]] / n : 0).toLocaleString() + '</td>';
+        }).join('');
+      }).join('') + '</tr>';
+
+    return rateRow +
+      '<table class="otbl orders"><thead>' +
       '<tr><th></th><th></th>' +
-      BUCKETS.map(function (k) { return '<th colspan="2" class="grp2">' + k[1] + '</th>'; }).join('') +
-      '<th></th></tr>' +
-      '<tr class="units"><th></th><th></th>' +
-      BUCKETS.map(function () { return '<th>cs</th><th>lb</th>'; }).join('') +
-      '<th></th></tr></thead><tbody>' + body + avg + '</tbody></table>' +
-      '<p class="hint">Cases and pounds invoiced, off the purchase orders, split by how the order ' +
-      'leaves the farm: ' +
-      '<b>' + esc(DATA.on_island_customer || 'Kona') + '</b> on our own trucks, <b>pick up</b> at the gate ' +
-      'under FOB Farm, and <b>off-island</b> on a boat. ' +
-      'The freight manifest cannot answer this — it misses more than half of Kona, because it only holds ' +
-      'what somebody built a pallet for, and it has no notion of pick-up at all.</p>';
+      DESTS.map(function (d) { return '<th colspan="3" class="grp2">' + d[1] + '</th>'; }).join('') +
+      '</tr><tr class="units"><th></th><th></th>' +
+      DESTS.map(function () {
+        return GROUPS.map(function (g) { return '<th>' + esc(g[1]) + '</th>'; }).join('');
+      }).join('') + '</tr></thead><tbody>' + minRow + body + avg + '</tbody></table>';
   }
+
   function shortDate(iso) {
     var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var d = new Date(iso + 'T00:00:00');
@@ -485,8 +496,9 @@
     var r = read(flow);
     SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
 
-    seg('pick', F.map(function (x) { return [x.id, x.name]; }), S.id,
-      function (v) { S.id = v; save(); paint(); });
+    seg('pick', F.map(function (x) {
+      return [x.id, x.name + (x.start ? ' \u00b7 ' + x.start : '')];
+    }), S.id, function (v) { S.id = v; save(); paint(); });
     document.getElementById('src').innerHTML =
       'Defined in <code>legs.csv</code> — edit that and run <code>build.py</code>.';
 
@@ -500,7 +512,11 @@
       '<span><i class="sw band"></i>a green box is one day of that place&rsquo;s opening hours</span>' +
       '<span><i class="sw mv"></i>moving</span>' +
       '<span><i class="sw wt"></i>standing still</span>' +
-      '<span><i class="sw tk"></i>where a task starts</span>';
+      '<span><i class="sw tk"></i>where a leg starts</span>' +
+      ((flow.branches || []).length > 1
+        ? (flow.branches || []).map(function (b, i) {
+            return '<span><i class="sw b' + (i % 4) + '"></i>branch ' + esc(b) + '</span>';
+          }).join('') : '');
 
     var off = offences(flow), warn = '';
     if (r.broken.length) {
@@ -518,8 +534,8 @@
     }
     document.getElementById('warn').innerHTML = warn;
     document.getElementById('tnote').textContent =
-      flow.tasks.length + ' tasks · ' + places(flow).length + ' places · ' + r.edges.length +
-      ' links · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
+      flow.tasks.length + ' legs · ' + (flow.branches || []).length + ' branches · ' +
+      places(flow).length + ' places · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
     document.getElementById('tasks').innerHTML = taskTable(flow, r);
     document.getElementById('sub').textContent = flow.note ||
       'Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.';
@@ -537,21 +553,27 @@
   }
 
   function paintOrders() {
-    var crops = {};
-    (DATA.sales || []).forEach(function (x) { crops[x.crop] = 1; });
-    var opts = Object.keys(crops).sort().map(function (c) {
-      return [c, c === 'cuke' ? 'Cucumbers' : c.charAt(0).toUpperCase() + c.slice(1)];
-    });
-    if (!opts.length) {
-      document.getElementById('orders').innerHTML = '<p class="hint">No order data in data.json.</p>';
-      return;
-    }
-    if (!crops[S.crop]) S.crop = opts[0][0];
-    seg('ocrop', opts, S.crop, function (v) { S.crop = v; save(); paint(); });
     document.getElementById('onote').textContent =
-      (DATA.window ? DATA.window.first + ' to ' + DATA.window.last : '') +
+      'Lettuce · ' + (DATA.window ? DATA.window.first + ' to ' + DATA.window.last : '') +
       ' · copied from the freight model';
-    document.getElementById('orders').innerHTML = ordersView();
+    var host = document.getElementById('orders');
+    host.innerHTML = ordersView();
+    // Delegated, and bound once. A rate change repaints the whole view, so a
+    // handler holding its own input goes on reading the element it replaced.
+    if (!host.__wired) {
+      host.__wired = true;
+      host.addEventListener('input', function (ev) {
+        var inp = ev.target;
+        if (!inp || !inp.getAttribute || !inp.getAttribute('data-rate')) return;
+        var key = inp.getAttribute('data-rate'), v = parseFloat(inp.value), pos = inp.selectionStart;
+        S.rates = S.rates || {};
+        S.rates[key] = isNaN(v) || v <= 0 ? '' : v;
+        save();
+        host.innerHTML = ordersView();
+        var again = host.querySelector('[data-rate="' + key + '"]');
+        if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+      });
+    }
   }
 
   function seg(id, opts, sel, cb) {

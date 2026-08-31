@@ -12,14 +12,14 @@ double-clicking.
 
 ## Where things live
 
+Three files, split by how often they change.
+
 | File | What it is |
 |---|---|
-| `journeys.csv` | One row per journey: its name and a note. |
-| `legs.csv` | **One row per leg.** Where it is, when it starts, when it stops. |
-| `hours.csv` | One row per place: the hours somebody will take it. |
-| `sailings.csv` | One row per boat: when it goes and what it connects to. |
-| `data.json` | Orders by destination, copied out of the freight model. |
-| `build.py` | Reads the CSVs, folds in the data, writes `index.html`. |
+| `legs.csv` | **The schedule.** One row per leg. The only thing you edit to change when something happens. |
+| `reference.json` | Quasi-static, hand-edited: what a journey is, who is open when, which boat goes where. Months between edits. |
+| `orders.json` | Pulled, not typed. Cases and pounds on order by destination, and the pack line's case counts. Copied out of the freight model's `data.json` — refresh it there. |
+| `build.py` | Reads all three, writes `index.html`. |
 | `viewer/` | The page: shell, stylesheet, app. |
 | `index.html` | Built. Do not edit — `build.py` overwrites it. |
 
@@ -33,43 +33,38 @@ place's opening hours.
 ## legs.csv
 
 ```
-journey,leg,place,starts,stops,after,icon,note
-Lettuce → Costco Kona,Load the truck,Hawaii Farming,M 06:00,M 07:00,Waits for the crew,truck,...
+journey,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note
+Costco Kona Lettuce,0,1,Packing,PH,"Sun, 10:00",Cold Storage,"Sun, 18:00",box,
+Costco Kona Lettuce,0,2,FS-incubate,Lab,"Sun, 14:00",Lab,"Sun, 20:00",clock,
 ```
 
-Days are written as `Su M T W Th F Sa`, or any longer form of the same
-(`Mon`, `Thurs`, `Saturday`). A bare `S` is rejected — it could be either end of
-the week, and a schedule is not the place to guess.
+A leg carries **where it starts as well as where it ends**, so its bar has a
+real slope rather than one inferred from whatever came before it.
 
-The first leg sets the week; every time after it is the next occurrence of that
-weekday walking forward, so a journey running Sunday to Friday is five days
-long rather than five days minus a wrap-around.
+**start_day** groups the rows into variants: the same journey run on a Sunday
+cut and on a Wednesday one, each its own picture, picked from the dropdown.
 
-A leg runs from its start to its stop. **The next start does not have to be the
-previous stop.** Leave a gap and the gap is drawn; start something before the
-thing it follows has finished and the overlap is drawn as a red backwards link,
-because two things happening at once is usually the truth.
+**branch** is what makes parallel work expressible. Branch 1 is the pallet;
+branch 2 is the food-safety clock running beside it. Within a branch the rows
+are in order, and that is the whole dependency story — there is no `after`
+column because the file already says it.
 
-`after` is written by name, semicolon-separated for more than one. It draws the
-links and decides where a leg begins on the chart; it does not move any times.
+Days are `Sun, 10:00` or `M 06:00` — any longer form of the weekday works. A
+bare `S` is rejected: it could be either end of the week.
 
-`place` is the same namespace as `hours.csv`, so a leg landing in a place picks
-up that place's opening hours for its lane.
+**The next start does not have to be the previous stop.** Leave a gap and the
+gap is drawn; overlap two legs and the overlap is drawn.
 
 The build refuses a file it cannot trust and says which row: a bad time, a day
-that is not a day, an icon that is not an icon, an `after` naming a leg that is
-not there, a journey that is not in `journeys.csv`. It does **not** refuse a
-stop before its start — that is a question about the schedule, not the syntax,
-so the viewer flags it in red instead.
+that is not a day, an icon that is not an icon, a journey with no entry in
+`reference.json`.
 
 ## Tabs
 
 - **Flow** — the chart and the task list for one journey.
-- **Orders** — cases and pounds invoiced by how the order leaves the farm:
-  Costco Kona on our own trucks, picked up at the gate under FOB Farm, or
-  off-island on a boat. Both units on every line, cases and pounds, because the
-  orders arrive in cases and the harvest is weighed. Copied from the freight
-  model; refresh it there.
+- **Orders** — cases on order by case type and destination, three types against
+  on-island and off-island, with minutes per case at the top and the minutes
+  each column needs in the first row.
 - **Hours** — everybody's clock, whether or not the journey on screen goes
   through them: the farm, Aloha Air's Kona counter, Young Brothers at Kawaihae,
   Honolulu and Kahului, HFA at both ends, Costco Kona receiving and the

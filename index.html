@@ -191,9 +191,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .otbl td s{text-decoration:none; margin-left:4px; font-family:"IBM Plex Mono",monospace;
   font-size:10px; color:var(--ink-3)}
 .otbl td u{text-decoration:none; color:var(--ink-3); font-size:14px}
-.otbl .barcell{width:110px; padding-right:0}
-.obar{display:block; height:9px; margin-left:auto; background:var(--band);
-  border-right:2px solid var(--band-2)}
 .otbl.hrs td.dcell,.otbl.hrs td.mono,.otbl.hrs td.nt{text-align:left}
 .otbl.hrs .mono{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-2)}
 .otbl.hrs .d{display:inline-block; width:17px; height:20px; line-height:19px; text-align:center;
@@ -220,6 +217,34 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .otbl.hrs tr.unk td,.otbl.hrs tr.unk th{opacity:.6}
 .otbl.hrs td.mono u{text-decoration:none; color:var(--ink-3)}
 .unconfirmed{color:var(--bad); font-weight:600}
+
+/* ---------- pack line ---------- */
+/* Three case types at three rates, so the minutes are the point and the cases
+   are how you get there. Six figures, in the order the columns come. */
+.rates{display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; padding:0 0 14px;
+  border-bottom:1px solid var(--line-2)}
+.rate{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-2)}
+/* A plain text box. The number spinner's arrows are a smaller target than the
+   digit they change and nobody nudges a pack rate one step at a time. */
+.rate input{width:52px; font-family:"IBM Plex Mono",monospace; font-size:12px; padding:3px 8px;
+  border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink);
+  text-align:right}
+.rate input:focus{outline:none; border-color:var(--accent)}
+.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600;
+  border-bottom:1px solid var(--line); padding-bottom:7px}
+
+/* Branches. Two threads leaving the same morning -- the pallet and the clock
+   running beside it -- and the whole point is that they are separate until they
+   meet, so they do not share a colour. */
+.move.b0,.wait.b0{stroke:var(--ink)}
+.move.b1,.wait.b1{stroke:var(--accent)}
+.move.b2,.wait.b2{stroke:var(--good)}
+.move.b3,.wait.b3{stroke:var(--ink-3)}
+.tick.b0{stroke:var(--ink)} .tick.b1{stroke:var(--accent)}
+.tick.b2{stroke:var(--good)} .tick.b3{stroke:var(--ink-3)}
+.dot.b0{color:var(--ink)} .dot.b1{color:var(--accent)}
+.dot.b2{color:var(--good)} .dot.b3{color:var(--ink-3)}
+.sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}
 
 </style>
 </head>
@@ -258,8 +283,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   <section class="page" id="page-orders" hidden>
     <div class="panel">
       <div class="panel-hd">
-        <h2>Orders by destination</h2>
-        <span class="seg" id="ocrop"></span>
+        <h2>Pack line</h2>
         <span class="note" id="onote" style="margin-left:auto"></span>
       </div>
       <div class="body"><div id="orders"></div></div>
@@ -279,9 +303,9 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 </div>
 
 <script>
-window.FLOWS = [{"id":"lettuce-costco-kona","name":"Lettuce \u2192 Costco Kona","note":"Our own box truck. No carrier at all, so the only thing between packing and the customer is who is awake.","tasks":[{"id":"t0","name":"Packing","place":"Hawaii Farming","icon":"box","note":"Ends at 6 PM, which is the clock everything else answers to.","s":10.0,"e":18.0,"after":[]},{"id":"t1","name":"Waits for the crew","place":"Hawaii Farming","icon":"clock","note":"Nobody is at the packhouse overnight, so it stands here until six.","s":18.0,"e":30.0,"after":["t0"]},{"id":"t2","name":"Load the truck","place":"Hawaii Farming","icon":"truck","note":"A box truck cannot stand loaded overnight, so it is loaded right before it drives.","s":30.0,"e":31.0,"after":["t1"]},{"id":"t3","name":"Drive to Kona","place":"Costco Kona","icon":"truck","note":"","s":31.0,"e":33.0,"after":["t2"]},{"id":"t4","name":"Costco receiving","place":"Costco Kona","icon":"store","note":"Inside the 4-11 window, so it goes straight in.","s":33.0,"e":33.5,"after":["t3"]}],"anchor":"Sun","windows":{"Hawaii Farming":{"days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0},"Costco Kona":{"days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0}}}];
-window.DATA = {"generated_from":"farm-freight-model data.json (sales_po x sales_po_line x sales_fob)","window":{"first":"2026-07-17","last":"2026-08-28"},"on_island_customer":"140 Kona","sales":[{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":578,"cases":119},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"off","lbs":1834,"cases":230},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"other","lbs":5,"cases":2},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":489,"cases":111},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"off","lbs":3411,"cases":374},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"other","lbs":17,"cases":4},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":506,"cases":115},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"off","lbs":3323,"cases":382},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":582,"cases":114},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"off","lbs":2975,"cases":351},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"other","lbs":20,"cases":5},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":618,"cases":122},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"off","lbs":3405,"cases":415},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":677,"cases":128},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"off","lbs":2945,"cases":331},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"other","lbs":20,"cases":5},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":521,"cases":104},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"off","lbs":3259,"cases":350},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":603,"cases":127},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"off","lbs":2717,"cases":303},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"other","lbs":22,"cases":6},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":739,"cases":146},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"off","lbs":2933,"cases":322},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":1165,"cases":291},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"off","lbs":3114,"cases":344},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"other","lbs":33,"cases":11},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":659,"cases":139},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"off","lbs":1438,"cases":164},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"kona","lbs":210,"cases":20},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":534,"cases":110},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"off","lbs":2498,"cases":287},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"other","lbs":26,"cases":8},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":647,"cases":149},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"off","lbs":2183,"cases":261},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":597,"cases":124},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"off","lbs":2778,"cases":316},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"other","lbs":31,"cases":10},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"kona","lbs":4032,"cases":252},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":13566,"cases":1030},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"off","lbs":22076,"cases":1473},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"kona","lbs":3456,"cases":216},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":6854,"cases":501},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"off","lbs":17056,"cases":1154},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"other","lbs":240,"cases":18},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"kona","lbs":4512,"cases":282},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":7775,"cases":531},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"off","lbs":27684,"cases":1843},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"kona","lbs":3072,"cases":192},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":6240,"cases":437},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"off","lbs":20576,"cases":1388},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"other","lbs":240,"cases":18},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"kona","lbs":3936,"cases":246},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":6347,"cases":434},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"off","lbs":26140,"cases":1748},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"kona","lbs":4128,"cases":258},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":6338,"cases":442},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"off","lbs":22980,"cases":1529},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"other","lbs":200,"cases":15},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"kona","lbs":4128,"cases":258},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":7054,"cases":483},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"off","lbs":22804,"cases":1511},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"kona","lbs":3840,"cases":240},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":6664,"cases":469},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"off","lbs":23636,"cases":1569},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"other","lbs":248,"cases":20},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"kona","lbs":3360,"cases":210},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":7187,"cases":495},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"off","lbs":26000,"cases":1726},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"kona","lbs":3456,"cases":216},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":5763,"cases":422},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"off","lbs":22712,"cases":1536},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"other","lbs":308,"cases":23},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"kona","lbs":5664,"cases":354},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":6974,"cases":473},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"off","lbs":23416,"cases":1556},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"kona","lbs":4704,"cases":294},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":5904,"cases":429},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"off","lbs":18740,"cases":1263},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"other","lbs":308,"cases":23},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"kona","lbs":4032,"cases":252},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":7011,"cases":487},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"off","lbs":23480,"cases":1588},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"kona","lbs":4320,"cases":270},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":5865,"cases":422},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"off","lbs":24932,"cases":1689},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"other","lbs":284,"cases":21}]};
-window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0,"lead":0,"note":"Nobody is here to load a truck outside these hours."},{"place":"Kona airport","days":[1,1,1,1,1,1,0],"open":6.0,"close":17.0,"lead":0,"note":"Aloha Air Cargo counter. Six days \u2014 dark Saturday."},{"place":"Kawaihae","days":[0,1,1,1,1,1,0],"open":7.0,"close":16.0,"lead":0,"note":"Young Brothers. Cargo acceptance ahead of the sailing."},{"place":"Honolulu","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"Kahului","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"HFA Honolulu","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"HFA Kahului","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"Costco Kona","days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0,"lead":0,"note":"Receiving. The only gate on-island."},{"place":"Off-island customer","days":[0,1,1,1,1,1,1],"open":5.0,"close":12.0,"lead":0,"note":"The back door at the other end."}],"sailings":[{"route":"Kawaihae to Honolulu","departs":"Tue 18:00","arrives":"Wed 06:00","connects":"","note":""},{"route":"Kawaihae to Honolulu","departs":"Fri 18:00","arrives":"Sat 06:00","connects":"","note":""},{"route":"Honolulu to Kahului","departs":"Wed 16:00","arrives":"Thu 06:00","connects":"the Tuesday sailing","note":"Maui is level with Oahu off this one."},{"route":"Honolulu to Kahului","departs":"Mon 16:00","arrives":"Tue 06:00","connects":"the Friday sailing","note":"Maui falls a day behind Oahu off this one."},{"route":"Honolulu to Nawiliwili","departs":"Mon","arrives":"Tue","connects":"the Friday sailing","note":"Kauai. Accepted in Honolulu Mon, Wed & Thu until 11am; available at Nawiliwili the next business day after arrival."},{"route":"Honolulu to Nawiliwili","departs":"Thu","arrives":"Fri","connects":"the Tuesday sailing","note":"Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday \u2014 level with Oahu."}]};
+window.FLOWS = [{"id":"costco-kona-lettuce-sun","name":"Costco Kona Lettuce","start":"Sun","note":"Our own box truck. Branch 1 is the pallet; branch 2 is the food-safety clock running beside it.","branches":["1","2"],"tasks":[{"id":"t0","name":"Packing","branch":"1","from":"PH","place":"Cold Storage","s":10.0,"e":18.0,"icon":"box","note":"","after":[]},{"id":"t1","name":"Load truck","branch":"1","from":"Cold Storage","place":"Lettuce Loading dock","s":31.0,"e":31.5,"icon":"truck","note":"","after":["t0"]},{"id":"t2","name":"Delveir to Costco","branch":"1","from":"Lettuce Loading dock","place":"Costco receiiving","s":31.5,"e":32.5,"icon":"store","note":"","after":["t1"]},{"id":"t3","name":"FS-incubate","branch":"2","from":"Lab","place":"Lab","s":14.0,"e":20.0,"icon":"clock","note":"","after":[]},{"id":"t4","name":"Azzule","branch":"2","from":"Lab","place":"Costco eligible to receive","s":20.0,"e":23.0,"icon":"depot","note":"","after":["t3"]}],"windows":{"PH":{"days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0},"Cold Storage":{"days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334},"Lettuce Loading dock":{"days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0},"Costco receiiving":{"days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0},"Lab":{"days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334}}},{"id":"costco-kona-lettuce-wed","name":"Costco Kona Lettuce","start":"Wed","note":"Our own box truck. Branch 1 is the pallet; branch 2 is the food-safety clock running beside it.","branches":["1","2"],"tasks":[{"id":"t0","name":"Packing","branch":"1","from":"PH","place":"Cold Storage","s":10.0,"e":18.0,"icon":"box","note":"","after":[]},{"id":"t1","name":"Load truck","branch":"1","from":"Cold Storage","place":"Lettuce Loading dock","s":31.0,"e":31.5,"icon":"truck","note":"","after":["t0"]},{"id":"t2","name":"Delveir to Costco","branch":"1","from":"Lettuce Loading dock","place":"Costco receiiving","s":31.5,"e":32.5,"icon":"store","note":"","after":["t1"]},{"id":"t3","name":"FS-incubate","branch":"2","from":"Lab","place":"Lab","s":14.0,"e":20.0,"icon":"clock","note":"","after":[]},{"id":"t4","name":"Azzule","branch":"2","from":"Lab","place":"Costco eligible to receive","s":20.0,"e":23.0,"icon":"depot","note":"","after":["t3"]}],"windows":{"PH":{"days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0},"Cold Storage":{"days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334},"Lettuce Loading dock":{"days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0},"Costco receiiving":{"days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0},"Lab":{"days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334}}}];
+window.DATA = {"generated_from":"farm-freight-model data.json (sales_po x sales_po_line x sales_fob)","window":{"first":"2026-07-17","last":"2026-08-28"},"on_island_customer":"140 Kona","sales":[{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":578,"cases":119},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"off","lbs":1834,"cases":230},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"other","lbs":5,"cases":2},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":489,"cases":111},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"off","lbs":3411,"cases":374},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"other","lbs":17,"cases":4},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":506,"cases":115},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"off","lbs":3323,"cases":382},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":582,"cases":114},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"off","lbs":2975,"cases":351},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"other","lbs":20,"cases":5},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":618,"cases":122},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"off","lbs":3405,"cases":415},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":677,"cases":128},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"off","lbs":2945,"cases":331},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"other","lbs":20,"cases":5},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":521,"cases":104},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"off","lbs":3259,"cases":350},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":603,"cases":127},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"off","lbs":2717,"cases":303},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"other","lbs":22,"cases":6},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":739,"cases":146},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"off","lbs":2933,"cases":322},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":1165,"cases":291},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"off","lbs":3114,"cases":344},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"other","lbs":33,"cases":11},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":659,"cases":139},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"off","lbs":1438,"cases":164},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"kona","lbs":210,"cases":20},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":534,"cases":110},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"off","lbs":2498,"cases":287},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"other","lbs":26,"cases":8},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":647,"cases":149},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"off","lbs":2183,"cases":261},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":597,"cases":124},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"off","lbs":2778,"cases":316},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"other","lbs":31,"cases":10},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"kona","lbs":4032,"cases":252},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":13566,"cases":1030},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"off","lbs":22076,"cases":1473},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"kona","lbs":3456,"cases":216},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":6854,"cases":501},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"off","lbs":17056,"cases":1154},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"other","lbs":240,"cases":18},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"kona","lbs":4512,"cases":282},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":7775,"cases":531},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"off","lbs":27684,"cases":1843},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"kona","lbs":3072,"cases":192},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":6240,"cases":437},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"off","lbs":20576,"cases":1388},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"other","lbs":240,"cases":18},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"kona","lbs":3936,"cases":246},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":6347,"cases":434},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"off","lbs":26140,"cases":1748},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"kona","lbs":4128,"cases":258},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":6338,"cases":442},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"off","lbs":22980,"cases":1529},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"other","lbs":200,"cases":15},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"kona","lbs":4128,"cases":258},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":7054,"cases":483},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"off","lbs":22804,"cases":1511},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"kona","lbs":3840,"cases":240},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":6664,"cases":469},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"off","lbs":23636,"cases":1569},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"other","lbs":248,"cases":20},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"kona","lbs":3360,"cases":210},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":7187,"cases":495},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"off","lbs":26000,"cases":1726},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"kona","lbs":3456,"cases":216},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":5763,"cases":422},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"off","lbs":22712,"cases":1536},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"other","lbs":308,"cases":23},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"kona","lbs":5664,"cases":354},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":6974,"cases":473},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"off","lbs":23416,"cases":1556},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"kona","lbs":4704,"cases":294},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":5904,"cases":429},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"off","lbs":18740,"cases":1263},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"other","lbs":308,"cases":23},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"kona","lbs":4032,"cases":252},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":7011,"cases":487},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"off","lbs":23480,"cases":1588},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"kona","lbs":4320,"cases":270},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":5865,"cases":422},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"off","lbs":24932,"cases":1689},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"other","lbs":284,"cases":21}],"packs":[{"wk":"2026-07-12","half":"early","on":{"LW":56,"LF":23,"TRAY":82},"off":{"LW":122,"LF":40,"TRAY":68}},{"wk":"2026-07-12","half":"late","on":{"LW":54,"LF":17,"TRAY":84},"off":{"LW":302,"LF":10,"TRAY":62}},{"wk":"2026-07-19","half":"early","on":{"LW":73,"LF":18,"TRAY":84},"off":{"LW":262,"LF":39,"TRAY":81}},{"wk":"2026-07-19","half":"late","on":{"LW":76,"LF":26,"TRAY":77},"off":{"LW":262,"LF":3,"TRAY":86}},{"wk":"2026-07-26","half":"early","on":{"LW":81,"LF":22,"TRAY":82},"off":{"LW":262,"LF":40,"TRAY":113}},{"wk":"2026-07-26","half":"late","on":{"LW":60,"LF":30,"TRAY":83},"off":{"LW":262,"LF":5,"TRAY":64}},{"wk":"2026-08-02","half":"early","on":{"LW":76,"LF":20,"TRAY":71},"off":{"LW":262,"LF":40,"TRAY":48}},{"wk":"2026-08-02","half":"late","on":{"LW":55,"LF":26,"TRAY":92},"off":{"LW":242,"LF":5,"TRAY":56}},{"wk":"2026-08-09","half":"early","on":{"LW":74,"LF":38,"TRAY":97},"off":{"LW":263,"LF":5,"TRAY":54}},{"wk":"2026-08-09","half":"late","on":{"LW":53,"LF":53,"TRAY":236},"off":{"LW":262,"LF":23,"TRAY":59}},{"wk":"2026-08-16","half":"early","on":{"LW":70,"LF":34,"TRAY":95},"off":{"LW":123,"LF":7,"TRAY":34}},{"wk":"2026-08-16","half":"late","on":{"LW":35,"LF":22,"TRAY":81},"off":{"LW":202,"LF":24,"TRAY":61}},{"wk":"2026-08-23","half":"early","on":{"LW":78,"LF":21,"TRAY":110},"off":{"LW":184,"LF":10,"TRAY":67}},{"wk":"2026-08-23","half":"late","on":{"LW":57,"LF":24,"TRAY":93},"off":{"LW":243,"LF":8,"TRAY":65}}],"pack_groups":[["LW","LW"],["LF","LF"],["TRAY","LR/AR/WR"]]};
+window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0,"lead":0,"note":"Hawaii Farming packhouse. Nobody is here to load a truck outside these hours."},{"place":"Cold Storage","days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334,"lead":0,"note":"Always open \u2014 it is our own cooler."},{"place":"Lettuce Loading dock","days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0,"lead":0,"note":""},{"place":"Costco receiiving","days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0,"lead":0,"note":"Receiving. The only gate on-island."},{"place":"Lab","days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334,"lead":0,"note":"The incubation runs whether or not anyone is watching it."},{"place":"Kona airport","days":[1,1,1,1,1,1,0],"open":6.0,"close":17.0,"lead":0,"note":"Aloha Air Cargo counter. Six days \u2014 dark Saturday."},{"place":"Kawaihae","days":[0,1,1,1,1,1,0],"open":7.0,"close":16.0,"lead":0,"note":"Young Brothers. Cargo acceptance ahead of the sailing."},{"place":"Honolulu","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"Kahului","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"HFA Honolulu","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"HFA Kahului","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"Off-island customer","days":[0,1,1,1,1,1,1],"open":5.0,"close":12.0,"lead":0,"note":"The back door at the other end."}],"sailings":[{"route":"Kawaihae to Honolulu","departs":"Tue 18:00","arrives":"Wed 06:00","connects":"","note":""},{"route":"Kawaihae to Honolulu","departs":"Fri 18:00","arrives":"Sat 06:00","connects":"","note":""},{"route":"Honolulu to Kahului","departs":"Wed 16:00","arrives":"Thu 06:00","connects":"the Tuesday sailing","note":"Maui is level with Oahu off this one."},{"route":"Honolulu to Kahului","departs":"Mon 16:00","arrives":"Tue 06:00","connects":"the Friday sailing","note":"Maui falls a day behind Oahu off this one."},{"route":"Honolulu to Nawiliwili","departs":"Mon","arrives":"Tue","connects":"the Friday sailing","note":"Kauai. Accepted in Honolulu Mon, Wed & Thu until 11am; available at Nawiliwili the next business day after arrival."},{"route":"Honolulu to Nawiliwili","departs":"Thu","arrives":"Fri","connects":"the Tuesday sailing","note":"Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday \u2014 level with Oahu."}]};
 </script>
 <script>
 (function () {
@@ -330,10 +354,10 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
     if (sv) {
       if (F.some(function (f) { return f.id === sv.id; })) S.id = sv.id;
       if (sv.tab) S.tab = sv.tab;
-      if (sv.crop) S.crop = sv.crop;
+      if (sv.rates) S.rates = sv.rates;
     }
   } catch (e) { /* nothing stored, or junk in the slot */ }
-  S.crop = S.crop || 'lettuce';
+  S.rates = S.rates || {};
   function save() {
     try { window.localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {}
   }
@@ -394,12 +418,10 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
     if (pts.length) start = Math.min.apply(null, pts.map(function (p) { return p.s; }));
     var idle = pts.reduce(function (a, p) { return a + Math.max(0, p.e - p.s); }, 0);
     var moving = 0, still = 0;
-    pts.forEach(function (p, i) {
-      var prev = null;
-      (p.t.after || []).forEach(function (id) {
-        if (byId[id] && (prev === null || num(byId[id].e) > num(byId[prev].e))) prev = id;
-      });
-      p.from = prev && byId[prev] ? (byId[prev].place || 'Somewhere') : p.place;
+    pts.forEach(function (p) {
+      // The leg carries its own origin, so a bar has a real slope rather than
+      // one inferred from whatever happened to come before it.
+      p.from = p.t.from || p.place;
       if (p.from === p.place) still += Math.max(0, p.e - p.s); else moving += Math.max(0, p.e - p.s);
     });
     var edges = [];
@@ -416,11 +438,15 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
              still: Math.round(still), moving: Math.round(moving),
              days: dayOf(end) - dayOf(start), hrs: Math.round(end - start) };
   }
+  // Every location a leg touches, in the order the journey reaches them, so the
+  // vertical axis reads top to bottom the way the product travels.
   function places(flow) {
     var seen = {}, out = [];
     flow.tasks.forEach(function (t) {
-      var p = t.place || 'Somewhere';
-      if (!seen[p]) { seen[p] = 1; out.push(p); }
+      [t.from, t.place].forEach(function (p) {
+        p = p || 'Somewhere';
+        if (!seen[p]) { seen[p] = 1; out.push(p); }
+      });
     });
     return out;
   }
@@ -492,7 +518,7 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
         if (still) wait += '<line class="wait" ' + seg + '/>';
         else move += '<line class="move" ' + seg + '/>';
       }
-      svg += '<circle class="tick" cx="' + X(p.s) + '" cy="' + y1 + '" r="2.6"><title>' +
+      svg += '<circle class="tick' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="2.6"><title>' +
         esc(p.t.name) + ' starts ' + stamp(p.s) + '</title></circle>';
       grabs += '<line class="grab" ' + seg + ' data-task="' + esc(p.id) + '"><title>' +
         esc(p.t.name) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
@@ -518,7 +544,8 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
       }
       lane.push({ lo: lo, hi: hi, slot: slot });
       var fed = feedsOf(flow, p.id);
-      dots += '<div class="dot s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
+      var db = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
+      dots += '<div class="dot' + db + ' s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
         '" style="left:' + x + '%;top:' + yOf[p.place] + 'px" data-task="' + esc(p.id) + '"' +
         ' title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
         (p.t.note ? '. ' + esc(p.t.note) : '') +
@@ -603,82 +630,90 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
       body + '</div>';
   }
 
-  // ── Orders by destination ─────────────────────────────────────────────────
-  // Three ways an order leaves the farm, off the purchase orders, so it owes
-  // nothing to whether anybody built a pallet for it.
-  var BUCKETS = [['kona', 'Costco Kona'], ['pickup', 'Pick up'], ['off', 'Off-island']];
-  function ordersView() {
-    var c = S.crop, rows = {}, weeks = {};
-    (DATA.sales || []).forEach(function (x) {
-      if (x.crop !== c) return;
-      var k = x.wk + '|' + x.half;
-      var R = rows[k] || (rows[k] = {});
-      R[x.bucket] = (R[x.bucket] || 0) + (x.cases || 0);
-      R[x.bucket + '_lb'] = (R[x.bucket + '_lb'] || 0) + (x.lbs || 0);
-      weeks[x.wk] = 1;
+  // ── What has to be packed, and how long it takes ──────────────────────────
+  // Three case types at three different rates against two destinations, which
+  // is the shape the pack line is actually planned in. Cases only: the pack
+  // line counts cases, and pounds were a second number nobody was using here.
+  var GROUPS = (window.DATA && DATA.pack_groups) || [['LW', 'LW'], ['LF', 'LF'], ['TRAY', 'LR/AR/WR']];
+  var DESTS = [['on', 'On-island'], ['off', 'Off-island']];
+  // Minutes per case, not cases per minute: a tray takes six minutes, it does
+  // not come off the line six at a time.
+  var RATE_DEF = { LW: 8, LF: 6, TRAY: 6 };
+
+  function rates() {
+    var r = {};
+    GROUPS.forEach(function (g) {
+      var v = S.rates && S.rates[g[0]];
+      r[g[0]] = (v === undefined || v === null || v === '' || +v <= 0) ? RATE_DEF[g[0]] : +v;
     });
-    var wks = Object.keys(weeks).sort();
-    var HALF = [['early', 'Sun / Mon'], ['late', 'Wed / Thu']];
-    var best = 0;
-    wks.forEach(function (w) {
-      HALF.forEach(function (h) {
-        var b = rows[w + '|' + h[0]];
-        if (b) best = Math.max(best, (b.kona_lb || 0) + (b.pickup_lb || 0) + (b.off_lb || 0));
+    return r;
+  }
+  function mins(cases, rate) { return cases * rate; }
+  function showMins(m) {
+    if (!m) return '—';
+    if (m < 60) return Math.round(m) + ' min';
+    var h = Math.floor(m / 60), mm = Math.round(m - h * 60);
+    return h + ' h' + (mm ? ' ' + mm : '');
+  }
+
+  function ordersView() {
+    var P = (window.DATA && DATA.packs) || [];
+    if (!P.length) return '<p class="hint">No pack data in data.json.</p>';
+    var R = rates();
+    var tot = {}, n = 0;
+    DESTS.forEach(function (d) { GROUPS.forEach(function (g) { tot[d[0] + g[0]] = 0; }); });
+    P.forEach(function (row) {
+      n++;
+      DESTS.forEach(function (d) {
+        GROUPS.forEach(function (g) { tot[d[0] + g[0]] += (row[d[0]] || {})[g[0]] || 0; });
       });
     });
-    // Orders arrive in cases and the harvest is weighed, so both units belong on
-    // every line rather than somebody converting in their head. They share one
-    // column and one type size -- neither is the headline -- and each sits in a
-    // fixed-width slot so both run straight down the page.
-    // The unit is a property of the column, not of every figure in it, so it is
-    // said once in the header and the cells carry nothing but numbers.
-    function qty(b, k) {
-      if (!b || !b[k]) return '<td class="fig">&mdash;</td><td class="fig">&mdash;</td>';
-      return '<td class="fig">' + Math.round(b[k]).toLocaleString() + '</td>' +
-        '<td class="fig">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + '</td>';
-    }
-    var tot = { kona: 0, pickup: 0, off: 0, kona_lb: 0, pickup_lb: 0, off_lb: 0, n: 0 };
-    var body = wks.map(function (w) {
-      return HALF.map(function (h, hi) {
-        var b = rows[w + '|' + h[0]] || null;
-        if (b) {
-          BUCKETS.forEach(function (k) {
-            tot[k[0]] += b[k[0]] || 0; tot[k[0] + '_lb'] += b[k[0] + '_lb'] || 0;
-          });
-          tot.n++;
-        }
-        var sum = b ? (b.kona_lb || 0) + (b.pickup_lb || 0) + (b.off_lb || 0) : 0;
-        var bar = sum && best ? '<span class="obar" style="width:' + (sum / best * 100).toFixed(1) + '%"></span>' : '';
-        return '<tr class="' + (hi ? '' : 'wkstart') + '">' +
-          (hi ? '' : '<th rowspan="2" class="wk">' + shortDate(w) + '</th>') +
-          '<th class="hf">' + h[1] + '</th>' +
-          BUCKETS.map(function (k) { return qty(b, k[0]); }).join('') +
-          '<td class="barcell">' + bar + '</td></tr>';
-      }).join('');
+
+    var rateRow = '<div class="rates"><span class="lbl">Minutes per case</span>' +
+      GROUPS.map(function (g) {
+        return '<label class="rate">' + esc(g[1]) +
+          '<input type="text" inputmode="numeric" value="' + R[g[0]] +
+          '" data-rate="' + g[0] + '"></label>';
+      }).join('') + '</div>';
+
+    var body = P.map(function (row, i) {
+      var first = i % 2 === 0;
+      return '<tr class="' + (first ? 'wkstart' : '') + '">' +
+        (first ? '<th rowspan="2" class="wk">' + shortDate(row.wk) + '</th>' : '') +
+        '<th class="hf">' + (row.half === 'early' ? 'Sun / Mon' : 'Wed / Thu') + '</th>' +
+        DESTS.map(function (d) {
+          return GROUPS.map(function (g) {
+            var v = (row[d[0]] || {})[g[0]] || 0;
+            return '<td class="fig">' + (v ? v.toLocaleString() : '&mdash;') + '</td>';
+          }).join('');
+        }).join('') + '</tr>';
     }).join('');
-    var mean = {};
-    BUCKETS.forEach(function (k) {
-      mean[k[0]] = tot.n ? tot[k[0]] / tot.n : 0;
-      mean[k[0] + '_lb'] = tot.n ? tot[k[0] + '_lb'] / tot.n : 0;
-    });
-    var avg = '<tr class="grp"><th colspan="9">Per window</th></tr>' +
+
+    var minRow = '<tr class="minrow"><th></th><th class="hf">Minutes</th>' +
+      DESTS.map(function (d) {
+        return GROUPS.map(function (g) {
+          return '<td class="fig">' + showMins(mins(n ? tot[d[0] + g[0]] / n : 0, R[g[0]])) + '</td>';
+        }).join('');
+      }).join('') + '</tr>';
+
+    var avg = '<tr class="grp"><th colspan="8">Per window</th></tr>' +
       '<tr><th></th><th class="hf">Average</th>' +
-      BUCKETS.map(function (k) { return qty(mean, k[0]); }).join('') +
-      '<td class="barcell"></td></tr>';
-    return '<table class="otbl orders"><thead>' +
+      DESTS.map(function (d) {
+        return GROUPS.map(function (g) {
+          return '<td class="fig">' + Math.round(n ? tot[d[0] + g[0]] / n : 0).toLocaleString() + '</td>';
+        }).join('');
+      }).join('') + '</tr>';
+
+    return rateRow +
+      '<table class="otbl orders"><thead>' +
       '<tr><th></th><th></th>' +
-      BUCKETS.map(function (k) { return '<th colspan="2" class="grp2">' + k[1] + '</th>'; }).join('') +
-      '<th></th></tr>' +
-      '<tr class="units"><th></th><th></th>' +
-      BUCKETS.map(function () { return '<th>cs</th><th>lb</th>'; }).join('') +
-      '<th></th></tr></thead><tbody>' + body + avg + '</tbody></table>' +
-      '<p class="hint">Cases and pounds invoiced, off the purchase orders, split by how the order ' +
-      'leaves the farm: ' +
-      '<b>' + esc(DATA.on_island_customer || 'Kona') + '</b> on our own trucks, <b>pick up</b> at the gate ' +
-      'under FOB Farm, and <b>off-island</b> on a boat. ' +
-      'The freight manifest cannot answer this — it misses more than half of Kona, because it only holds ' +
-      'what somebody built a pallet for, and it has no notion of pick-up at all.</p>';
+      DESTS.map(function (d) { return '<th colspan="3" class="grp2">' + d[1] + '</th>'; }).join('') +
+      '</tr><tr class="units"><th></th><th></th>' +
+      DESTS.map(function () {
+        return GROUPS.map(function (g) { return '<th>' + esc(g[1]) + '</th>'; }).join('');
+      }).join('') + '</tr></thead><tbody>' + minRow + body + avg + '</tbody></table>';
   }
+
   function shortDate(iso) {
     var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var d = new Date(iso + 'T00:00:00');
@@ -771,8 +806,9 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
     var r = read(flow);
     SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
 
-    seg('pick', F.map(function (x) { return [x.id, x.name]; }), S.id,
-      function (v) { S.id = v; save(); paint(); });
+    seg('pick', F.map(function (x) {
+      return [x.id, x.name + (x.start ? ' \u00b7 ' + x.start : '')];
+    }), S.id, function (v) { S.id = v; save(); paint(); });
     document.getElementById('src').innerHTML =
       'Defined in <code>legs.csv</code> — edit that and run <code>build.py</code>.';
 
@@ -786,7 +822,11 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
       '<span><i class="sw band"></i>a green box is one day of that place&rsquo;s opening hours</span>' +
       '<span><i class="sw mv"></i>moving</span>' +
       '<span><i class="sw wt"></i>standing still</span>' +
-      '<span><i class="sw tk"></i>where a task starts</span>';
+      '<span><i class="sw tk"></i>where a leg starts</span>' +
+      ((flow.branches || []).length > 1
+        ? (flow.branches || []).map(function (b, i) {
+            return '<span><i class="sw b' + (i % 4) + '"></i>branch ' + esc(b) + '</span>';
+          }).join('') : '');
 
     var off = offences(flow), warn = '';
     if (r.broken.length) {
@@ -804,8 +844,8 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
     }
     document.getElementById('warn').innerHTML = warn;
     document.getElementById('tnote').textContent =
-      flow.tasks.length + ' tasks · ' + places(flow).length + ' places · ' + r.edges.length +
-      ' links · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
+      flow.tasks.length + ' legs · ' + (flow.branches || []).length + ' branches · ' +
+      places(flow).length + ' places · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
     document.getElementById('tasks').innerHTML = taskTable(flow, r);
     document.getElementById('sub').textContent = flow.note ||
       'Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.';
@@ -823,21 +863,27 @@ window.REF = {"hours":[{"place":"Hawaii Farming","days":[1,1,1,1,1,1,1],"open":6
   }
 
   function paintOrders() {
-    var crops = {};
-    (DATA.sales || []).forEach(function (x) { crops[x.crop] = 1; });
-    var opts = Object.keys(crops).sort().map(function (c) {
-      return [c, c === 'cuke' ? 'Cucumbers' : c.charAt(0).toUpperCase() + c.slice(1)];
-    });
-    if (!opts.length) {
-      document.getElementById('orders').innerHTML = '<p class="hint">No order data in data.json.</p>';
-      return;
-    }
-    if (!crops[S.crop]) S.crop = opts[0][0];
-    seg('ocrop', opts, S.crop, function (v) { S.crop = v; save(); paint(); });
     document.getElementById('onote').textContent =
-      (DATA.window ? DATA.window.first + ' to ' + DATA.window.last : '') +
+      'Lettuce · ' + (DATA.window ? DATA.window.first + ' to ' + DATA.window.last : '') +
       ' · copied from the freight model';
-    document.getElementById('orders').innerHTML = ordersView();
+    var host = document.getElementById('orders');
+    host.innerHTML = ordersView();
+    // Delegated, and bound once. A rate change repaints the whole view, so a
+    // handler holding its own input goes on reading the element it replaced.
+    if (!host.__wired) {
+      host.__wired = true;
+      host.addEventListener('input', function (ev) {
+        var inp = ev.target;
+        if (!inp || !inp.getAttribute || !inp.getAttribute('data-rate')) return;
+        var key = inp.getAttribute('data-rate'), v = parseFloat(inp.value), pos = inp.selectionStart;
+        S.rates = S.rates || {};
+        S.rates[key] = isNaN(v) || v <= 0 ? '' : v;
+        save();
+        host.innerHTML = ordersView();
+        var again = host.querySelector('[data-rate="' + key + '"]');
+        if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+      });
+    }
   }
 
   function seg(id, opts, sel, cb) {

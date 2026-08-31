@@ -181,9 +181,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .otbl td s{text-decoration:none; margin-left:4px; font-family:"IBM Plex Mono",monospace;
   font-size:10px; color:var(--ink-3)}
 .otbl td u{text-decoration:none; color:var(--ink-3); font-size:14px}
-.otbl .barcell{width:110px; padding-right:0}
-.obar{display:block; height:9px; margin-left:auto; background:var(--band);
-  border-right:2px solid var(--band-2)}
 .otbl.hrs td.dcell,.otbl.hrs td.mono,.otbl.hrs td.nt{text-align:left}
 .otbl.hrs .mono{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-2)}
 .otbl.hrs .d{display:inline-block; width:17px; height:20px; line-height:19px; text-align:center;
@@ -210,3 +207,31 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .otbl.hrs tr.unk td,.otbl.hrs tr.unk th{opacity:.6}
 .otbl.hrs td.mono u{text-decoration:none; color:var(--ink-3)}
 .unconfirmed{color:var(--bad); font-weight:600}
+
+/* ---------- pack line ---------- */
+/* Three case types at three rates, so the minutes are the point and the cases
+   are how you get there. Six figures, in the order the columns come. */
+.rates{display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; padding:0 0 14px;
+  border-bottom:1px solid var(--line-2)}
+.rate{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-2)}
+/* A plain text box. The number spinner's arrows are a smaller target than the
+   digit they change and nobody nudges a pack rate one step at a time. */
+.rate input{width:52px; font-family:"IBM Plex Mono",monospace; font-size:12px; padding:3px 8px;
+  border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink);
+  text-align:right}
+.rate input:focus{outline:none; border-color:var(--accent)}
+.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600;
+  border-bottom:1px solid var(--line); padding-bottom:7px}
+
+/* Branches. Two threads leaving the same morning -- the pallet and the clock
+   running beside it -- and the whole point is that they are separate until they
+   meet, so they do not share a colour. */
+.move.b0,.wait.b0{stroke:var(--ink)}
+.move.b1,.wait.b1{stroke:var(--accent)}
+.move.b2,.wait.b2{stroke:var(--good)}
+.move.b3,.wait.b3{stroke:var(--ink-3)}
+.tick.b0{stroke:var(--ink)} .tick.b1{stroke:var(--accent)}
+.tick.b2{stroke:var(--good)} .tick.b3{stroke:var(--ink-3)}
+.dot.b0{color:var(--ink)} .dot.b1{color:var(--accent)}
+.dot.b2{color:var(--good)} .dot.b3{color:var(--ink-3)}
+.sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}

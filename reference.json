@@ -1,0 +1,148 @@
+{
+  "_": "Hand-edited. Everything here changes rarely: what a journey is, who is open when, and which boat goes where. The legs themselves live in legs.csv.",
+  "journeys": {
+    "Costco Kona Lettuce": "Our own box truck. Branch 1 is the pallet; branch 2 is the food-safety clock running beside it."
+  },
+  "hours": [
+    {
+      "place": "PH",
+      "days": "Sun-Sat",
+      "open": "06:00",
+      "close": "19:00",
+      "after_arrival": 0,
+      "note": "Hawaii Farming packhouse. Nobody is here to load a truck outside these hours."
+    },
+    {
+      "place": "Cold Storage",
+      "days": "Sun-Sat",
+      "open": "00:00",
+      "close": "23:59",
+      "after_arrival": 0,
+      "note": "Always open — it is our own cooler."
+    },
+    {
+      "place": "Lettuce Loading dock",
+      "days": "Sun-Sat",
+      "open": "06:00",
+      "close": "19:00",
+      "after_arrival": 0,
+      "note": ""
+    },
+    {
+      "place": "Costco receiiving",
+      "days": "Mon-Sat",
+      "open": "04:00",
+      "close": "11:00",
+      "after_arrival": 0,
+      "note": "Receiving. The only gate on-island."
+    },
+    {
+      "place": "Lab",
+      "days": "Sun-Sat",
+      "open": "00:00",
+      "close": "23:59",
+      "after_arrival": 0,
+      "note": "The incubation runs whether or not anyone is watching it."
+    },
+    {
+      "place": "Kona airport",
+      "days": "Sun-Fri",
+      "open": "06:00",
+      "close": "17:00",
+      "after_arrival": 0,
+      "note": "Aloha Air Cargo counter. Six days — dark Saturday."
+    },
+    {
+      "place": "Kawaihae",
+      "days": "Mon-Fri",
+      "open": "07:00",
+      "close": "16:00",
+      "after_arrival": 0,
+      "note": "Young Brothers. Cargo acceptance ahead of the sailing."
+    },
+    {
+      "place": "Honolulu",
+      "days": "Mon-Sat",
+      "open": "07:00",
+      "close": "15:00",
+      "after_arrival": 24,
+      "note": "Young Brothers. Available the next business day after arrival."
+    },
+    {
+      "place": "Kahului",
+      "days": "Mon-Sat",
+      "open": "07:00",
+      "close": "15:00",
+      "after_arrival": 24,
+      "note": "Young Brothers. Available the next business day after arrival."
+    },
+    {
+      "place": "HFA Honolulu",
+      "days": "Mon-Fri",
+      "open": "06:00",
+      "close": "15:00",
+      "after_arrival": 0,
+      "note": "Collects, then runs the route."
+    },
+    {
+      "place": "HFA Kahului",
+      "days": "Mon-Fri",
+      "open": "06:00",
+      "close": "15:00",
+      "after_arrival": 0,
+      "note": "Collects, then runs the route."
+    },
+    {
+      "place": "Off-island customer",
+      "days": "Mon-Sat",
+      "open": "05:00",
+      "close": "12:00",
+      "after_arrival": 0,
+      "note": "The back door at the other end."
+    }
+  ],
+  "sailings": [
+    {
+      "route": "Kawaihae to Honolulu",
+      "departs": "Tue 18:00",
+      "arrives": "Wed 06:00",
+      "connects": "",
+      "note": ""
+    },
+    {
+      "route": "Kawaihae to Honolulu",
+      "departs": "Fri 18:00",
+      "arrives": "Sat 06:00",
+      "connects": "",
+      "note": ""
+    },
+    {
+      "route": "Honolulu to Kahului",
+      "departs": "Wed 16:00",
+      "arrives": "Thu 06:00",
+      "connects": "the Tuesday sailing",
+      "note": "Maui is level with Oahu off this one."
+    },
+    {
+      "route": "Honolulu to Kahului",
+      "departs": "Mon 16:00",
+      "arrives": "Tue 06:00",
+      "connects": "the Friday sailing",
+      "note": "Maui falls a day behind Oahu off this one."
+    },
+    {
+      "route": "Honolulu to Nawiliwili",
+      "departs": "Mon",
+      "arrives": "Tue",
+      "connects": "the Friday sailing",
+      "note": "Kauai. Accepted in Honolulu Mon, Wed & Thu until 11am; available at Nawiliwili the next business day after arrival."
+    },
+    {
+      "route": "Honolulu to Nawiliwili",
+      "departs": "Thu",
+      "arrives": "Fri",
+      "connects": "the Tuesday sailing",
+      "note": "Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday — level with Oahu."
+    }
+  ]
+}

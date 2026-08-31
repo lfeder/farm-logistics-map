@@ -1,6 +1,11 @@
-journey,leg,place,starts,stops,after,icon,note
-Lettuce → Costco Kona,Packing,Hawaii Farming,Su 10:00,Su 18:00,,box,"Ends at 6 PM, which is the clock everything else answers to."
-Lettuce → Costco Kona,Waits for the crew,Hawaii Farming,Su 18:00,M 06:00,Packing,clock,"Nobody is at the packhouse overnight, so it stands here until six."
-Lettuce → Costco Kona,Load the truck,Hawaii Farming,M 06:00,M 07:00,Waits for the crew,truck,"A box truck cannot stand loaded overnight, so it is loaded right before it drives."
-Lettuce → Costco Kona,Drive to Kona,Costco Kona,M 07:00,M 09:00,Load the truck,truck,
-Lettuce → Costco Kona,Costco receiving,Costco Kona,M 09:00,M 09:30,Drive to Kona,store,"Inside the 4-11 window, so it goes straight in."
+journey,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note
+Costco Kona Lettuce,0,1,Packing,PH,"Sun, 10:00",Cold Storage,"Sun, 18:00",box,
+Costco Kona Lettuce,0,1,Load truck,Cold Storage,"Mon, 07:00",Lettuce Loading dock,"Mon, 07:30",truck,
+Costco Kona Lettuce,0,1,Delveir to Costco,Lettuce Loading dock,"Mon, 07:30",Costco receiiving,"Mon, 08:30",store,
+Costco Kona Lettuce,0,2,FS-incubate,Lab,"Sun, 14:00",Lab,"Sun, 20:00",clock,
+Costco Kona Lettuce,0,2,Azzule,Lab,"Sun, 20:00",Costco eligible to receive,"Sun, 23:00",depot,
+Costco Kona Lettuce,3,1,Packing,PH,"Wed, 10:00",Cold Storage,"Wed, 18:00",box,
+Costco Kona Lettuce,3,1,Load truck,Cold Storage,"Thu, 07:00",Lettuce Loading dock,"Thu, 07:30",truck,
+Costco Kona Lettuce,3,1,Delveir to Costco,Lettuce Loading dock,"Thu, 07:30",Costco receiiving,"Thu, 08:30",store,
+Costco Kona Lettuce,3,2,FS-incubate,Lab,"Wed, 14:00",Lab,"Wed, 20:00",clock,
+Costco Kona Lettuce,3,2,Azzule,Lab,"Wed, 20:00",Costco eligible to receive,"Wed, 23:00",depot,

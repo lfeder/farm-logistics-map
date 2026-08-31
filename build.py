@@ -1,17 +1,18 @@
-"""Build index.html from the CSVs, data.json and viewer/.
+"""Build index.html from legs.csv, reference.json, orders.json and viewer/.
 
-A journey is a set of legs and nothing else, so the thing you edit to change a
-schedule is a spreadsheet:
+Three files, split by how often they change rather than by what they describe:
 
-    journeys.csv   one row per journey: its name, its cut days, a note
-    legs.csv       one row per leg: where it is, when it starts, when it stops
-    hours.csv      one row per place: the hours somebody will take it
-    sailings.csv   one row per boat: when it goes and what it connects to
+    legs.csv        THE schedule. One row per leg of a journey, and the only
+                    thing you edit to change when something happens.
+    reference.json  Quasi-static and hand-edited: what a journey is, who is open
+                    when, which boat goes where. Months between edits.
+    orders.json     Pulled, not typed. Cases and pounds on order by destination,
+                    and the pack line's case counts, copied out of the freight
+                    model's data.json. Refresh it there, not here.
 
     python3 build.py
 
-Touches no network and needs no credentials. data.json is copied out of the
-freight model; refresh it there.
+Touches no network and needs no credentials.
 """
 import csv
 import json
@@ -38,6 +39,9 @@ def read(name, need):
     if missing:
         die(name, "missing column%s: %s" % ("" if len(missing) == 1 else "s", ", ".join(missing)))
     return rows
+
+
+REF = json.load(open(os.path.join(HERE, "reference.json")))
 
 
 def hhmm(s, f, where):
@@ -90,10 +94,10 @@ DAY_WORDS = {"su": 0, "sun": 0, "sunday": 0,
 
 
 def day_time(s, f, where):
-    """'M 06:00' -> (weekday index, hour of day)."""
-    m = re.match(r"^([A-Za-z]+)\s+(\d{1,2}:\d{2})$", (s or "").strip())
+    """'Sun, 10:00' or 'M 06:00' -> (weekday index, hour of day)."""
+    m = re.match(r"^([A-Za-z]+)\s*,?\s+(\d{1,2}:\d{2})$", (s or "").strip())
     if not m:
-        die(f, "%s: expected a day and a time like 'M 06:00', got %r" % (where, s))
+        die(f, "%s: expected a day and a time like 'Sun, 10:00', got %r" % (where, s))
     w = m.group(1).lower()
     if w == "s":
         die(f, "%s: 'S' could be Sunday or Saturday — write Su or Sa" % where)
@@ -102,110 +106,105 @@ def day_time(s, f, where):
     return DAY_WORDS[w], hhmm(m.group(2), f, where)
 
 
-def after(dw, hod, floor):
-    """The first hour at or after `floor` that lands on that weekday at that
-    time, counting from the journey's own first day. A journey that runs Sunday
-    to Friday is five days long, not five days minus a modulo."""
-    base = int(floor // 24) * 24
-    for i in range(0, 60):
-        h = base + i * 24 + hod
-        if h >= floor - 1e-9 and ((ANCHOR_IDX + int(h // 24)) % 7) == dw:
-            return h
-    return floor
-
-
 def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "flow"
 
 
 # ── hours, keyed by place ────────────────────────────────────────────────────
-# A window belongs to a place, and the place name in legs.csv is the same name,
-# so there is one namespace and a leg's lane picks up its own hours.
-hours = {}
-hours_order = []
-for r in read("hours.csv", ["place", "days", "open", "close"]):
-    p = (r["place"] or "").strip()
+# A window belongs to a place, and the place names in legs.csv are the same
+# names, so there is one namespace and a leg's lane picks up its own hours.
+hours, hours_order = {}, []
+for r in REF.get("hours", []):
+    p = (r.get("place") or "").strip()
     if not p:
         continue
     if p in hours:
-        die("hours.csv", "%r appears twice" % p)
-    hours[p] = {"place": p, "days": days_mask(r["days"], "hours.csv", p),
-                "open": hhmm(r["open"], "hours.csv", p),
-                "close": hhmm(r["close"], "hours.csv", p),
-                "lead": int(re.sub(r"[^0-9]", "", r.get("after_arrival") or "") or 0),
+        die("reference.json", "hours: %r appears twice" % p)
+    hours[p] = {"place": p, "days": days_mask(r.get("days"), "reference.json", p),
+                "open": hhmm(r.get("open"), "reference.json", p),
+                "close": hhmm(r.get("close"), "reference.json", p),
+                "lead": int(r.get("after_arrival") or 0),
                 "note": (r.get("note") or "").strip()}
     hours_order.append(p)
 
 sailings = []
-for r in read("sailings.csv", ["route", "departs", "arrives"]):
-    if not (r["route"] or "").strip():
+for r in REF.get("sailings", []):
+    if not (r.get("route") or "").strip():
         continue
-    sailings.append({"route": r["route"].strip(), "departs": (r["departs"] or "").strip(),
-                     "arrives": (r["arrives"] or "").strip(),
+    sailings.append({"route": r["route"].strip(), "departs": (r.get("departs") or "").strip(),
+                     "arrives": (r.get("arrives") or "").strip(),
                      "connects": (r.get("connects") or "").strip(),
                      "note": (r.get("note") or "").strip()})
 
-# ── journeys and their legs ──────────────────────────────────────────────────
-flows, by_name = [], {}
-for r in read("journeys.csv", ["journey"]):
-    nm = (r["journey"] or "").strip()
-    if not nm:
-        continue
-    f = {"id": slug(nm), "name": nm, "note": (r.get("note") or "").strip(), "tasks": []}
-    flows.append(f)
-    by_name[nm] = f
+# ── journeys, and one variant per start day ─────────────────────────────────
+# A journey is defined once and run on more than one cutting day, so the rows
+# group by (journey, start day) and each group is its own picture. The branch
+# column is what makes the food-safety clock expressible: branch 1 is the
+# pallet, branch 2 runs beside it, and both leave the same morning.
+#
+# A leg carries where it starts as well as where it ends, so its bar has a real
+# slope instead of one inferred from whatever came before it.
+meta = REF.get("journeys", {})
 
-for r in read("legs.csv", ["journey", "leg", "place", "starts", "stops"]):
+NEED = ["journey", "start_day", "branch", "leg",
+        "start_location", "start_dt", "end_location", "end_dt"]
+groups, order = {}, []
+for r in read("legs.csv", NEED):
     jn = (r["journey"] or "").strip()
-    if not jn and not (r["leg"] or "").strip():
+    if not jn:
         continue
-    if jn not in by_name:
-        die("legs.csv", "%r is not a journey in journeys.csv" % jn)
-    f = by_name[jn]
-    where = "%s / %s" % (jn, r["leg"])
-    icon = (r.get("icon") or "clock").strip().lower() or "clock"
-    if icon not in ICONS:
-        die("legs.csv", "%s: %r is not an icon (%s)" % (where, icon, ", ".join(sorted(ICONS))))
-    f["tasks"].append({"id": "t%d" % len(f["tasks"]), "name": r["leg"].strip(),
-                       "place": (r["place"] or "Somewhere").strip(),
-                       "_s": day_time(r["starts"], "legs.csv", where),
-                       "_e": day_time(r["stops"], "legs.csv", where),
-                       "icon": icon, "note": (r.get("note") or "").strip(),
-                       "_after": r.get("after") or ""})
+    if jn not in meta:
+        die("legs.csv", "%r has no entry under \"journeys\" in reference.json" % jn)
+    key = (jn, (r["start_day"] or "0").strip())
+    if key not in groups:
+        groups[key] = []
+        order.append(key)
+    groups[key].append(r)
 
-for f in flows:
-    if not f["tasks"]:
-        die("legs.csv", "%r has no legs" % f["name"])
-    # The first leg sets the week. Every time after it is the next occurrence of
-    # its weekday, walking forward, so a journey that crosses a Sunday keeps
-    # going instead of wrapping back to the start.
-    ANCHOR_IDX = f["tasks"][0]["_s"][0]
-    f["anchor"] = DOW[ANCHOR_IDX]
-    globals()["ANCHOR_IDX"] = ANCHOR_IDX
-    floor = 0.0
-    for t in f["tasks"]:
-        t["s"] = after(t["_s"][0], t["_s"][1], floor)
-        t["e"] = after(t["_e"][0], t["_e"][1], t["s"])
-        floor = t["s"]
-        del t["_s"], t["_e"]
-    # Prereqs are written by name, because a column of ids is unreadable.
-    ids = {t["name"]: t["id"] for t in f["tasks"]}
-    for t in f["tasks"]:
-        out = []
-        for nm in [x.strip() for x in re.split(r"[;,]", t.pop("_after")) if x.strip()]:
-            if nm not in ids:
-                die("legs.csv", "%s: %r comes after %r, which is not a leg of that journey"
-                    % (f["name"], t["name"], nm))
-            out.append(ids[nm])
-        t["after"] = out
-    # Each place a leg lands in picks up its own hours, if anybody wrote them.
-    f["windows"] = {}
-    for t in f["tasks"]:
-        if t["place"] in hours:
-            w = hours[t["place"]]
-            f["windows"][t["place"]] = {"days": w["days"], "open": w["open"], "close": w["close"]}
+flows = []
+for key in order:
+    jn, sd = key
+    rows_ = groups[key]
+    where0 = "%s / start day %s" % (jn, sd)
+    anchor_idx = day_time(rows_[0]["start_dt"], "legs.csv", where0)[0]
 
-data = json.load(open(os.path.join(HERE, "data.json")))
+    def at(spec, where, _a=None):
+        dw, hod = day_time(spec, "legs.csv", where)
+        return ((dw - anchor_idx) % 7) * 24 + hod
+
+    tasks, branches = [], []
+    for r in rows_:
+        where = "%s / %s" % (where0, r["leg"])
+        icon = (r.get("icon") or "").strip().lower() or "clock"
+        if icon not in ICONS:
+            die("legs.csv", "%s: %r is not an icon (%s)" % (where, icon, ", ".join(sorted(ICONS))))
+        br = (r["branch"] or "1").strip()
+        if br not in branches:
+            branches.append(br)
+        tasks.append({"id": "t%d" % len(tasks), "name": (r["leg"] or "").strip(), "branch": br,
+                      "from": (r["start_location"] or "Somewhere").strip(),
+                      "place": (r["end_location"] or "Somewhere").strip(),
+                      "s": at(r["start_dt"], where), "e": at(r["end_dt"], where),
+                      "icon": icon, "note": (r.get("note") or "").strip()})
+    # Within a branch the rows are already in order, and that is the whole
+    # dependency story -- nothing needs an "after" column to say what the file
+    # already says.
+    last = {}
+    for t in tasks:
+        t["after"] = [last[t["branch"]]] if t["branch"] in last else []
+        last[t["branch"]] = t["id"]
+
+    label = DOW[anchor_idx]
+    wins = {}
+    for t in tasks:
+        for pl in (t["from"], t["place"]):
+            if pl in hours:
+                wins[pl] = {"days": hours[pl]["days"], "open": hours[pl]["open"],
+                            "close": hours[pl]["close"]}
+    flows.append({"id": slug(jn) + "-" + slug(label), "name": jn, "start": label,
+                  "note": meta.get(jn, ""), "branches": branches, "tasks": tasks, "windows": wins})
+
+data = json.load(open(os.path.join(HERE, "orders.json")))
 ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
@@ -222,10 +221,11 @@ with open(path, "w") as fh:
     fh.write(out)
 
 for f in flows:
-    unknown = sorted({t["place"] for t in f["tasks"]} - set(hours))
-    print("%-28s %2d legs from %s, %d places%s"
-          % (f["name"], len(f["tasks"]), f["anchor"], len(f["windows"]),
-             "" if not unknown else "  (no hours for: %s)" % ", ".join(unknown)))
+    unknown = sorted({p for t in f["tasks"] for p in (t["from"], t["place"])} - set(hours))
+    print("%-22s %-4s start  %2d legs, %d branch%s, %d places%s"
+          % (f["name"], f["start"], len(f["tasks"]), len(f["branches"]),
+             "" if len(f["branches"]) == 1 else "es", len(f["windows"]),
+             "" if not unknown else "  (no hours: %s)" % ", ".join(unknown)))
 print("%d places with hours, %d sailings" % (len(hours), len(sailings)))
 print("%d order rows, %s to %s" % (len(data["sales"]), data["window"]["first"], data["window"]["last"]))
 print("wrote %s (%.0f KB)" % (path, len(out) / 1024))
