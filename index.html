@@ -312,7 +312,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
     <div class="panel">
       <div class="panel-hd">
         <h2>Pack line</h2>
-        <span class="note" id="onote" style="margin-left:auto"></span>
       </div>
       <div class="body"><div id="orders"></div></div>
     </div>
@@ -949,9 +948,6 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   }
 
   function paintOrders() {
-    document.getElementById('onote').textContent =
-      'Lettuce · ' + (DATA.window ? DATA.window.first + ' to ' + DATA.window.last : '') +
-      ' · copied from the freight model';
     var host = document.getElementById('orders');
     host.innerHTML = ordersView();
     // Delegated, and bound once. A rate change repaints the whole view, so a

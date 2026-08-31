@@ -611,9 +611,6 @@
   }
 
   function paintOrders() {
-    document.getElementById('onote').textContent =
-      'Lettuce · ' + (DATA.window ? DATA.window.first + ' to ' + DATA.window.last : '') +
-      ' · copied from the freight model';
     var host = document.getElementById('orders');
     host.innerHTML = ordersView();
     // Delegated, and bound once. A rate change repaints the whole view, so a
