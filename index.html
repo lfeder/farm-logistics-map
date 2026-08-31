@@ -230,7 +230,9 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink);
   text-align:right}
 .rate input:focus{outline:none; border-color:var(--accent)}
-.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600;
+/* The average is what the line runs at; the max is what it has to survive. */
+.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600}
+.otbl.orders tr.maxrow td,.otbl.orders tr.maxrow th{color:var(--ink-2); font-weight:600;
   border-bottom:1px solid var(--line); padding-bottom:7px}
 
 /* Branches. Two threads leaving the same morning -- the pallet and the clock
@@ -267,14 +269,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pd-h.over{color:var(--bad)}
 .pd-lb{flex:0 0 82px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:11px;
   color:var(--ink-3)}
-.pd-key{display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center; padding:8px 0 0 96px;
-  font-size:11px; color:var(--ink-3)}
-.pd-key span{display:inline-flex; align-items:center; gap:5px}
-.pd-sw{display:inline-block; width:11px; height:11px; border-radius:2px}
-.pd-sw.k{background:var(--ink)} .pd-sw.o{background:var(--accent)}
-.pd-sw.f{background:var(--good)} .pd-sw.r{background:var(--ink-3)}
-.pd-note{color:var(--bad)}
-
+ 
 </style>
 </head>
 <body>
@@ -740,12 +735,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     }
     var packBar = '<div class="packdays">' +
       dayRow('Pack day 1', segs1, hKona + hLF + hR > DAY1 + .01) +
-      dayRow('Pack day 2', segs2, false) +
-      '<div class="pd-key">' +
-      [['k', 'Kona LW'], ['o', 'Off-island LW'], ['f', 'LF'], ['r', 'LR/AR/WR']].map(function (x) {
-        return '<span><i class="pd-sw ' + x[0] + '"></i>' + x[1] + '</span>';
-      }).join('') +
-      '<span class="pd-note">Dashed line is the ' + DAY1 + ' h day.</span></div></div>';
+      dayRow('Pack day 2', segs2, false) + '</div>';
 
     var rateRow = '<div class="rates"><span class="lbl">Minutes per case</span>' +
       GROUPS.map(function (g) {
@@ -767,10 +757,25 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
         }).join('') + '</tr>';
     }).join('');
 
+    var peak = {};
+    DESTS.forEach(function (d) { GROUPS.forEach(function (g) { peak[d[0] + g[0]] = 0; }); });
+    P.forEach(function (row) {
+      DESTS.forEach(function (d) {
+        GROUPS.forEach(function (g) {
+          peak[d[0] + g[0]] = Math.max(peak[d[0] + g[0]], (row[d[0]] || {})[g[0]] || 0);
+        });
+      });
+    });
     var minRow = '<tr class="minrow"><th></th><th class="hf">Minutes</th>' +
       DESTS.map(function (d) {
         return GROUPS.map(function (g) {
           return '<td class="fig">' + showMins(mins(n ? tot[d[0] + g[0]] / n : 0, R[g[0]])) + '</td>';
+        }).join('');
+      }).join('') + '</tr>' +
+      '<tr class="maxrow"><th></th><th class="hf">Max</th>' +
+      DESTS.map(function (d) {
+        return GROUPS.map(function (g) {
+          return '<td class="fig">' + peak[d[0] + g[0]].toLocaleString() + '</td>';
         }).join('');
       }).join('') + '</tr>';
 

@@ -401,12 +401,7 @@
     }
     var packBar = '<div class="packdays">' +
       dayRow('Pack day 1', segs1, hKona + hLF + hR > DAY1 + .01) +
-      dayRow('Pack day 2', segs2, false) +
-      '<div class="pd-key">' +
-      [['k', 'Kona LW'], ['o', 'Off-island LW'], ['f', 'LF'], ['r', 'LR/AR/WR']].map(function (x) {
-        return '<span><i class="pd-sw ' + x[0] + '"></i>' + x[1] + '</span>';
-      }).join('') +
-      '<span class="pd-note">Dashed line is the ' + DAY1 + ' h day.</span></div></div>';
+      dayRow('Pack day 2', segs2, false) + '</div>';
 
     var rateRow = '<div class="rates"><span class="lbl">Minutes per case</span>' +
       GROUPS.map(function (g) {
@@ -428,10 +423,25 @@
         }).join('') + '</tr>';
     }).join('');
 
+    var peak = {};
+    DESTS.forEach(function (d) { GROUPS.forEach(function (g) { peak[d[0] + g[0]] = 0; }); });
+    P.forEach(function (row) {
+      DESTS.forEach(function (d) {
+        GROUPS.forEach(function (g) {
+          peak[d[0] + g[0]] = Math.max(peak[d[0] + g[0]], (row[d[0]] || {})[g[0]] || 0);
+        });
+      });
+    });
     var minRow = '<tr class="minrow"><th></th><th class="hf">Minutes</th>' +
       DESTS.map(function (d) {
         return GROUPS.map(function (g) {
           return '<td class="fig">' + showMins(mins(n ? tot[d[0] + g[0]] / n : 0, R[g[0]])) + '</td>';
+        }).join('');
+      }).join('') + '</tr>' +
+      '<tr class="maxrow"><th></th><th class="hf">Max</th>' +
+      DESTS.map(function (d) {
+        return GROUPS.map(function (g) {
+          return '<td class="fig">' + peak[d[0] + g[0]].toLocaleString() + '</td>';
         }).join('');
       }).join('') + '</tr>';
 

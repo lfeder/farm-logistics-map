@@ -220,7 +220,9 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink);
   text-align:right}
 .rate input:focus{outline:none; border-color:var(--accent)}
-.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600;
+/* The average is what the line runs at; the max is what it has to survive. */
+.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600}
+.otbl.orders tr.maxrow td,.otbl.orders tr.maxrow th{color:var(--ink-2); font-weight:600;
   border-bottom:1px solid var(--line); padding-bottom:7px}
 
 /* Branches. Two threads leaving the same morning -- the pallet and the clock
@@ -257,10 +259,4 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pd-h.over{color:var(--bad)}
 .pd-lb{flex:0 0 82px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:11px;
   color:var(--ink-3)}
-.pd-key{display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center; padding:8px 0 0 96px;
-  font-size:11px; color:var(--ink-3)}
-.pd-key span{display:inline-flex; align-items:center; gap:5px}
-.pd-sw{display:inline-block; width:11px; height:11px; border-radius:2px}
-.pd-sw.k{background:var(--ink)} .pd-sw.o{background:var(--accent)}
-.pd-sw.f{background:var(--good)} .pd-sw.r{background:var(--ink-3)}
-.pd-note{color:var(--bad)}
+ 
