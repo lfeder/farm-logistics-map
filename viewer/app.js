@@ -411,7 +411,7 @@
       var words = nm.split(/[\s\/]+/).filter(function (w) { return w; });
       var wLen = 0;
       words.forEach(function (w) { if (w.length > wLen) wLen = w.length; });
-      var wpc = (26 + wLen * 5.6) / PLOT_PX * 100;
+      var wpc = (12 + wLen * 5.6) / PLOT_PX * 100;
       var hh = Math.max(1, words.length) * ROW;
       var lo = PCT(p.s) + .6, hi = lo + wpc;
       // Sloped, the name sits centred on the start dot's row. Flat, it sits
@@ -435,7 +435,7 @@
       dots += '<div class="ln' + db + '" style="left:' + PCT(p.s) + '%;top:' + ly + 'px"' +
         ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
         stamp(p.e) + ', ' + dur(p.e - p.s) + (p.t.note ? '. ' + esc(p.t.note) : '') + '">' +
-        ico(p.t.icon) + '<span class="nw">' + esc(nm) + '</span></div>';
+        '<span class="nw">' + esc(nm) + '</span></div>';
     });
 
     var lbl = lanes.map(function (l) {
