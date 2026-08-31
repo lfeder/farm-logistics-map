@@ -255,10 +255,15 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pd{display:flex; align-items:center; gap:12px; padding:5px 0}
 .pd-l{flex:0 0 84px; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--ink-3); font-weight:600}
-.pd-bar{position:relative; flex:1 1 auto; min-width:0; height:26px; display:flex;
-  background:var(--card-2); border:1px solid var(--line-2); border-radius:5px; overflow:hidden}
+/* The track is only a measuring rail: both days are scaled against the same
+   width, but an empty tail is not a thing that happens, so nothing is drawn
+   past the last segment. */
+.pd-bar{position:relative; flex:1 1 auto; min-width:0; height:26px; display:flex}
 .pd-s{display:flex; align-items:center; justify-content:center; overflow:hidden; white-space:nowrap;
   font-size:10px; font-weight:600; color:#fff}
+.pd-s:first-child{border-radius:5px 0 0 5px}
+.pd-s:last-child{border-radius:0 5px 5px 0}
+.pd-s:only-child{border-radius:5px}
 .pd-s.k{background:var(--ink)}
 .pd-s.o{background:var(--accent)}
 .pd-s.f{background:var(--good)}
