@@ -44,9 +44,17 @@ What it *feeds* is those same edges read backwards, so it is derived on the fly
 and shown under each task rather than typed — the two can never drift apart.
 
 A task starts when the **last** of its prereqs is done, which is what makes a
-merge behave like a merge. Anything left unresolved is in a dependency circle or
-points at a task that has been deleted; it is called out in red and left off the
-chart rather than quietly dropped.
+merge behave like a merge.
+
+**A task with no prereqs is counted from midnight on day 0.** That is almost
+never what anyone means, so any task that is not an `at` and has nothing to come
+after is outlined in red and named above the list. Deleting a task out of the
+middle closes the chain over the hole — whatever depended on it inherits what it
+depended on — rather than leaving the next task hanging.
+
+Anything left unresolved is in a dependency circle or points at a task that has
+been deleted; it is called out in red and left off the chart rather than quietly
+dropped.
 
 `lead` is worth knowing about: hours after arrival before the cargo can even be
 collected. Set it to 24 on a `opens` task and the next-business-day rule falls

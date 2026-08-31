@@ -536,7 +536,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       : (r.at[t.id] === r.end ? 'Feeds nothing — this is the end of the flow' : 'Feeds nothing yet')) +
       '</span>';
 
-    var orphan = r.at[t.id] === undefined;
+    var orphan = r.at[t.id] === undefined || (r.loose && r.loose[t.id]);
     return '<div class="task' + (orphan ? ' orphan' : '') + '" id="task-' + esc(t.id) + '">' +
       '<div class="t-hd">' +
       '<span class="t-n">' + (i + 1) + '</span>' +
@@ -598,13 +598,29 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       '<span><i class="sw wt"></i>waiting</span>' +
       '<span class="note">Drag a solid bar to change how long that leg takes. ' +
       'Click any dot, band or flat run to open its task.</span>';
-    document.getElementById('warn').innerHTML = r.stuck.length
-      ? '<div class="warn">' + r.stuck.length + ' task' + (r.stuck.length > 1 ? 's are' : ' is') +
+    // Two ways a flow can be wrong, and both are worth saying out loud.
+    var loose = flow.tasks.filter(function (t) {
+      return t.kind !== 'at' && !(t.after || []).filter(function (id) { return r.byId[id]; }).length;
+    });
+    var warn = '';
+    if (r.stuck.length) {
+      warn += '<div class="warn">' + r.stuck.length + ' task' + (r.stuck.length > 1 ? 's are' : ' is') +
         ' unreachable: ' + r.stuck.map(function (id) {
           return esc((r.byId[id] || {}).name || id);
         }).join(', ') + '. Either they depend on each other in a circle, or on a task that ' +
-        'has been deleted. They are outlined in red below and left off the chart.</div>'
-      : '';
+        'has been deleted. They are outlined in red below and left off the chart.</div>';
+    }
+    if (loose.length) {
+      warn += '<div class="warn">' + loose.map(function (t) { return esc(t.name); }).join(', ') +
+        ' ' + (loose.length > 1 ? 'have' : 'has') + ' nothing to come after, so ' +
+        (loose.length > 1 ? 'they are' : 'it is') + ' being counted from midnight on day 0. ' +
+        'Give ' + (loose.length > 1 ? 'them' : 'it') + ' a prereq, or make ' +
+        (loose.length > 1 ? 'them' : 'it') + ' an “At a time” task.</div>';
+    }
+    document.getElementById('warn').innerHTML = warn;
+    var looseIds = {};
+    loose.forEach(function (t) { looseIds[t.id] = 1; });
+    r.loose = looseIds;
     document.getElementById('tnote').textContent =
       flow.tasks.length + ' tasks · ' + places(r).length + ' places · ' + r.edges.length +
       ' links · ' + r.hrs + ' h, of which ' + r.idle + ' standing still';
@@ -688,10 +704,18 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       if (del) del.onclick = function () {
         if (flow.tasks.length <= 1) return;
         flow.tasks.splice(t.__i, 1);
-        // A deleted task cannot go on being a prereq, or everything after it
-        // silently falls off the chart.
+        // Delete a task out of the middle and the chain has to close over the
+        // hole: whatever depended on it inherits what IT depended on. Merely
+        // dropping the dead id leaves the next task with no prereq at all, and
+        // a task with no prereq starts at midnight on day 0 -- so removing one
+        // step silently moved everything after it to the wrong day.
+        var inherited = (t.after || []).slice();
         flow.tasks.forEach(function (o) {
-          o.after = (o.after || []).filter(function (x) { return x !== t.id; });
+          if ((o.after || []).indexOf(t.id) < 0) return;
+          o.after = o.after.filter(function (x) { return x !== t.id; });
+          inherited.forEach(function (x) {
+            if (x !== o.id && o.after.indexOf(x) < 0) o.after.push(x);
+          });
         });
         save(); paint();
       };
