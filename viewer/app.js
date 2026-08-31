@@ -229,19 +229,23 @@
       // beginning of its activity rather than the end. If that spot is taken
       // the name steps up; it never slides along the bar, so it cannot drift
       // away from the leg it belongs to.
+      // A step is exactly one name's height, so two names a step apart sit
+      // shoulder to shoulder and must not read as a collision -- otherwise a
+      // name stepping up blocks the row below it as well as its own.
+      var ROW = 12;
       var wpc = (30 + nm.length * 5.6) / PLOT_PX * 100;
       var lo = PCT(p.s) + .6, hi = lo + wpc;
-      var STEPS = y1 === y2 ? [-11, -22, -33, 0] : [0, -11, -22, 11];
+      var STEPS = y1 === y2 ? [-1, -2, -3, 0] : [0, -1, -2, 1];
       var ly = null;
       for (var k = 0; k < STEPS.length; k++) {
-        var cand = y1 + STEPS[k], free = true;
+        var cand = y1 + STEPS[k] * ROW, free = true;
         for (var q2 = 0; q2 < taken.length; q2++) {
           var o = taken[q2];
-          if (Math.abs(o.y - cand) < 12 && lo < o.hi + .4 && o.lo < hi + .4) { free = false; break; }
+          if (Math.abs(o.y - cand) < ROW && lo < o.hi + .4 && o.lo < hi + .4) { free = false; break; }
         }
         if (free) { ly = cand; break; }
       }
-      if (ly === null) ly = y1 + STEPS[0];
+      if (ly === null) ly = y1 + STEPS[0] * ROW;
       taken.push({ y: ly, lo: lo, hi: hi });
       dots += '<div class="ln' + db + '" style="left:' + PCT(p.s) + '%;top:' + ly + 'px"' +
         ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
