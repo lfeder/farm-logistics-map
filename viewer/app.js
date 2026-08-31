@@ -831,9 +831,15 @@
     var r = read(flow);
     SPAN = flow.many ? 7 : Math.max(2, Math.ceil(r.end / 24) + 1);
 
+    // Mark the days we actually cut on, which is what each shown journey
+    // starts on. It used to mark day 0, and day 0 stopped being the cut the
+    // moment several journeys began sharing a Sunday axis.
+    var cuts = {};
+    list.forEach(function (f) { cuts[f.start] = 1; });
     var ax = '';
     for (var i = 0; i < SPAN; i++) {
-      ax += '<div class="day' + (i === 0 ? ' cut' : '') + '">' + dayName(i) + '</div>';
+      var dn = dayName(i);
+      ax += '<div class="day' + (cuts[dn] ? ' cut' : '') + '">' + dn + '</div>';
     }
     // The four-hour marks are only useful if you can say what hour they are.
     var hx = '';
