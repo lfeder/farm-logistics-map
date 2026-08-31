@@ -196,14 +196,16 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .hint{margin:14px 0 0; font-size:11.5px; color:var(--ink-3); line-height:1.5}
 .hint b{color:var(--ink-2); font-weight:600}
 
-/* Cases and pounds share a column and a type size. The orders come in cases and
-   the harvest is weighed, so a line carrying only one of them makes somebody
-   convert -- but neither is the headline, so neither gets to be bigger. Fixed
-   slots keep both columns of figures running straight down the page. */
-.q{display:inline-flex; justify-content:flex-end; gap:12px;
-  font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; font-size:11.5px}
-.otbl .q s{text-decoration:none; display:inline-block; text-align:right; color:var(--ink);
-  margin:0; font-size:11.5px}
-.otbl .q s.cs{width:58px}
-.otbl .q s.lb{width:70px}
-.q i{font-style:normal; color:var(--ink-3); font-size:10px; margin-left:4px}
+/* The unit belongs to the column. Saying "cs" and "lb" against every figure was
+   repeating in ninety places what the header can say twice, and it made the
+   numbers fight for the eye with their own labels. */
+.otbl.orders .grp2{text-align:center; border-bottom:none; padding-bottom:2px}
+.otbl.orders tr.units th{font-size:9.5px; letter-spacing:.06em; text-transform:none;
+  color:var(--ink-3); font-weight:500; text-align:right; padding-bottom:6px;
+  border-bottom:2px solid var(--ink)}
+.otbl.orders thead tr:first-child th{border-bottom:none}
+.otbl td.fig{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+  font-size:11.5px; color:var(--ink); text-align:right; padding-right:10px}
+.otbl td.fig:nth-of-type(even){padding-right:22px}
+.otbl.hrs tr.unk td,.otbl.hrs tr.unk th{opacity:.6}
+.otbl.hrs td.mono u{text-decoration:none; color:var(--ink-3)}

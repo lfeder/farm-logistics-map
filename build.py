@@ -86,9 +86,54 @@ def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "flow"
 
 
+def top_sections(md):
+    """The '# ' sections, keyed by heading."""
+    out, name, buf = {}, None, []
+    for line in md.split("\n"):
+        # A '## ' journey ends a '# ' section too, or Sailings swallows every
+        # table below it and the reference quietly grows rows nobody wrote.
+        if line.startswith("## "):
+            if name:
+                out[name] = buf
+            name, buf = None, []
+            continue
+        if line.startswith("# "):
+            if name:
+                out[name] = buf
+            name, buf = line[2:].strip().lower(), []
+        elif name:
+            buf.append(line)
+    if name:
+        out[name] = buf
+    return out
+
+
+def reference(md):
+    """The tables that describe everybody else's clock, whether or not this
+    journey goes through them: opening hours, and the sailing schedule."""
+    sec = top_sections(md)
+    hours = []
+    for r in rows(sec.get("hours", [])):
+        r = r + [""] * (6 - len(r))
+        if not r[0]:
+            continue
+        hours.append({"party": r[0], "days": days_mask(r[1], "Hours / " + r[0]),
+                      "open": hhmm(r[2], "Hours / " + r[0]),
+                      "close": hhmm(r[3], "Hours / " + r[0]),
+                      "lead": int(re.sub(r"[^0-9]", "", r[4]) or 0),
+                      "note": r[5]})
+    sail = []
+    for r in rows(sec.get("sailings", [])):
+        r = r + [""] * (5 - len(r))
+        if not r[0]:
+            continue
+        sail.append({"route": r[0], "departs": r[1], "arrives": r[2],
+                     "connects": r[3], "note": r[4]})
+    return {"hours": hours, "sailings": sail}
+
+
 def parse(md):
     """journeys.md -> the list of flows the viewer reads."""
-    # Everything before the first '## ' is the preamble, which is for humans.
     chunks = re.split(r"\n(?=## )", md)
     flows = []
     for chunk in chunks[1:]:
@@ -160,11 +205,13 @@ def parse(md):
 
 md = open(os.path.join(HERE, "journeys.md")).read()
 flows = parse(md)
+ref = reference(md)
 data = json.load(open(os.path.join(HERE, "data.json")))
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell
        .replace("/*__FLOWS__*/", json.dumps(flows, separators=(",", ":")))
+       .replace("/*__REF__*/", json.dumps(ref, separators=(",", ":")))
        .replace("/*__DATA__*/", json.dumps(data, separators=(",", ":")))
        .replace("<style>/*__CSS__*/</style>",
                 "<style>\n%s\n</style>" % open(os.path.join(HERE, "viewer", "style.css")).read())
@@ -177,5 +224,7 @@ with open(path, "w") as fh:
 print("%d journeys: %s" % (len(flows), ", ".join(f["name"] for f in flows)))
 for f in flows:
     print("  %-28s %2d tasks, %d places" % (f["name"], len(f["tasks"]), len(f["windows"])))
+print("reference: %d parties with hours, %d sailings"
+      % (len(ref["hours"]), len(ref["sailings"])))
 print("%d order rows, %s to %s" % (len(data["sales"]), data["window"]["first"], data["window"]["last"]))
 print("wrote %s (%.0f KB)" % (path, len(out) / 1024))

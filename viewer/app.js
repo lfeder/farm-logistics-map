@@ -345,11 +345,12 @@
     // every line rather than somebody converting in their head. They share one
     // column and one type size -- neither is the headline -- and each sits in a
     // fixed-width slot so both run straight down the page.
+    // The unit is a property of the column, not of every figure in it, so it is
+    // said once in the header and the cells carry nothing but numbers.
     function qty(b, k) {
-      if (!b || !b[k]) return '<span class="q"><s class="cs">&mdash;</s><s class="lb"></s></span>';
-      return '<span class="q">' +
-        '<s class="cs">' + Math.round(b[k]).toLocaleString() + '<i>cs</i></s>' +
-        '<s class="lb">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + '<i>lb</i></s></span>';
+      if (!b || !b[k]) return '<td class="fig">&mdash;</td><td class="fig">&mdash;</td>';
+      return '<td class="fig">' + Math.round(b[k]).toLocaleString() + '</td>' +
+        '<td class="fig">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + '</td>';
     }
     var tot = { kona: 0, pickup: 0, off: 0, kona_lb: 0, pickup_lb: 0, off_lb: 0, n: 0 };
     var body = wks.map(function (w) {
@@ -366,7 +367,7 @@
         return '<tr class="' + (hi ? '' : 'wkstart') + '">' +
           (hi ? '' : '<th rowspan="2" class="wk">' + shortDate(w) + '</th>') +
           '<th class="hf">' + h[1] + '</th>' +
-          BUCKETS.map(function (k) { return '<td>' + qty(b, k[0]) + '</td>'; }).join('') +
+          BUCKETS.map(function (k) { return qty(b, k[0]); }).join('') +
           '<td class="barcell">' + bar + '</td></tr>';
       }).join('');
     }).join('');
@@ -375,11 +376,16 @@
       mean[k[0]] = tot.n ? tot[k[0]] / tot.n : 0;
       mean[k[0] + '_lb'] = tot.n ? tot[k[0] + '_lb'] / tot.n : 0;
     });
-    var avg = '<tr class="grp"><th colspan="6">Per window</th></tr><tr><th></th><th class="hf">Average</th>' +
-      BUCKETS.map(function (k) { return '<td>' + qty(mean, k[0]) + '</td>'; }).join('') +
+    var avg = '<tr class="grp"><th colspan="9">Per window</th></tr>' +
+      '<tr><th></th><th class="hf">Average</th>' +
+      BUCKETS.map(function (k) { return qty(mean, k[0]); }).join('') +
       '<td class="barcell"></td></tr>';
-    return '<table class="otbl"><thead><tr><th></th><th></th>' +
-      BUCKETS.map(function (k) { return '<th>' + k[1] + '</th>'; }).join('') +
+    return '<table class="otbl orders"><thead>' +
+      '<tr><th></th><th></th>' +
+      BUCKETS.map(function (k) { return '<th colspan="2" class="grp2">' + k[1] + '</th>'; }).join('') +
+      '<th></th></tr>' +
+      '<tr class="units"><th></th><th></th>' +
+      BUCKETS.map(function () { return '<th>cs</th><th>lb</th>'; }).join('') +
       '<th></th></tr></thead><tbody>' + body + avg + '</tbody></table>' +
       '<p class="hint">Cases and pounds invoiced, off the purchase orders, split by how the order ' +
       'leaves the farm: ' +
@@ -394,31 +400,65 @@
     return d.getDate() + ' ' + M[d.getMonth()];
   }
 
-  // ── Opening hours, every place across every journey ───────────────────────
+  // ── Hours: everybody's clock, not just this journey's ─────────────────────
+  // A window belongs to a party, not to a task, and the ones that matter are
+  // the ones this product waits at whether or not the journey on screen goes
+  // through them.
   function hoursView() {
-    var seen = {};
-    var out = F.map(function (flow) {
-      var pl = places(flow).filter(function (p) { return winOf(flow, p); });
-      if (!pl.length) return '';
-      return '<h4>' + esc(flow.name) + '</h4><table class="otbl hrs"><thead><tr>' +
-        '<th>Place</th><th>Days</th><th>Opens</th><th>Closes</th><th></th></tr></thead><tbody>' +
-        pl.map(function (p) {
-          var w = winOf(flow, p);
-          var key = p + '|' + w.days.join('') + '|' + w.open + '|' + w.close;
-          var dup = seen[key] ? ' <em>same as above</em>' : '';
-          seen[key] = 1;
-          return '<tr><th class="hf">' + esc(p) + '</th>' +
-            '<td class="dcell">' + DOW.map(function (dn, d) {
-              return '<span class="d' + (w.days[d] ? ' on' : '') + '" title="' + dn + '">' + dn[0] + '</span>';
-            }).join('') + '</td>' +
+    var R = window.REF || { hours: [], sailings: [] };
+    var out = '';
+    if (R.hours.length) {
+      out += '<h4>Who will take it, and when</h4>' +
+        '<table class="otbl hrs"><thead><tr><th>Party</th><th>Days</th><th>Opens</th>' +
+        '<th>Closes</th><th>After arrival</th><th>Note</th></tr></thead><tbody>' +
+        R.hours.map(function (w) {
+          return '<tr><th class="hf">' + esc(w.party) + '</th>' +
+            '<td class="dcell">' + dayCells(w.days) + '</td>' +
             '<td class="mono">' + clock(num(w.open)) + '</td>' +
             '<td class="mono">' + clock(num(w.close)) + '</td>' +
-            '<td class="nt">' + dup + '</td></tr>';
+            '<td class="mono">' + (w.lead ? w.lead + ' h' : '<u>—</u>') + '</td>' +
+            '<td class="nt">' + esc(w.note || '') + '</td></tr>';
         }).join('') + '</tbody></table>';
+    }
+    if (R.sailings.length) {
+      out += '<h4>Young Brothers sailings</h4>' +
+        '<table class="otbl hrs"><thead><tr><th>Route</th><th>Departs</th><th>Arrives</th>' +
+        '<th>Connects</th><th>Note</th></tr></thead><tbody>' +
+        R.sailings.map(function (x) {
+          var open = /\?/.test(x.departs) || /\?/.test(x.arrives);
+          return '<tr' + (open ? ' class="unk"' : '') + '><th class="hf">' + esc(x.route) + '</th>' +
+            '<td class="mono">' + esc(x.departs) + '</td>' +
+            '<td class="mono">' + esc(x.arrives) + '</td>' +
+            '<td class="nt">' + esc(x.connects || '') + '</td>' +
+            '<td class="nt">' + mark(x.note || '') + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    // What this journey actually uses, which is a subset and worth seeing apart.
+    var flow = cur();
+    var pl = flow ? places(flow).filter(function (p) { return winOf(flow, p); }) : [];
+    if (pl.length) {
+      out += '<h4>Used by ' + esc(flow.name) + '</h4>' +
+        '<table class="otbl hrs"><thead><tr><th>Place</th><th>Days</th><th>Opens</th>' +
+        '<th>Closes</th><th></th></tr></thead><tbody>' +
+        pl.map(function (p) {
+          var w = winOf(flow, p);
+          return '<tr><th class="hf">' + esc(p) + '</th>' +
+            '<td class="dcell">' + dayCells(w.days) + '</td>' +
+            '<td class="mono">' + clock(num(w.open)) + '</td>' +
+            '<td class="mono">' + clock(num(w.close)) + '</td><td></td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    return out + '<p class="hint">All of this is set in <code>journeys.md</code> — the two reference ' +
+      'tables at the top of the file, and each journey&rsquo;s own <b>Hours</b> table. Days here are ' +
+      'real weekdays, where the task times on the Flow tab are offsets from the cut.</p>';
+  }
+  function dayCells(days) {
+    return DOW.map(function (dn, d) {
+      return '<span class="d' + (days[d] ? ' on' : '') + '" title="' + dn + '">' + dn[0] + '</span>';
     }).join('');
-    return out + '<p class="hint">Set in <code>journeys.md</code> under each journey&rsquo;s ' +
-      '<b>Hours</b> table. These are real weekdays — Costco receiving is shut on a Sunday whatever ' +
-      'day we cut on — where the task times are offsets from the cut.</p>';
+  }
+  function mark(t) {
+    return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   }
 
   // ── Render ────────────────────────────────────────────────────────────────

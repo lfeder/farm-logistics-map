@@ -59,7 +59,12 @@ schedule, not the syntax, so the viewer flags it in red instead.
   off-island on a boat. Both units on every line, because the orders arrive in
   cases and the harvest is weighed. Copied from the freight model; refresh it
   there.
-- **Hours** — every place's opening hours, per journey.
+- **Hours** — everybody's clock, whether or not the journey on screen goes
+  through them: the farm, Aloha Air's Kona counter, Young Brothers at Kawaihae,
+  Honolulu and Kahului, HFA at both ends, Costco Kona receiving and the
+  off-island docks — plus the Young Brothers sailing schedule and which boat
+  connects to which. Set in the `# Hours` and `# Sailings` tables at the top of
+  `journeys.md`.
 
 Hours **gate** the written times without overriding them: a start or stop
 outside its place's hours is printed in red in the task list and named above it.
