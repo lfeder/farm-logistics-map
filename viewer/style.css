@@ -74,27 +74,14 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
    is drawn for what it is rather than closed up. */
 .link{stroke:var(--ink-3); stroke-width:1.5; stroke-dasharray:1 4; opacity:.75}
 .link.back{stroke:var(--bad); opacity:.9; stroke-dasharray:3 3}
-.tick{fill:var(--card); stroke:var(--ink); stroke-width:1.5}
 .grab{stroke:transparent; stroke-width:13; stroke-linecap:round; cursor:ew-resize}
 .grab:hover{stroke:var(--accent); opacity:.22}
-.dot{position:absolute; width:0; height:0; color:var(--ink); cursor:pointer}
-.dot b{position:absolute; left:-3px; top:-3px; width:6px; height:6px; border-radius:50%;
-  background:currentColor; display:block}
-.dot.end b{left:-4.5px; top:-4.5px; width:9px; height:9px; box-shadow:0 0 0 2px var(--card)}
-.dot span{position:absolute; left:7px; display:flex; align-items:center; gap:3px; white-space:nowrap;
-  font-size:9.5px; font-weight:500; line-height:1.1}
-.dot.s0 span{bottom:2px} .dot.s1 span{top:2px} .dot.s2 span{bottom:13px}
-.dot.flip span{left:auto; right:7px; flex-direction:row-reverse}
-.dot em{font-style:normal; color:var(--ink-3); font-weight:400}
-.dot.end span{font-weight:600}
-.dot:hover b{box-shadow:0 0 0 3px var(--accent-soft)}
 .legend{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; padding-top:14px; margin-top:10px;
   border-top:1px solid var(--line-2); font-size:11.5px; color:var(--ink-2)}
 .legend span{display:inline-flex; align-items:center; gap:5px}
 .sw{display:inline-block; width:11px; height:11px; border-radius:2px}
 .sw.sw.mv{width:16px; height:2px; border-radius:0; background:var(--ink-2)}
 .sw.wt{width:16px; height:0; border-radius:0; border-top:2px dashed var(--ink-3)}
-.sw.tk{width:7px; height:7px; border-radius:50%; background:var(--card); border:1.5px solid var(--ink)}
 .i{display:inline-block; vertical-align:-2px; flex:0 0 auto}
 
 /* ---------- the list ---------- */
@@ -229,10 +216,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .move.b1,.wait.b1{stroke:var(--accent)}
 .move.b2,.wait.b2{stroke:var(--good)}
 .move.b3,.wait.b3{stroke:var(--ink-3)}
-.tick.b0{stroke:var(--ink)} .tick.b1{stroke:var(--accent)}
-.tick.b2{stroke:var(--good)} .tick.b3{stroke:var(--ink-3)}
-.dot.b0{color:var(--ink)} .dot.b1{color:var(--accent)}
-.dot.b2{color:var(--good)} .dot.b3{color:var(--ink-3)}
 .sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}
 
 /* ---------- the two pack days ---------- */
@@ -246,6 +229,12 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
    width, but an empty tail is not a thing that happens, so nothing is drawn
    past the last segment. */
 .pd-bar{position:relative; flex:1 1 auto; min-width:0; height:26px; display:flex}
+/* The clock the bars are read against, on the same track so a segment can be
+   placed in the day rather than only measured. */
+.pd-axis{padding-bottom:0}
+.pd-scale{height:14px; display:block}
+.pd-t{position:absolute; transform:translateX(-50%); top:0; font-family:"IBM Plex Mono",monospace;
+  font-size:8.5px; color:var(--ink-3); white-space:nowrap}
 .pd-s{display:flex; align-items:center; justify-content:center; overflow:hidden; white-space:nowrap;
   font-size:10px; font-weight:600; color:#fff}
 .pd-s:first-child{border-radius:5px 0 0 5px}
@@ -261,3 +250,22 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pd-lb{flex:0 0 82px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:11px;
   color:var(--ink-3)}
  
+/* Three labels a leg: the hour at each end against its own dot, and the name on
+   the bar between them. Hanging the name off one end made a flat bar read as
+   though the name belonged to the far end of it. */
+.pt{fill:var(--card); stroke-width:2}
+.pt.b0{stroke:var(--ink)} .pt.b1{stroke:var(--accent)}
+.pt.b2{stroke:var(--good)} .pt.b3{stroke:var(--ink-3)}
+.lt{position:absolute; font-family:"IBM Plex Mono",monospace; font-size:9px; color:var(--ink-3);
+  white-space:nowrap; pointer-events:none}
+.lt.s{transform:translate(-100%,-50%); padding-right:7px}
+.lt.e{transform:translate(0,-50%); padding-left:7px}
+.ln{position:absolute; display:flex; align-items:center; gap:3px; white-space:nowrap;
+  font-size:10px; font-weight:600; line-height:1; cursor:pointer;
+  background:var(--card); padding:1px 4px; border-radius:3px}
+.ln.b0{color:var(--ink)} .ln.b1{color:var(--accent)}
+.ln.b2{color:var(--good)} .ln.b3{color:var(--ink-3)}
+.ln{transform:translate(0,-50%); margin-left:8px}
+.ln.n0{margin-top:-11px} .ln.n1{margin-top:11px} .ln.n2{margin-top:-23px}
+.ln.n3{margin-top:23px} .ln.n4{margin-top:-35px} .ln.n5{margin-top:35px}
+.ln:hover{outline:2px solid var(--accent-soft)}

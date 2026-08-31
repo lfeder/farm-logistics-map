@@ -196,42 +196,61 @@
         if (still) wait += '<line class="wait' + b + '" ' + seg + '/>';
         else move += '<line class="move' + b + '" ' + seg + '/>';
       }
-      svg += '<circle class="tick' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="2.6"><title>' +
-        esc(p.t.name) + ' starts ' + stamp(p.s) + '</title></circle>';
+      svg += '<circle class="pt' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="3"/>' +
+        '<circle class="pt' + b + '" cx="' + X(p.e) + '" cy="' + yOf[p.place] + '" r="3"/>';
       grabs += '<line class="grab" ' + seg + ' data-task="' + esc(p.id) + '"><title>' +
         esc(p.t.name) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
         '. Drag to move the whole task.</title></line>';
     });
     svg += link + wait + move + grabs;
 
-    var dots = '', placed = {};
+    // A leg carries three labels: the hour at each end, against its own dot, and
+    // the name on the bar between them. Hanging the name off one end made a
+    // flat bar read as though the name belonged to the far end of it.
+    var dots = '', taken = [], stamped = {};
     r.pts.forEach(function (p) {
-      // A leg is named where it begins, not where it ends: the label reads as
-      // the thing about to happen rather than as a receipt for it.
-      var x = PCT(p.s), last = p.e === r.end;
-      var nm = p.t.name || 'Task', tm = clock(p.s);
-      var wpc = (30 + (nm.length + tm.length) * 5.3) / PLOT_PX * 100;
-      var flip = x + wpc > 99;
-      var lo = flip ? x - wpc : x, hi = flip ? x : x + wpc;
-      var lane = placed[p.from] || (placed[p.from] = []), slot = 0;
-      for (; slot < 3; slot++) {
-        var free = true;
-        for (var q = 0; q < lane.length; q++) {
-          var o = lane[q];
-          if (o.slot === slot && lo < o.hi + .5 && o.lo < hi + .5) { free = false; break; }
+      var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
+      var y2 = yOf[p.place];
+      var db = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
+      var nm = p.t.name || 'Task';
+      // One leg's stop is usually the next one's start, in the same place at
+      // the same minute, and printing the hour twice on top of itself is how
+      // that reads. Each moment gets one label.
+      function hourLbl(h, y, side) {
+        var k = y + '|' + h;
+        if (stamped[k]) return '';
+        stamped[k] = 1;
+        var w = (clock(h).length * 5.2 + 10) / PLOT_PX * 100, x = PCT(h);
+        taken.push({ y: y, lo: side === 's' ? x - w : x, hi: side === 's' ? x : x + w });
+        return '<div class="lt ' + side + db + '" style="left:' + x + '%;top:' + y + 'px">' +
+          clock(h) + '</div>';
+      }
+      dots += hourLbl(p.s, y1, 's') + hourLbl(p.e, y2, 'e');
+
+      // The name sits at the middle of the bar, stepped off it when two names
+      // would land on each other.
+      // The name starts at the middle of the bar and runs right, rather than
+      // straddling it, so it never sits on the hour printed at either end.
+      var mx = PCT((p.s + p.e) / 2), my = (y1 + y2) / 2;
+      var wpc = (30 + nm.length * 5.6) / PLOT_PX * 100;
+      var lo = mx + 0.6, hi = mx + 0.6 + wpc;
+      // Names dodge the hour labels as well as each other: on a short leg the
+      // middle of the bar is only a few pixels from its own end.
+      var OFF = [-11, 11, -23, 23, -35, 35], slot = 0;
+      for (; slot < OFF.length; slot++) {
+        var ly = my + OFF[slot], free = true;
+        for (var q2 = 0; q2 < taken.length; q2++) {
+          var o = taken[q2];
+          if (Math.abs(o.y - ly) < 12 && lo < o.hi + .4 && o.lo < hi + .4) { free = false; break; }
         }
         if (free) break;
       }
-      lane.push({ lo: lo, hi: hi, slot: slot });
-      var fed = feedsOf(flow, p.id);
-      var db = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
-      dots += '<div class="dot' + db + ' s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
-        '" style="left:' + x + '%;top:' + (yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from]) +
-        'px" data-task="' + esc(p.id) + '"' +
-        ' title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
-        (p.t.note ? '. ' + esc(p.t.note) : '') +
-        (fed.length ? '. Feeds ' + esc(fed.map(function (x2) { return x2.name; }).join(', ')) : '') +
-        '">' + '<b></b><span>' + ico(p.t.icon) + esc(nm) + '<em>' + tm + '</em></span></div>';
+      if (slot >= OFF.length) slot = OFF.length - 1;
+      taken.push({ y: my + OFF[slot], lo: lo, hi: hi });
+      dots += '<div class="ln n' + slot + db + '" style="left:' + mx + '%;top:' + my + 'px"' +
+        ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
+        stamp(p.e) + ', ' + dur(p.e - p.s) + (p.t.note ? '. ' + esc(p.t.note) : '') + '">' +
+        ico(p.t.icon) + esc(nm) + '</div>';
     });
 
     var lbl = lanes.map(function (l) {
@@ -318,6 +337,14 @@
   // not come off the line six at a time.
   var RATE_DEF = { LW: 2, LF: 1, TRAY: 1 };
 
+  function startHour() {
+    var v = parseInt(S.startHour, 10);
+    return isNaN(v) || v < 0 || v > 23 ? 10 : v;
+  }
+  function hourLabel(h) {
+    var x = ((Math.floor(h) % 24) + 24) % 24;
+    return x === 0 ? '12a' : x < 12 ? x + 'a' : x === 12 ? '12p' : (x - 12) + 'p';
+  }
   function rates() {
     var r = {};
     GROUPS.forEach(function (g) {
@@ -369,11 +396,11 @@
     ].filter(function (x) { return x[1] > 0.5; });
     var segs2 = [['Off-island LW', offLW2, mins(offLW2, R.LW) / 60, offLW2 * LB.LW, 'o']]
       .filter(function (x) { return x[1] > 0.5; });
+    var wide = Math.max(hKona + hLF + hR + mins(offLW1, R.LW) / 60,
+                        mins(offLW2, R.LW) / 60, DAY1) || 1;
     function dayRow(label, segs, over) {
       var h = segs.reduce(function (a, x) { return a + x[2]; }, 0);
       var lb = segs.reduce(function (a, x) { return a + x[3]; }, 0);
-      var wide = Math.max(hKona + hLF + hR + mins(offLW1, R.LW) / 60,
-                          mins(offLW2, R.LW) / 60, DAY1) || 1;
       return '<div class="pd"><span class="pd-l">' + label + '</span>' +
         '<span class="pd-bar">' +
         segs.map(function (x) {
@@ -386,7 +413,15 @@
         '<span class="pd-h' + (over ? ' over' : '') + '">' + showMins(h * 60) + '</span>' +
         '<span class="pd-lb">' + Math.round(lb).toLocaleString() + ' lb</span></div>';
     }
+    var st = startHour(), scale = '';
+    for (var hh = 0; hh <= Math.floor(wide); hh++) {
+      scale += '<span class="pd-t" style="left:' + (hh / wide * 100).toFixed(3) + '%">' +
+        hourLabel(st + hh) + '</span>';
+    }
     var packBar = '<div class="packdays">' +
+      '<div class="pd pd-axis"><span class="pd-l"></span>' +
+      '<span class="pd-bar pd-scale">' + scale + '</span>' +
+      '<span class="pd-h"></span><span class="pd-lb"></span></div>' +
       dayRow('Pack day 1', segs1, hKona + hLF + hR > DAY1 + .01) +
       dayRow('Pack day 2', segs2, false) + '</div>';
 
@@ -395,7 +430,9 @@
         return '<label class="rate">' + esc(g[1]) +
           '<input type="text" inputmode="numeric" value="' + R[g[0]] +
           '" data-rate="' + g[0] + '"></label>';
-      }).join('') + '</div>';
+      }).join('') +
+      '<label class="rate"><span class="lbl">Starts</span>' +
+      '<input type="text" inputmode="numeric" value="' + st + '" data-start="1"></label></div>';
 
     var body = P.map(function (row, i) {
       var first = i % 2 === 0;
@@ -551,7 +588,6 @@
     document.getElementById('legend').innerHTML =
       '<span><i class="sw mv"></i>moving</span>' +
       '<span><i class="sw wt"></i>standing still</span>' +
-      '<span><i class="sw tk"></i>where a leg starts</span>' +
       ((flow.branches || []).length > 1
         ? (flow.branches || []).map(function (b, i) {
             return '<span><i class="sw b' + (i % 4) + '"></i>branch ' + esc(b) + '</span>';
@@ -598,13 +634,19 @@
       host.__wired = true;
       host.addEventListener('input', function (ev) {
         var inp = ev.target;
-        if (!inp || !inp.getAttribute || !inp.getAttribute('data-rate')) return;
-        var key = inp.getAttribute('data-rate'), v = parseFloat(inp.value), pos = inp.selectionStart;
-        S.rates = S.rates || {};
-        S.rates[key] = isNaN(v) || v <= 0 ? '' : v;
+        if (!inp || !inp.getAttribute) return;
+        var key = inp.getAttribute('data-rate'), pos = inp.selectionStart;
+        if (inp.getAttribute('data-start')) {
+          var h = parseInt(inp.value, 10);
+          S.startHour = isNaN(h) || h < 0 || h > 23 ? '' : h;
+        } else if (key) {
+          var v = parseFloat(inp.value);
+          S.rates = S.rates || {};
+          S.rates[key] = isNaN(v) || v <= 0 ? '' : v;
+        } else { return; }
         save();
         host.innerHTML = ordersView();
-        var again = host.querySelector('[data-rate="' + key + '"]');
+        var again = host.querySelector(key ? '[data-rate="' + key + '"]' : '[data-start]');
         if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) {} }
       });
     }
