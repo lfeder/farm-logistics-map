@@ -196,14 +196,9 @@
         var br = (r.branch || '1').trim() || '1';
         if (branches.indexOf(br) < 0) branches.push(br);
         var ic = (r.icon || '').toLowerCase();
-        // Keep the weekday the leg was written on as well as the hour it lands
-        // at for this journey's own anchor. One of them draws a single journey
-        // from its cut; the other hangs every journey on the same week.
-        var ds = dayTime(r.s, where), de = dayTime(r.e, where);
         tasks.push({ id: 't' + tasks.length, name: r.leg, branch: br,
           from: r.from || 'Somewhere', place: r.place || 'Somewhere',
           s: at(r.s), e: at(r.e),
-          sd: ds.d, sh: ds.h, ed: de.d, eh: de.h,
           icon: ICONS.indexOf(ic) < 0 ? iconFor(r.leg) : ic,
           note: r.note || '' });
       });
@@ -478,6 +473,9 @@
       var ly = null;
       for (var k = 0; k < STEPS.length; k++) {
         var cand = y1 + base + STEPS[k] * hh, free = true;
+        // A name may not leave the plot. Stepping off the top used to put it
+        // over the day and hour labels, where it read as part of the axis.
+        if (cand - hh / 2 < 0 || cand + hh / 2 > H) continue;
         for (var q2 = 0; q2 < taken.length; q2++) {
           var o = taken[q2];
           if (cand - hh / 2 < o.b && o.t < cand + hh / 2 &&
@@ -829,17 +827,20 @@
     ANCHOR = flow.many ? 'Sun' : (flow.start || 'Sun');
 
     var r = read(flow);
-    SPAN = flow.many ? 7 : Math.max(2, Math.ceil(r.end / 24) + 1);
+    // As many days as the drawing reaches into, and not one more.
+    SPAN = Math.max(2, Math.ceil(r.end / 24));
 
-    // Mark the days we actually cut on, which is what each shown journey
-    // starts on. It used to mark day 0, and day 0 stopped being the cut the
-    // moment several journeys began sharing a Sunday axis.
+    // Mark the days we actually cut on -- which is where each shown journey
+    // begins, by position rather than by name. A journey that runs past the
+    // end of the week reaches a second Sunday, and that Sunday is not this
+    // journey's cut.
     var cuts = {};
-    list.forEach(function (f) { cuts[f.start] = 1; });
+    list.forEach(function (f) {
+      cuts[((dowIdx(f.start) - dowIdx(ANCHOR)) % 7 + 7) % 7] = 1;
+    });
     var ax = '';
     for (var i = 0; i < SPAN; i++) {
-      var dn = dayName(i);
-      ax += '<div class="day' + (cuts[dn] ? ' cut' : '') + '">' + dn + '</div>';
+      ax += '<div class="day' + (cuts[i] ? ' cut' : '') + '">' + dayName(i) + '</div>';
     }
     // The four-hour marks are only useful if you can say what hour they are.
     var hx = '';
@@ -963,18 +964,20 @@
     if (list.length === 1) return list[0];
     var tasks = [], branches = [], windows = {};
     list.forEach(function (f, i) {
-      var pre = 'f' + i + ':';
+      var pre = 'f' + i + ':', base = dowIdx(f.start) * 24;
       f.tasks.forEach(function (t) {
         var c = {}, k;
         for (k in t) if (has(t, k)) c[k] = t[k];
         c.id = pre + t.id;
         c.after = (t.after || []).map(function (a) { return pre + a; });
         c.journey = f.name + ' \u00b7 ' + cutLabel(f.start);
-        c.s = t.sd * 24 + t.sh;
-        c.e = t.ed * 24 + t.eh;
-        // A leg that runs past midnight on Saturday lands before its own start
-        // once the week wraps. It still takes as long as it took.
-        while (c.e < c.s) c.e += 24;
+        // Slide the whole journey along by how far its cut sits from Sunday,
+        // keeping the order it was written in. Reading each leg's weekday
+        // straight off the calendar instead would fold a journey that runs
+        // past Saturday back to the left of the chart, and it would deliver
+        // before it packed.
+        c.s = base + t.s;
+        c.e = base + t.e;
         tasks.push(c);
       });
       (f.branches || []).forEach(function (b) { if (branches.indexOf(b) < 0) branches.push(b); });
