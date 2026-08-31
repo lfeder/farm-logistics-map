@@ -49,7 +49,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 /* ---------- the chart: time across, place down ---------- */
 .body{padding:14px 18px 14px}
 .axis{display:flex; gap:12px; padding-bottom:2px}
-.gut{flex:0 0 116px; display:flex; flex-direction:column}
+.gut{flex:0 0 128px; display:flex; flex-direction:column}
 .days{flex:1 1 auto; min-width:0; display:flex}
 .day{flex:1 1 0; text-align:center; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
   color:var(--ink-3); font-weight:600; border-left:1px solid var(--line-2); padding-bottom:3px}
@@ -65,28 +65,28 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .chart{display:flex; gap:12px}
 .lane-lbl{display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
   font-size:10.5px; font-weight:600; color:var(--ink-2); line-height:1.15; text-align:right}
-.lane-lbl i{margin-top:2px; padding:1px 5px; border:1px solid var(--band-2); border-radius:4px;
+.lane-lbl button{margin-top:2px; padding:1px 5px; border:1px solid var(--band-2); border-radius:4px;
   background:var(--band); color:var(--good); font-family:"IBM Plex Mono",monospace;
-  font-size:9px; font-weight:600; font-style:normal; white-space:nowrap}
+  font-size:9px; font-weight:600; white-space:nowrap; cursor:pointer}
+.lane-lbl button.off{background:var(--card-2); border-color:var(--line); color:var(--ink-3)}
+.lane-lbl button:hover{border-color:var(--accent); color:var(--accent)}
 .plot{position:relative; flex:1 1 auto; min-width:0}
 .svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible}
 .svg line{vector-effect:non-scaling-stroke}
 .lane{stroke:var(--line-2); stroke-width:1}
 .col{stroke:var(--line-2); stroke-width:1}
-.band{fill:var(--band); cursor:pointer}
-.band:hover{fill:var(--band-2)}
+.band{fill:var(--band)}
 .cap{position:absolute; font-size:8.5px; font-weight:600; color:var(--good);
   white-space:nowrap; padding-left:3px; pointer-events:none; opacity:.85}
 .move{stroke:var(--ink); stroke-width:2; stroke-linecap:round}
 .wait{stroke:var(--ink); stroke-width:2; stroke-dasharray:2 3; opacity:.6}
-/* Where a task begins, so a bar reads as a span rather than a line to a dot. */
+/* A prereq's stop and the next start need not meet. Where they do not, the gap
+   is drawn for what it is rather than closed up. */
+.link{stroke:var(--ink-3); stroke-width:1.5; stroke-dasharray:1 4; opacity:.75}
+.link.back{stroke:var(--bad); opacity:.9; stroke-dasharray:3 3}
 .tick{fill:var(--card); stroke:var(--ink); stroke-width:1.5}
-/* A prereq that finished early and waited for its siblings. */
-.link{stroke:var(--ink-3); stroke-width:1.5; stroke-dasharray:1 4; opacity:.7}
-.grab{stroke:transparent; stroke-width:13; stroke-linecap:round; cursor:pointer}
-.grab.leg{cursor:ew-resize}
-.grab.leg:hover{stroke:var(--accent); opacity:.22}
-.grab.gate:hover{stroke:var(--good); opacity:.22}
+.grab{stroke:transparent; stroke-width:13; stroke-linecap:round; cursor:ew-resize}
+.grab:hover{stroke:var(--accent); opacity:.22}
 .dot{position:absolute; width:0; height:0; color:var(--ink); cursor:pointer}
 .dot b{position:absolute; left:-3px; top:-3px; width:6px; height:6px; border-radius:50%;
   background:currentColor; display:block}
@@ -108,77 +108,88 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .sw.tk{width:7px; height:7px; border-radius:50%; background:var(--card); border:1.5px solid var(--ink)}
 .i{display:inline-block; vertical-align:-2px; flex:0 0 auto}
 
-/* ---------- the builder ---------- */
-/* A task is one line. Every control says what it is by its own shape -- a time
-   input looks like a time, seven letters look like days -- so the captions that
-   used to sit above them were costing a row each to repeat the obvious. */
-.tasks{padding:12px 18px 18px; display:flex; flex-direction:column; gap:6px}
-.task{border:1px solid var(--line); border-radius:8px; background:var(--card); overflow:visible}
-.task.lit{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
-.task.orphan{border-color:var(--bad); background:var(--accent-soft)}
-.t-row{display:flex; align-items:center; gap:6px; padding:6px 9px; min-height:40px}
-.t-n{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--ink-3); font-weight:600;
-  min-width:15px; text-align:right}
-.t-ico{cursor:pointer; color:var(--ink-2); display:inline-flex; padding:2px}
-.t-ico:hover{color:var(--accent)}
-.task input,.task select,.task button{font-family:inherit}
-.t-row input,.t-row select{font-size:12.5px; padding:3px 6px; border:1px solid var(--line);
-  border-radius:5px; background:var(--card); color:var(--ink)}
-.t-row input:focus,.t-row select:focus{outline:none; border-color:var(--accent)}
-.t-name{flex:1 1 120px; min-width:84px; font-weight:600}
-.t-kind{flex:0 0 auto; font-size:12px !important; padding:3px 4px !important}
-.t-fields{display:flex; align-items:center; gap:4px; font-size:11px; color:var(--ink-3)}
-.t-t{width:92px; font-family:"IBM Plex Mono",monospace; font-size:11px !important;
-  padding:3px 2px !important}
-.t-num{width:46px; text-align:right; font-family:"IBM Plex Mono",monospace}
-.t-num.sm{width:38px}
-.t-fields i{font-style:normal; font-size:10.5px; color:var(--ink-3); white-space:nowrap}
-.t-place{flex:0 1 112px; min-width:78px}
-.t-when{flex:0 0 auto; margin-left:auto; padding-left:4px;
-  font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--ink-2);
-  white-space:nowrap; text-align:right}
-/* A task that ends where it started is a task spent standing still, and that is
-   the one thing on this screen worth spotting from across the room. */
-.t-when.still{color:var(--accent)}
-.t-mv.has{border-color:var(--ink-3); color:var(--ink-2)}
-.t-x,.t-mv{background:none; border:1px solid var(--line); color:var(--ink-3); font-size:11px;
-  width:22px; height:22px; border-radius:5px; cursor:pointer; padding:0; line-height:1; flex:0 0 auto}
-.t-x:hover{border-color:var(--bad); color:var(--bad)}
-.t-mv:hover:not(:disabled){border-color:var(--accent); color:var(--accent)}
-.t-mv:disabled{opacity:.35; cursor:default}
-.dcell{display:inline-flex; gap:1px}
-.d{width:17px; height:20px; border:1px solid var(--line); background:var(--card); color:var(--ink-3);
-  font-size:9.5px; font-weight:600; border-radius:3px; cursor:pointer; padding:0}
-.d.on{background:var(--good); border-color:var(--good); color:#fff}
-.d:hover{border-color:var(--accent)}
-/* Prereqs are stored; what a task feeds is the same edges read backwards, so it
-   is derived and shown rather than typed. Both live in the one popover so the
-   row stays a row. */
-.t-afterwrap{position:relative; flex:0 0 auto}
-.t-after{background:var(--card-2); border:1px solid var(--line); color:var(--ink-3); font-size:11px;
-  padding:3px 8px; border-radius:11px; cursor:pointer; max-width:116px; overflow:hidden;
-  text-overflow:ellipsis; white-space:nowrap}
-.t-after.on{color:var(--ink-2); border-color:var(--ink-3)}
-.t-after:hover{border-color:var(--accent); color:var(--accent)}
-.t-pop{position:absolute; z-index:20; top:26px; right:0; width:270px; padding:9px;
+/* ---------- the list ---------- */
+/* Every task carries the same fields, so every row is the same grid and the
+   columns line up down the page. That is only possible because a task now says
+   when it starts and when it stops outright, rather than each kind of task
+   needing its own controls. */
+.tasks{padding:0 18px 18px}
+.grid{display:grid; gap:0 8px; align-items:center;
+  grid-template-columns:
+    22px 24px minmax(120px,1fr) minmax(88px,150px)
+    62px 92px 62px 92px 52px auto 22px 22px 22px 22px;}
+.gh{font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:600; padding:10px 0 6px; border-bottom:1px solid var(--line); white-space:nowrap}
+.gh.r{text-align:right}
+.row{display:contents}
+.row>*{min-width:0}
+.cell{padding:4px 0; border-bottom:1px solid var(--line-2); height:100%;
+  display:flex; align-items:center; gap:3px}
+.row.lit .cell{background:var(--accent-soft)}
+.row.bad .cell{background:var(--accent-soft)}
+.n{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--ink-3); font-weight:600;
+  justify-content:flex-end; padding-right:3px}
+.ico{cursor:pointer; color:var(--ink-2); justify-content:center}
+.ico:hover{color:var(--accent)}
+.cell input,.cell select{width:100%; font-family:inherit; font-size:12.5px; padding:3px 6px;
+  border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink)}
+.cell input:focus,.cell select:focus{outline:none; border-color:var(--accent)}
+.cell input.nm{font-weight:600}
+.cell input[type=time],.cell select.dsel{font-family:"IBM Plex Mono",monospace; font-size:11px;
+  padding:3px 2px}
+.dur{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3);
+  justify-content:flex-end; white-space:nowrap}
+/* A task that stops where it started is standing still, and that is the one
+   thing on this screen worth spotting from across the room. */
+.dur.still{color:var(--accent); font-weight:600}
+.dur.bad{color:var(--bad); font-weight:600}
+.mini{background:none; border:1px solid var(--line); color:var(--ink-3); font-family:inherit;
+  font-size:11px; width:22px; height:22px; border-radius:5px; cursor:pointer; padding:0; line-height:1}
+.mini:hover:not(:disabled){border-color:var(--accent); color:var(--accent)}
+.mini.x:hover{border-color:var(--bad); color:var(--bad)}
+.mini:disabled{opacity:.35; cursor:default}
+.mini.has{border-color:var(--ink-3); color:var(--ink-2)}
+.afterwrap{position:relative; justify-content:flex-start}
+.after{background:var(--card-2); border:1px solid var(--line); color:var(--ink-3); font-family:inherit;
+  font-size:11px; padding:3px 8px; border-radius:11px; cursor:pointer; max-width:100%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.after.on{color:var(--ink-2); border-color:var(--ink-3)}
+.after:hover{border-color:var(--accent); color:var(--accent)}
+.pop{position:absolute; z-index:20; top:26px; right:0; width:280px; padding:9px;
   background:var(--card); border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow);
   display:flex; flex-wrap:wrap; gap:4px}
-.t-pop[hidden]{display:none}
-.chip{border:1px solid var(--line); background:var(--card); color:var(--ink-3);
+.pop[hidden]{display:none}
+.chip{border:1px solid var(--line); background:var(--card); color:var(--ink-3); font-family:inherit;
   font-size:11px; padding:2px 8px; border-radius:11px; cursor:pointer; white-space:nowrap}
 .chip.on{background:var(--ink); border-color:var(--ink); color:var(--card); font-weight:600}
 .chip:hover:not(.on){border-color:var(--accent); color:var(--accent)}
-.t-feeds,.feeds{flex:1 1 100%; font-size:11px; color:var(--ink-3); padding-top:3px;
+.feeds{flex:1 1 100%; font-size:11px; color:var(--ink-3); padding-top:3px;
   border-top:1px solid var(--line-2); margin-top:2px}
-.t-feeds b{color:var(--ink-2); font-weight:600}
-.t-noterow{padding:0 9px 8px 30px}
-.t-noterow[hidden]{display:none}
-.t-noterow input{width:100%; font-size:12px; padding:3px 7px; border:1px solid var(--line);
-  border-radius:5px; background:var(--card-2); color:var(--ink-2)}
-.t-noterow input:focus{outline:none; border-color:var(--accent); background:var(--card)}
-@media (max-width:1150px){ .t-row{flex-wrap:wrap} .t-when{margin-left:0} }
-.warn{margin:0 18px 14px; padding:9px 12px; border:1px solid var(--bad); border-radius:7px;
+.feeds b{color:var(--ink-2); font-weight:600}
+.noterow{grid-column:3 / -1; padding:0 0 7px}
+.noterow[hidden]{display:none}
+.noterow input{width:100%; font-family:inherit; font-size:12px; padding:3px 7px;
+  border:1px solid var(--line); border-radius:5px; background:var(--card-2); color:var(--ink-2)}
+.noterow input:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.warn{margin:12px 18px 0; padding:9px 12px; border:1px solid var(--bad); border-radius:7px;
   background:var(--accent-soft); color:var(--bad); font-size:12.5px}
+
+/* ---------- opening hours, which belong to a place ---------- */
+/* A window is a fact about a door, not about a task: Costco receiving is open
+   4 to 11 whether or not anything is driving towards it. */
+.places{display:flex; flex-wrap:wrap; gap:8px; padding:11px 18px 14px; border-top:1px solid var(--line-2)}
+.pl{display:flex; align-items:center; gap:5px; border:1px solid var(--line); border-radius:8px;
+  padding:5px 9px; background:var(--card-2)}
+.pl b{font-size:11.5px; font-weight:600; color:var(--ink-2)}
+.pl input[type=time]{width:88px; font-family:"IBM Plex Mono",monospace; font-size:11px; padding:2px 2px;
+  border:1px solid var(--line); border-radius:4px; background:var(--card); color:var(--ink)}
+.pl .dash{color:var(--ink-3); font-size:11px}
+.dcell{display:inline-flex; gap:1px}
+.d{width:17px; height:20px; border:1px solid var(--line); background:var(--card); color:var(--ink-3);
+  font-family:inherit; font-size:9.5px; font-weight:600; border-radius:3px; cursor:pointer; padding:0}
+.d.on{background:var(--good); border-color:var(--good); color:#fff}
+.d:hover{border-color:var(--accent)}
+@media (max-width:1150px){ .tasks{overflow-x:auto} .grid{min-width:1120px} }
 </style>
 </head>
 <body>
@@ -186,7 +197,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   <header>
     <div>
       <h1>Task Vis</h1>
-      <p class="sub" id="sub">One flow at a time. Time runs across, place runs down — so a diagonal is movement and a flat run is waiting.</p>
+      <p class="sub" id="sub">One flow at a time. Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.</p>
     </div>
   </header>
 
@@ -203,10 +214,9 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       <div id="grid"></div>
       <div class="legend" id="legend"></div>
     </div>
+    <div class="places" id="places"></div>
   </section>
 
-  <!-- A flow is a set of tasks and the prereqs between them. Nothing about it
-       is written into the code: change a task here and the chart is the answer. -->
   <section class="panel">
     <div class="panel-hd">
       <h2>Tasks</h2>
@@ -222,7 +232,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   "use strict";
 
   var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  var STORE = 'taskvis.flows.v1';
+  var STORE = 'taskvis.flows.v3';
 
   var ICON = {
     box:   '<path d="M2 5.2 8 2.4l6 2.8v5.6L8 13.6 2 10.8z"/><path d="M2 5.2 8 8l6-2.8M8 8v5.6"/>',
@@ -241,50 +251,45 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   }
 
   // ── What a task is ────────────────────────────────────────────────────────
-  // Four kinds, which between them say everything this model knows about when
-  // a thing happens:
+  // A start, a stop, and where it ends up. Both times are typed, in hours from
+  // midnight on day 0, so every task carries exactly the same fields and the
+  // list is one grid rather than a different set of controls per kind.
   //
-  //   at      a clock time on day 0. A task with no prereqs needs one of these.
-  //   takes   N hours after its prereqs are all done. Loading, driving, flying.
-  //   opens   waits until somebody will take it: which days, what hours, and
-  //           how long after arrival before it can even be collected.
-  //   sails   waits for the next scheduled departure on given weekdays.
+  //   { id, name, place, icon, note, s, e, after: [ids] }
   //
-  // Each task also names the place the product is in when the task ends, and
-  // those places are the chart's vertical axis. A task ending where its prereq
-  // ended is a wait; a task ending somewhere else is a move.
+  // Nothing is derived from the graph. `after` records what has to happen
+  // first, which is what the links are drawn from, but it does NOT push times
+  // about: the next start does not have to be the previous stop. A gap is a
+  // gap and gets drawn as one; an overlap is two things happening at once,
+  // which is often the truth and used to be inexpressible.
   //
-  // Dependencies are stored one way only. A task lists what it comes `after`;
-  // what it feeds is those same edges read backwards, so it is derived on the
-  // fly and the two can never drift apart. A task starts when the LAST of its
-  // prereqs is done, which is what makes a merge behave like a merge.
-  var KINDS = [
-    ['at',    'At a time'],
-    ['takes', 'Takes'],
-    ['opens', 'Waits for a window'],
-    ['sails', 'Waits for a departure']
-  ];
-
+  // Opening hours belong to a PLACE, not to a task. Costco receiving is open 4
+  // to 11 whether or not anything is driving towards it.
   function defaults() {
     return [{
       id: 'kona-lettuce',
       name: 'Lettuce → Costco Kona',
       note: 'Our own box truck. No carrier at all, so the only thing between packing and the customer is who is awake.',
       days: ['Sun', 'Mon', 'Wed', 'Thu'],
+      windows: {
+        'Packhouse':   { days: [1,1,1,1,1,1,1], open: 6, close: 19 },
+        'Costco Kona': { days: [0,1,1,1,1,1,1], open: 4, close: 11 }
+      },
       tasks: [
-        { id: 'pack',  name: 'Packing ends',     place: 'Packhouse',   icon: 'box',   kind: 'at',
-          at: 18, after: [] },
-        { id: 'crew',  name: 'Crew on shift',    place: 'Packhouse',   icon: 'depot', kind: 'opens',
-          days: [1,1,1,1,1,1,1], open: 6, close: 19, lead: 0, after: ['pack'],
-          note: 'Nobody is here to load a truck outside these hours.' },
-        { id: 'load',  name: 'Truck loaded',     place: 'Packhouse',   icon: 'truck', kind: 'takes',
-          dur: 1, after: ['crew'],
+        { id: 'pack',  name: 'Packing',          place: 'Packhouse',   icon: 'box',
+          s: 10, e: 18, after: [],
+          note: 'Ends at 6 PM, which is when the clock everything else answers to starts.' },
+        { id: 'hold',  name: 'Waits for the crew', place: 'Packhouse', icon: 'clock',
+          s: 18, e: 30, after: ['pack'],
+          note: 'Nobody is at the packhouse overnight, so it stands here until six.' },
+        { id: 'load',  name: 'Load the truck',   place: 'Packhouse',   icon: 'truck',
+          s: 30, e: 31, after: ['hold'],
           note: 'A box truck cannot stand loaded overnight, so it is loaded right before it drives.' },
-        { id: 'drive', name: 'Drive to Kona',    place: 'Costco Kona', icon: 'truck', kind: 'takes',
-          dur: 2, after: ['load'] },
-        { id: 'recv',  name: 'Costco receiving', place: 'Costco Kona', icon: 'store', kind: 'opens',
-          days: [0,1,1,1,1,1,1], open: 4, close: 11, lead: 0, after: ['drive'],
-          note: 'The back door. Shut Sundays.' }
+        { id: 'drive', name: 'Drive to Kona',    place: 'Costco Kona', icon: 'truck',
+          s: 31, e: 33, after: ['load'] },
+        { id: 'recv',  name: 'Costco receiving', place: 'Costco Kona', icon: 'store',
+          s: 33, e: 33.5, after: ['drive'],
+          note: 'Inside the 4–11 window, so it goes straight in.' }
       ]
     }];
   }
@@ -308,209 +313,163 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   var SPAN = 3, ANCHOR = 'Sun';
   var dowIdx = function (n) { return DOW.indexOf(n); };
   function clock(h) {
-    var t = ((Math.round(h * 2) / 2 % 24) + 24) % 24, hh = Math.floor(t), m = t - hh === .5 ? ':30' : '';
+    var t = ((Math.round(h * 4) / 4 % 24) + 24) % 24, hh = Math.floor(t);
+    var mn = Math.round((t - hh) * 60), m = mn ? ':' + (mn < 10 ? '0' : '') + mn : '';
     return (hh % 12 === 0 ? 12 : hh % 12) + m + ' ' + (hh < 12 ? 'AM' : 'PM');
   }
-  function stamp(h) { return DOW[(dowIdx(ANCHOR) + Math.floor(h / 24)) % 7] + ' ' + clock(h); }
+  function dayOf(h) { return Math.floor(h / 24); }
+  function dayName(d) { return DOW[((dowIdx(ANCHOR) + d) % 7 + 7) % 7]; }
+  function stamp(h) { return dayName(dayOf(h)) + ' ' + clock(h); }
   function hhmm(h) {
     var t = ((h % 24) + 24) % 24, hr = Math.floor(t), mn = Math.round((t - hr) * 60);
     return (hr < 10 ? '0' : '') + hr + ':' + (mn < 10 ? '0' : '') + mn;
   }
   function fromHM(s) {
     var p = String(s || '').split(':'), h = parseFloat(p[0]), m = parseFloat(p[1] || 0);
-    return isNaN(h) ? 0 : Math.max(0, Math.min(23.98, h + (isNaN(m) ? 0 : m / 60)));
+    return isNaN(h) ? 0 : Math.max(0, Math.min(23.99, h + (isNaN(m) ? 0 : m / 60)));
   }
   function num(v, d) { var n = parseFloat(v); return isNaN(n) ? (d || 0) : n; }
-  function winSpan(t) {
-    var a = clock(num(t.open)), b = clock(num(t.close));
-    return a.slice(-2) === b.slice(-2) ? a.slice(0, -3) + '–' + b : a + '–' + b;
+  function dur(h) {
+    var v = Math.round(h * 4) / 4;
+    if (v <= 0) return '0 h';
+    if (v < 1) return Math.round(v * 60) + ' m';
+    return (Math.abs(v - Math.round(v)) < .01 ? Math.round(v) : v.toFixed(2).replace(/0$/, '')) + ' h';
   }
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function all(q) { return [].slice.call(document.querySelectorAll(q)); }
-  function uid(p) { return p + '-' + Math.random().toString(36).slice(2, 7); }
+  function uid(p) { return p + Math.random().toString(36).slice(2, 7); }
+  function cssId(id) { return String(id).replace(/[^A-Za-z0-9_-]/g, '\\$&'); }
 
-  // ── Walking the graph ─────────────────────────────────────────────────────
-  function nextOpen(t, h) {
-    h += num(t.lead, 0);
-    for (var i = 0; i < 28; i++) {
-      var d = Math.floor(h / 24) + i, dw = (dowIdx(ANCHOR) + d) % 7;
-      if (!t.days || !t.days[dw]) continue;
-      var o = d * 24 + num(t.open), c = d * 24 + num(t.close);
-      if (h <= o) return o;
-      if (h < c) return h;
-    }
-    return h;
-  }
-  function nextDeparture(t, h) {
-    for (var i = 0; i < 28; i++) {
-      var d = Math.floor(h / 24) + i, dw = (dowIdx(ANCHOR) + d) % 7;
-      if (!t.days || !t.days[dw]) continue;
-      var x = d * 24 + num(t.at);
-      if (x >= h) return x;
-    }
-    return h;
-  }
-  function endOf(t, base) {
-    if (t.kind === 'at') return num(t.at);
-    if (t.kind === 'takes') return base + num(t.dur);
-    if (t.kind === 'opens') return nextOpen(t, base);
-    if (t.kind === 'sails') return nextDeparture(t, base);
-    return base;
-  }
-  // A task runs when the LAST of its prereqs is done, so a merge waits for
-  // everything feeding it. Anything still unresolved after no further progress
-  // is in a cycle or points at a task that is gone; it is reported, not hidden.
-  function walk(flow) {
-    var byId = {}, at = {}, span = {}, order = [];
+  // ── Reading a flow ────────────────────────────────────────────────────────
+  // There is nothing to solve: the times are already there. This only sorts,
+  // works out the places, and finds the links worth drawing.
+  function read(flow) {
+    var byId = {};
     flow.tasks.forEach(function (t) { byId[t.id] = t; });
-    var pending = flow.tasks.slice(), guard = 0;
-    while (pending.length && guard++ < 999) {
-      var moved = false;
-      for (var i = 0; i < pending.length; i++) {
-        var t = pending[i];
-        var pre = (t.after || []).filter(function (id) { return byId[id]; });
-        var ready = pre.every(function (id) { return at[id] !== undefined; });
-        if (!ready) continue;
-        // A task starts when the LAST of its prereqs is done and stops when its
-        // own kind says so. Both are real times, and the gap between them is
-        // the task: an hour of loading, or eleven hours outside a shut door.
-        var base = pre.length ? Math.max.apply(null, pre.map(function (id) { return at[id]; })) : 0;
-        var e = endOf(t, base);
-        var s = t.kind === 'at' ? e : base;
-        // Where it starts is where the prereq that governed it left off; with
-        // nothing behind it, it starts where it ends.
-        var gov = null;
-        pre.forEach(function (id) { if (at[id] === base && gov === null) gov = id; });
-        span[t.id] = { s: s, e: e, from: gov ? (byId[gov].place || 'Somewhere') : (t.place || 'Somewhere') };
-        at[t.id] = e;
-        order.push(t.id);
-        pending.splice(i, 1); i--; moved = true;
-      }
-      if (!moved) break;
-    }
-    var pts = order.map(function (id) {
-      var t = byId[id], sp = span[id];
-      return { id: id, t: t, h: sp.e, s: sp.s, e: sp.e, from: sp.from, place: t.place || 'Somewhere' };
+    var pts = flow.tasks.map(function (t) {
+      return { id: t.id, t: t, s: num(t.s), e: num(t.e), place: t.place || 'Somewhere' };
     });
-    var starts = pts.map(function (p) { return p.s; }), ends = pts.map(function (p) { return p.e; });
-    var start = starts.length ? Math.min.apply(null, starts) : 0;
-    var end = ends.length ? Math.max.apply(null, ends) : 0;
-    // A task that ends where it started is a task spent standing still.
-    var idle = pts.reduce(function (a, p) {
-      return p.from === p.place ? a + Math.max(0, p.e - p.s) : a;
-    }, 0);
-    // Links back to every prereq. The governing one is a point; an earlier one
-    // leaves a gap, which is that branch finishing early and waiting.
+    var start = 0, end = 0;
+    pts.forEach(function (p) {
+      start = Math.min(start === 0 && !pts.length ? p.s : start, p.s);
+      end = Math.max(end, p.e, p.s);
+    });
+    if (pts.length) start = Math.min.apply(null, pts.map(function (p) { return p.s; }));
+    var idle = pts.reduce(function (a, p) { return a + Math.max(0, p.e - p.s); }, 0);
+    var moving = 0, still = 0;
+    pts.forEach(function (p, i) {
+      var prev = null;
+      (p.t.after || []).forEach(function (id) {
+        if (byId[id] && (prev === null || num(byId[id].e) > num(byId[prev].e))) prev = id;
+      });
+      p.from = prev && byId[prev] ? (byId[prev].place || 'Somewhere') : p.place;
+      if (p.from === p.place) still += Math.max(0, p.e - p.s); else moving += Math.max(0, p.e - p.s);
+    });
     var edges = [];
     flow.tasks.forEach(function (t) {
-      if (!span[t.id]) return;
       (t.after || []).forEach(function (id) {
-        if (at[id] === undefined) return;
-        edges.push({ from: id, to: t.id, h0: at[id], h1: span[t.id].s,
+        if (!byId[id]) return;
+        edges.push({ from: id, to: t.id, h0: num(byId[id].e), h1: num(t.s),
                      p0: byId[id].place || 'Somewhere' });
       });
     });
-    return {
-      at: at, span: span, byId: byId, pts: pts, edges: edges,
-      stuck: pending.map(function (t) { return t.id; }),
-      start: start, end: end,
-      days: Math.floor(end / 24) - Math.floor(start / 24),
-      hrs: Math.round(end - start), idle: Math.round(idle)
-    };
+    var broken = flow.tasks.filter(function (t) { return num(t.e) < num(t.s); });
+    return { byId: byId, pts: pts, edges: edges, broken: broken,
+             start: start, end: end, idle: Math.round(idle),
+             still: Math.round(still), moving: Math.round(moving),
+             days: dayOf(end) - dayOf(start), hrs: Math.round(end - start) };
   }
-  // Places, in the order the walk first reaches them, so the vertical axis
-  // reads top to bottom the way the product actually travels.
-  function places(r) {
+  function places(flow) {
     var seen = {}, out = [];
-    r.pts.forEach(function (p) { if (!seen[p.place]) { seen[p.place] = 1; out.push(p.place); } });
+    flow.tasks.forEach(function (t) {
+      var p = t.place || 'Somewhere';
+      if (!seen[p]) { seen[p] = 1; out.push(p); }
+    });
     return out;
   }
   function feedsOf(flow, id) {
     return flow.tasks.filter(function (t) { return (t.after || []).indexOf(id) >= 0; });
   }
-  function gateAt(flow, place) {
-    for (var i = 0; i < flow.tasks.length; i++) {
-      var t = flow.tasks[i];
-      if (t.kind === 'opens' && (t.place || 'Somewhere') === place) return t;
-    }
-    return null;
+  function winOf(flow, place) { return (flow.windows || {})[place] || null; }
+  function winSpan(w) {
+    var a = clock(num(w.open)), b = clock(num(w.close));
+    return a.slice(-2) === b.slice(-2) ? a.slice(0, -3) + '–' + b : a + '–' + b;
   }
 
   // ── Drawing ───────────────────────────────────────────────────────────────
-  var LANE_H = 38, PAD_T = 14, PAD_B = 18, PLOT_PX = 1060;
+  var LANE_H = 38, PAD_T = 14, PAD_B = 18, PLOT_PX = 1040;
   var X = function (h) { return (h / (SPAN * 24)) * 1000; };
   var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
 
   function chart(flow, r) {
-    var lanes = places(r), yOf = {};
+    var lanes = places(flow), yOf = {};
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
 
-    var svg = '';
+    var svg = '', caps = '', busy = {};
     for (var c = 1; c < SPAN; c++) {
       svg += '<line class="col" x1="' + X(c * 24) + '" x2="' + X(c * 24) + '" y1="0" y2="' + H + '"/>';
     }
-
-    var busy = {}, caps = '';
-    r.pts.forEach(function (p) { (busy[p.place] || (busy[p.place] = [])).push(PCT(p.h)); });
+    r.pts.forEach(function (p) { (busy[p.place] || (busy[p.place] = [])).push(PCT(p.e)); });
     lanes.forEach(function (l, i) {
       var y = PAD_T + i * LANE_H;
       svg += '<line class="lane" x1="0" x2="1000" y1="' + (y + LANE_H / 2) + '" y2="' + (y + LANE_H / 2) + '"/>';
-      var g = gateAt(flow, l);
-      if (!g) return;
+      var w = winOf(flow, l);
+      if (!w) return;
       var open = [];
       for (var d = 0; d < SPAN; d++) {
-        if (!g.days[(dowIdx(ANCHOR) + d) % 7]) continue;
+        if (!w.days[(dowIdx(ANCHOR) + d) % 7]) continue;
         open.push(d);
-        var x0 = X(d * 24 + num(g.open)), x1 = X(d * 24 + num(g.close));
+        var x0 = X(d * 24 + num(w.open)), x1 = X(d * 24 + num(w.close));
         svg += '<rect class="band" x="' + x0 + '" width="' + Math.max(0, x1 - x0) +
-          '" y="' + (y + 5) + '" height="' + (LANE_H - 10) + '" data-task="' + esc(g.id) +
-          '"><title>' + esc(g.name) + ' — ' + winSpan(g) + '. Click to open the task.</title></rect>';
+          '" y="' + (y + 5) + '" height="' + (LANE_H - 10) + '"><title>' + esc(l) + ' open ' +
+          winSpan(w) + '</title></rect>';
       }
       if (!open.length) return;
       var mine = busy[l] || [], pick = open[0];
       for (var oi = 0; oi < open.length; oi++) {
-        var px = PCT(open[oi] * 24 + num(g.open)), clear = true;
+        var px = PCT(open[oi] * 24 + num(w.open)), clear = true;
         for (var bi = 0; bi < mine.length; bi++) if (Math.abs(mine[bi] - px) < 15) clear = false;
         if (clear) { pick = open[oi]; break; }
       }
-      caps += '<div class="cap" style="left:' + PCT(pick * 24 + num(g.open)) + '%;top:' + (y + 3) + 'px">' +
-        esc(g.name) + '</div>';
+      caps += '<div class="cap" style="left:' + PCT(pick * 24 + num(w.open)) + '%;top:' + (y + 3) + 'px">' +
+        esc(l) + ' open</div>';
     });
 
-    // A dependency that finished early leaves a gap before the task it feeds
-    // starts. That gap is that branch standing about, so it is drawn where it
-    // stood — on the prereq's own lane.
-    var move = '', wait = '', grabs = '', link = '';
+    // Links first, so a bar always sits on top of the thread that reached it.
+    // A link that runs backwards means a task starts before what it comes after
+    // has finished, which is allowed and is worth seeing.
+    var link = '';
     r.edges.forEach(function (e) {
-      if (e.h1 - e.h0 <= .01) return;
-      link += '<line class="link" x1="' + X(e.h0) + '" y1="' + yOf[e.p0] +
-        '" x2="' + X(e.h1) + '" y2="' + yOf[e.p0] + '"/>';
+      if (Math.abs(e.h1 - e.h0) <= .01) return;
+      link += '<line class="link' + (e.h1 < e.h0 ? ' back' : '') + '" x1="' + X(e.h0) +
+        '" y1="' + yOf[e.p0] + '" x2="' + X(e.h1) + '" y2="' + yOf[e.p0] + '"/>';
     });
-    // Then every task as a bar, from where and when it started to where and
-    // when it stopped. Flat is standing still; sloped is moving.
+
+    var move = '', wait = '', grabs = '';
     r.pts.forEach(function (p) {
-      if (p.e - p.s <= .01 && p.from === p.place) return;   // an instant, no bar
-      var seg = 'x1="' + X(p.s) + '" y1="' + yOf[p.from] + '" x2="' + X(p.e) + '" y2="' + yOf[p.place] + '"';
+      var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
+      var seg = 'x1="' + X(p.s) + '" y1="' + y1 + '" x2="' + X(p.e) + '" y2="' + yOf[p.place] + '"';
       var still = p.from === p.place;
-      if (still) wait += '<line class="wait" ' + seg + '/>';
-      else move += '<line class="move" ' + seg + '/>';
-      svg += '<circle class="tick" cx="' + X(p.s) + '" cy="' + yOf[p.from] + '" r="2.6"/>';
-      grabs += '<line class="grab ' + (p.t.kind === 'takes' ? 'leg' : 'gate') + '" ' + seg +
-        ' data-task="' + esc(p.id) + '"><title>' + esc(p.t.name) + ' — ' + stamp(p.s) + ' to ' +
-        stamp(p.e) + ', ' + Math.round(p.e - p.s) + ' h' +
-        (p.t.kind === 'takes' ? '. Drag the bar to change it.' : still ? ' standing still.' : '.') +
-        '</title></line>';
+      if (p.e - p.s > .01 || !still) {
+        if (still) wait += '<line class="wait" ' + seg + '/>';
+        else move += '<line class="move" ' + seg + '/>';
+      }
+      svg += '<circle class="tick" cx="' + X(p.s) + '" cy="' + y1 + '" r="2.6"><title>' +
+        esc(p.t.name) + ' starts ' + stamp(p.s) + '</title></circle>';
+      grabs += '<line class="grab" ' + seg + ' data-task="' + esc(p.id) + '"><title>' +
+        esc(p.t.name) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
+        '. Drag to move the whole task.</title></line>';
     });
     svg += link + wait + move + grabs;
 
     var dots = '', placed = {};
-    r.pts.forEach(function (p, i) {
-      var x = PCT(p.h), last = p.h === r.end;
-      var nm = p.t.name || 'Task', tm = clock(p.h);
+    r.pts.forEach(function (p) {
+      var x = PCT(p.e), last = p.e === r.end;
+      var nm = p.t.name || 'Task', tm = clock(p.e);
       var wpc = (30 + (nm.length + tm.length) * 5.3) / PLOT_PX * 100;
       var flip = x + wpc > 99;
       var lo = flip ? x - wpc : x, hi = flip ? x : x + wpc;
@@ -527,120 +486,116 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       var fed = feedsOf(flow, p.id);
       dots += '<div class="dot s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
         '" style="left:' + x + '%;top:' + yOf[p.place] + 'px" data-task="' + esc(p.id) + '"' +
-        ' title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' +
-        Math.round(p.e - p.s) + ' h' + (p.t.note ? '. ' + esc(p.t.note) : '') +
+        ' title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
+        (p.t.note ? '. ' + esc(p.t.note) : '') +
         (fed.length ? '. Feeds ' + esc(fed.map(function (x2) { return x2.name; }).join(', ')) : '') +
-        '. Click to open the task.">' +
-        '<b></b><span>' + ico(p.t.icon) + esc(nm) + '<em>' + tm + '</em></span></div>';
+        '">' + '<b></b><span>' + ico(p.t.icon) + esc(nm) + '<em>' + tm + '</em></span></div>';
     });
 
     var lbl = lanes.map(function (l) {
-      var g = gateAt(flow, l);
+      var w = winOf(flow, l);
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) +
-        (g ? '<i>' + winSpan(g) + '</i>' : '') + '</div>';
+        '<button class="win' + (w ? '' : ' off') + '" data-place="' + esc(l) + '">' +
+        (w ? winSpan(w) : 'no hours') + '</button></div>';
     }).join('');
 
     return '<div class="hd"><b>' + esc(flow.name) + '</b><small>' + esc(flow.note || '') + '</small>' +
       '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') + '</small>' +
-      '<em>' + r.hrs + ' h, ' + r.idle + ' waiting</em></div></div>' +
+      '<em>' + r.hrs + ' h end to end, ' + r.still + ' standing still</em></div></div>' +
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
       caps + dots + '</div></div>';
   }
 
-  // ── The builder ───────────────────────────────────────────────────────────
-  function card(t, i, flow, r) {
-    var sp = r.span[t.id];
-    var still = sp && sp.from === (t.place || 'Somewhere') && sp.e - sp.s > .01;
-    var when = !sp ? '—'
-      : sp.e - sp.s <= .01 ? stamp(sp.e)
-      : stamp(sp.s) + ' → ' + stamp(sp.e) + ' · ' + Math.round(sp.e - sp.s) + ' h';
-
-    // The definition of a task is one line. Every control carries its own
-    // meaning -- a time input looks like a time, seven letters look like days --
-    // so the labels that used to caption them were costing a whole row to say
-    // what the control already said.
-    var f = '';
-    if (t.kind === 'at') {
-      f = '<input class="t-t" type="time" step="900" value="' + hhmm(num(t.at)) +
-          '" data-f="at" title="Clock time on day 0">';
-    } else if (t.kind === 'takes') {
-      f = '<input class="t-num" type="number" min="0" max="240" step="0.5" value="' + num(t.dur) +
-          '" data-f="dur" title="How many hours it takes"><i>h</i>';
-    } else if (t.kind === 'opens') {
-      f = dayBtns(t) +
-          '<input class="t-t" type="time" step="900" value="' + hhmm(num(t.open)) +
-          '" data-f="open" title="Opens"> – ' +
-          '<input class="t-t" type="time" step="900" value="' + hhmm(num(t.close)) +
-          '" data-f="close" title="Closes">' +
-          '<input class="t-num sm" type="number" min="0" max="240" step="1" value="' + num(t.lead) +
-          '" data-f="lead" title="Hours after arrival before it can be collected"><i>h after</i>';
-    } else {
-      f = dayBtns(t) +
-          '<input class="t-t" type="time" step="900" value="' + hhmm(num(t.at)) +
-          '" data-f="at" title="Departure time">';
+  // ── The list ──────────────────────────────────────────────────────────────
+  var COLS = ['', '', 'Task', 'Place', 'Starts', '', 'Stops', '', 'Takes', 'After', '', '', '', ''];
+  function daySel(v, f) {
+    var o = '';
+    for (var d = 0; d < 7; d++) {
+      o += '<option value="' + d + '"' + (d === v ? ' selected' : '') + '>' + dayName(d) + '</option>';
     }
-
+    return '<select class="dsel" data-f="' + f + '">' + o + '</select>';
+  }
+  function row(t, i, flow, r) {
+    var p = null;
+    r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
+    var len = num(t.e) - num(t.s);
+    var still = p && p.from === (t.place || 'Somewhere');
     var pre = (t.after || []).filter(function (id) { return r.byId[id]; });
     var afterLbl = !pre.length ? 'after —'
       : pre.length === 1 ? 'after ' + (r.byId[pre[0]].name || '?')
       : 'after ' + pre.length;
     var others = flow.tasks.filter(function (o) { return o.id !== t.id; });
-    var pop = '<div class="t-pop" hidden>' + (others.length
+    var fed = feedsOf(flow, t.id);
+    var pop = '<div class="pop" hidden>' + (others.length
       ? others.map(function (o) {
           return '<button class="chip' + ((t.after || []).indexOf(o.id) >= 0 ? ' on' : '') +
             '" data-after="' + esc(o.id) + '">' + esc(o.name) + '</button>';
         }).join('')
       : '<span class="feeds">nothing else to depend on yet</span>') +
-      '<div class="t-feeds">' + feedsLine(flow, t, r) + '</div></div>';
+      '<div class="feeds">' + (fed.length
+        ? 'Feeds <b>' + fed.map(function (o) { return esc(o.name); }).join('</b>, <b>') + '</b>'
+        : 'Feeds nothing') + '</div></div>';
 
-    var orphan = r.at[t.id] === undefined || (r.loose && r.loose[t.id]);
-    return '<div class="task' + (orphan ? ' orphan' : '') + '" id="task-' + esc(t.id) + '">' +
-      '<div class="t-row">' +
-      '<span class="t-n">' + (i + 1) + '</span>' +
-      '<span class="t-ico" data-ico="1" title="Change the icon">' + ico(t.icon) + '</span>' +
-      '<input class="t-name" value="' + esc(t.name) + '" data-f="name" placeholder="Name this task"' +
-      (t.note ? ' title="' + esc(t.note) + '"' : '') + '>' +
-      '<select class="t-kind" data-f="kind">' + KINDS.map(function (k) {
-        return '<option value="' + k[0] + '"' + (t.kind === k[0] ? ' selected' : '') + '>' + k[1] + '</option>';
-      }).join('') + '</select>' +
-      '<span class="t-fields">' + f + '</span>' +
-      '<input class="t-place" value="' + esc(t.place) + '" data-f="place" list="places" ' +
-      'placeholder="Where it ends up" title="Where the product is when this task stops">' +
-      '<span class="t-afterwrap"><button class="t-after' + (pre.length ? ' on' : '') +
-      '" title="What has to finish first">' + esc(afterLbl) + '</button>' + pop + '</span>' +
-      '<span class="t-when' + (still ? ' still' : '') + '">' + when + '</span>' +
-      '<button class="t-mv' + (t.note ? ' has' : '') + '" data-note="1" title="' +
-      (t.note ? esc(t.note) : 'Add a note') + '">&#9432;</button>' +
-      '<button class="t-mv" data-mv="-1" title="Move up"' + (i ? '' : ' disabled') + '>&#8593;</button>' +
-      '<button class="t-mv" data-mv="1" title="Move down"' +
-        (i === flow.tasks.length - 1 ? ' disabled' : '') + '>&#8595;</button>' +
-      '<button class="t-x" data-del="1" title="Remove this task">&times;</button>' +
-      '</div>' +
-      '<div class="t-noterow" hidden>' +
-      '<input value="' + esc(t.note || '') + '" data-f="note" placeholder="Why this task is here"></div>' +
+    return '<div class="row' + (len < 0 ? ' bad' : '') + '" id="task-' + esc(t.id) + '">' +
+      '<div class="cell n">' + (i + 1) + '</div>' +
+      '<div class="cell ico" data-ico="1" title="Change the icon">' + ico(t.icon) + '</div>' +
+      '<div class="cell"><input class="nm" value="' + esc(t.name) + '" data-f="name" placeholder="Name"' +
+      (t.note ? ' title="' + esc(t.note) + '"' : '') + '></div>' +
+      '<div class="cell"><input value="' + esc(t.place) + '" data-f="place" list="places-list" placeholder="Place"></div>' +
+      '<div class="cell">' + daySel(dayOf(num(t.s)), 'sday') + '</div>' +
+      '<div class="cell"><input type="time" step="900" value="' + hhmm(num(t.s)) + '" data-f="stime"></div>' +
+      '<div class="cell">' + daySel(dayOf(num(t.e)), 'eday') + '</div>' +
+      '<div class="cell"><input type="time" step="900" value="' + hhmm(num(t.e)) + '" data-f="etime"></div>' +
+      '<div class="cell dur' + (len < 0 ? ' bad' : still && len > .01 ? ' still' : '') + '">' +
+      (len < 0 ? 'backwards' : dur(len)) + '</div>' +
+      '<div class="cell afterwrap"><button class="after' + (pre.length ? ' on' : '') +
+      '" title="What has to happen first">' + esc(afterLbl) + '</button>' + pop + '</div>' +
+      '<div class="cell"><button class="mini' + (t.note ? ' has' : '') + '" data-note="1" title="' +
+      (t.note ? esc(t.note) : 'Add a note') + '">&#9432;</button></div>' +
+      '<div class="cell"><button class="mini" data-mv="-1" title="Move up"' +
+      (i ? '' : ' disabled') + '>&#8593;</button></div>' +
+      '<div class="cell"><button class="mini" data-mv="1" title="Move down"' +
+      (i === flow.tasks.length - 1 ? ' disabled' : '') + '>&#8595;</button></div>' +
+      '<div class="cell"><button class="mini x" data-del="1" title="Remove">&times;</button></div>' +
+      '<div class="noterow" hidden><input value="' + esc(t.note || '') +
+      '" data-f="note" placeholder="Why this task is here"></div>' +
       '</div>';
   }
-  function feedsLine(flow, t, r) {
-    var fed = feedsOf(flow, t.id);
-    return fed.length
-      ? 'Feeds <b>' + fed.map(function (o) { return esc(o.name); }).join('</b>, <b>') + '</b>'
-      : (r.at[t.id] === r.end ? 'Feeds nothing — this is the end of the flow' : 'Feeds nothing yet');
+  function blank(after, s) {
+    return { id: uid('t'), name: 'New task', place: '', icon: 'clock',
+             s: s, e: s + 1, after: after || [] };
   }
-  function dayBtns(t) {
-    return '<span class="dcell">' + DOW.map(function (dn, d) {
-      return '<button class="d' + (t.days && t.days[d] ? ' on' : '') + '" data-day="' + d +
-        '" title="' + dn + '">' + dn[0] + '</button>';
-    }).join('') + '</span>';
+
+  // ── Gating on the hours ───────────────────────────────────────────────────
+  // The times are typed, not solved, so a window cannot push them about. What
+  // it can do is say when a typed time falls outside the door it belongs to,
+  // and offer to move it to the next moment that door is open.
+  function nextOpen(w, h) {
+    for (var i = 0; i < 28; i++) {
+      var d = Math.floor(h / 24) + i, dw = (dowIdx(ANCHOR) + d) % 7;
+      if (!w.days[dw]) continue;
+      var o = d * 24 + num(w.open), c = d * 24 + num(w.close);
+      if (h <= o) return o;
+      if (h < c) return h;
+    }
+    return h;
   }
-  function blank(kind, after) {
-    var t = { id: uid('t'), name: 'New task', place: '', icon: 'clock', kind: kind || 'takes',
-              dur: 1, after: after || [] };
-    if (kind === 'opens') { t.days = [1,1,1,1,1,1,1]; t.open = 8; t.close = 17; t.lead = 0; }
-    if (kind === 'sails') { t.days = [0,0,1,0,0,1,0]; t.at = 18; }
-    if (kind === 'at') t.at = 18;
-    return t;
+  function outside(flow, place, h) {
+    var w = winOf(flow, place);
+    if (!w) return false;
+    return nextOpen(w, h) !== h;
+  }
+  function offences(flow) {
+    var out = [];
+    flow.tasks.forEach(function (t) {
+      var pl = t.place || 'Somewhere', w = winOf(flow, pl);
+      if (!w) return;
+      if (outside(flow, pl, num(t.s))) out.push({ t: t, f: 's', pl: pl });
+      if (outside(flow, pl, num(t.e))) out.push({ t: t, f: 'e', pl: pl });
+    });
+    return out;
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -649,49 +604,43 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
     if (flow.days.indexOf(S.day) < 0) S.day = flow.days[0];
     ANCHOR = S.day;
 
-    var r = walk(flow);
+    var r = read(flow);
     SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
-    r = walk(flow);
 
     var ax = '';
     for (var i = 0; i < SPAN; i++) {
-      ax += '<div class="day' + (i === 0 ? ' cut' : '') + '">' + DOW[(dowIdx(ANCHOR) + i) % 7] + '</div>';
+      ax += '<div class="day' + (i === 0 ? ' cut' : '') + '">' + dayName(i) + '</div>';
     }
     document.getElementById('axis').innerHTML = '<div class="gut"></div><div class="days">' + ax + '</div>';
     document.getElementById('grid').innerHTML = chart(flow, r);
     document.getElementById('legend').innerHTML =
-      '<span><i class="sw band"></i>a green box is one day of a window this flow waits for</span>' +
+      '<span><i class="sw band"></i>a green box is one day of that place&rsquo;s opening hours</span>' +
       '<span><i class="sw mv"></i>moving</span>' +
-      '<span><i class="sw wt"></i>waiting</span>' +
-      '<span><i class="sw tk"></i>where the task starts</span>' +
-      '<span class="note">Drag a solid bar to change how long that leg takes. ' +
-      'Click any dot, band or flat run to open its task.</span>';
-    // Two ways a flow can be wrong, and both are worth saying out loud.
-    var loose = flow.tasks.filter(function (t) {
-      return t.kind !== 'at' && !(t.after || []).filter(function (id) { return r.byId[id]; }).length;
-    });
+      '<span><i class="sw wt"></i>standing still</span>' +
+      '<span><i class="sw tk"></i>where a task starts</span>' +
+      '<span class="note">Drag a bar to move the whole task. Click any bar or dot to find its row.</span>';
+    document.getElementById('places').innerHTML = placeEditor(flow);
+
+    var off = offences(flow);
     var warn = '';
-    if (r.stuck.length) {
-      warn += '<div class="warn">' + r.stuck.length + ' task' + (r.stuck.length > 1 ? 's are' : ' is') +
-        ' unreachable: ' + r.stuck.map(function (id) {
-          return esc((r.byId[id] || {}).name || id);
-        }).join(', ') + '. Either they depend on each other in a circle, or on a task that ' +
-        'has been deleted. They are outlined in red below and left off the chart.</div>';
+    if (r.broken.length) {
+      warn += '<div class="warn">' + r.broken.map(function (t) { return esc(t.name); }).join(', ') +
+        ' stop' + (r.broken.length > 1 ? '' : 's') + ' before ' +
+        (r.broken.length > 1 ? 'they' : 'it') + ' start' + (r.broken.length > 1 ? '' : 's') + '.</div>';
     }
-    if (loose.length) {
-      warn += '<div class="warn">' + loose.map(function (t) { return esc(t.name); }).join(', ') +
-        ' ' + (loose.length > 1 ? 'have' : 'has') + ' nothing to come after, so ' +
-        (loose.length > 1 ? 'they are' : 'it is') + ' being counted from midnight on day 0. ' +
-        'Give ' + (loose.length > 1 ? 'them' : 'it') + ' a prereq, or make ' +
-        (loose.length > 1 ? 'them' : 'it') + ' an “At a time” task.</div>';
+    if (off.length) {
+      warn += '<div class="warn">' + off.length + ' time' + (off.length > 1 ? 's fall' : ' falls') +
+        ' outside the opening hours of the place ' + (off.length > 1 ? 'they belong' : 'it belongs') +
+        ' to: ' + off.map(function (o) {
+          return esc(o.t.name) + ' ' + (o.f === 's' ? 'starts' : 'stops') + ' ' +
+                 stamp(num(o.f === 's' ? o.t.s : o.t.e));
+        }).join('; ') + '. <button class="btn" id="snap">Move them to opening time</button></div>';
     }
     document.getElementById('warn').innerHTML = warn;
-    var looseIds = {};
-    loose.forEach(function (t) { looseIds[t.id] = 1; });
-    r.loose = looseIds;
+
     document.getElementById('tnote').textContent =
-      flow.tasks.length + ' tasks · ' + places(r).length + ' places · ' + r.edges.length +
-      ' links · ' + r.hrs + ' h, of which ' + r.idle + ' standing still';
+      flow.tasks.length + ' tasks · ' + places(flow).length + ' places · ' + r.edges.length +
+      ' links · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
 
     if (!chartOnly) {
       seg('pick', F.map(function (x) { return [x.id, x.name]; }), S.id,
@@ -699,58 +648,100 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       seg('day', flow.days.map(function (d) { return [d, d]; }), S.day,
         function (v) { S.day = v; save(); paint(); });
       document.getElementById('tasks').innerHTML =
-        '<datalist id="places">' + places(r).map(function (p) {
+        '<datalist id="places-list">' + places(flow).map(function (p) {
           return '<option value="' + esc(p) + '">';
         }).join('') + '</datalist>' +
-        flow.tasks.map(function (t, i) { return card(t, i, flow, r); }).join('');
+        '<div class="grid">' +
+        COLS.map(function (c, i) {
+          return '<div class="gh' + (i === 8 ? ' r' : '') + '">' + c + '</div>';
+        }).join('') +
+        flow.tasks.map(function (t, i) { return row(t, i, flow, r); }).join('') +
+        '</div>';
     } else {
-      // A keystroke must not retype the form under the cursor, so only the
-      // times each card reports are refreshed.
       flow.tasks.forEach(function (t) {
-        var el = document.querySelector('#task-' + cssId(t.id) + ' .t-when'), sp = r.span[t.id];
+        var el = document.querySelector('#task-' + cssId(t.id) + ' .dur');
         if (!el) return;
-        el.textContent = !sp ? '—'
-          : sp.e - sp.s <= .01 ? stamp(sp.e)
-          : stamp(sp.s) + ' → ' + stamp(sp.e) + ' · ' + Math.round(sp.e - sp.s) + ' h';
-        el.classList.toggle('still', !!sp && sp.from === (t.place || 'Somewhere') && sp.e - sp.s > .01);
+        var len = num(t.e) - num(t.s), p = null;
+        r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
+        el.textContent = len < 0 ? 'backwards' : dur(len);
+        el.className = 'cell dur' + (len < 0 ? ' bad'
+          : p && p.from === (t.place || 'Somewhere') && len > .01 ? ' still' : '');
       });
     }
+    markOutside(flow);
     wire(flow, r);
   }
-  function cssId(id) { return String(id).replace(/[^A-Za-z0-9_-]/g, '\\$&'); }
-
-  function wire(flow, r) {
-    all('#tasks .task').forEach(function (cardEl) {
-      var id = cardEl.id.replace(/^task-/, '');
-      var t = null;
-      flow.tasks.forEach(function (x, i) { if (x.id === id) { t = x; t.__i = i; } });
+  // The offending inputs wear it, so the fix is where the mistake is.
+  function markOutside(flow) {
+    all('#tasks .row').forEach(function (rowEl) {
+      var id = rowEl.id.replace(/^task-/, ''), t = null;
+      flow.tasks.forEach(function (x) { if (x.id === id) t = x; });
       if (!t) return;
-      [].slice.call(cardEl.querySelectorAll('[data-f]')).forEach(function (el) {
+      var pl = t.place || 'Somewhere', w = winOf(flow, pl);
+      [['stime', 's'], ['etime', 'e']].forEach(function (pair) {
+        var el = rowEl.querySelector('[data-f="' + pair[0] + '"]');
+        if (!el) return;
+        var bad = w && outside(flow, pl, num(t[pair[1]]));
+        el.style.borderColor = bad ? 'var(--bad)' : '';
+        el.title = bad ? pl + ' is only open ' + winSpan(w) + ' on the days marked below the chart.' : '';
+      });
+    });
+  }
+
+  function placeEditor(flow) {
+    return '<span class="lbl" style="align-self:center">Opening hours</span>' +
+      places(flow).map(function (p) {
+        var w = winOf(flow, p);
+        if (!w) {
+          return '<span class="pl"><b>' + esc(p) + '</b>' +
+            '<button class="btn" data-addwin="' + esc(p) + '">set hours</button></span>';
+        }
+        return '<span class="pl" data-win="' + esc(p) + '"><b>' + esc(p) + '</b>' +
+          '<span class="dcell">' + DOW.map(function (dn, d) {
+            return '<button class="d' + (w.days[d] ? ' on' : '') + '" data-wday="' + d +
+              '" title="' + dn + '">' + dn[0] + '</button>';
+          }).join('') + '</span>' +
+          '<input type="time" step="900" value="' + hhmm(num(w.open)) + '" data-wf="open">' +
+          '<span class="dash">–</span>' +
+          '<input type="time" step="900" value="' + hhmm(num(w.close)) + '" data-wf="close">' +
+          '<button class="mini x" data-delwin="' + esc(p) + '" title="No hours for this place">&times;</button>' +
+          '</span>';
+      }).join('');
+  }
+
+  // ── Wiring ────────────────────────────────────────────────────────────────
+  function wire(flow, r) {
+    all('#tasks .row').forEach(function (rowEl) {
+      var id = rowEl.id.replace(/^task-/, ''), t = null, idx = -1;
+      flow.tasks.forEach(function (x, i) { if (x.id === id) { t = x; idx = i; } });
+      if (!t) return;
+      [].slice.call(rowEl.querySelectorAll('[data-f]')).forEach(function (el) {
         el.oninput = function () {
           var f = el.getAttribute('data-f');
-          if (f === 'kind') {
-            var fresh = blank(el.value, t.after);
-            fresh.id = t.id; fresh.name = t.name; fresh.place = t.place;
-            fresh.icon = t.icon; fresh.note = t.note;
-            flow.tasks[t.__i] = fresh;
-            save(); paint();
-            return;
-          }
-          if (f === 'name' || f === 'place' || f === 'note') t[f] = el.value;
-          else if (el.type === 'time') t[f] = fromHM(el.value);
-          else t[f] = Math.max(0, num(el.value));
+          if (f === 'name' || f === 'place' || f === 'note') { t[f] = el.value; save(); paint(); return; }
+          // Day and time are two halves of one number, so each edit rebuilds it
+          // from whichever half did not change.
+          if (f === 'sday') t.s = (+el.value) * 24 + (num(t.s) % 24);
+          else if (f === 'stime') t.s = dayOf(num(t.s)) * 24 + fromHM(el.value);
+          else if (f === 'eday') t.e = (+el.value) * 24 + (num(t.e) % 24);
+          else if (f === 'etime') t.e = dayOf(num(t.e)) * 24 + fromHM(el.value);
           save(); paint(true);
         };
       });
-      [].slice.call(cardEl.querySelectorAll('.d')).forEach(function (b) {
-        b.onclick = function () {
-          var d = +b.getAttribute('data-day');
-          t.days[d] = t.days[d] ? 0 : 1;
-          b.classList.toggle('on');
-          save(); paint(true);
-        };
-      });
-      [].slice.call(cardEl.querySelectorAll('.chip')).forEach(function (b) {
+      var ic = rowEl.querySelector('.ico');
+      if (ic) ic.onclick = function () {
+        t.icon = ICONS[(ICONS.indexOf(t.icon) + 1) % ICONS.length];
+        save(); paint();
+      };
+      var ab = rowEl.querySelector('.after'), pop = rowEl.querySelector('.pop');
+      if (ab) ab.onclick = function (ev) {
+        ev.stopPropagation();
+        var wasOpen = !pop.hidden;
+        all('.pop').forEach(function (o) { o.hidden = true; });
+        pop.hidden = wasOpen;
+      };
+      if (pop) pop.onclick = function (ev) { ev.stopPropagation(); };
+      [].slice.call(rowEl.querySelectorAll('.chip')).forEach(function (b) {
         b.onclick = function (ev) {
           ev.stopPropagation();
           var dep = b.getAttribute('data-after');
@@ -758,49 +749,30 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
           var k = t.after.indexOf(dep);
           if (k >= 0) t.after.splice(k, 1); else t.after.push(dep);
           save(); paint();
-          // Setting several prereqs in a row should not mean reopening the
-          // popover between each one.
-          var again = document.querySelector('#task-' + cssId(t.id) + ' .t-pop');
+          var again = document.querySelector('#task-' + cssId(t.id) + ' .pop');
           if (again) again.hidden = false;
         };
       });
-      // The prereq popover, and the note line that is folded away until wanted.
-      var ab = cardEl.querySelector('.t-after'), pop = cardEl.querySelector('.t-pop');
-      if (ab) ab.onclick = function (ev) {
-        ev.stopPropagation();
-        var wasOpen = !pop.hidden;
-        all('.t-pop').forEach(function (o) { o.hidden = true; });
-        pop.hidden = wasOpen;
-      };
-      if (pop) pop.onclick = function (ev) { ev.stopPropagation(); };
-      var nb = cardEl.querySelector('[data-note]');
+      var nb = rowEl.querySelector('[data-note]');
       if (nb) nb.onclick = function () {
-        var row = cardEl.querySelector('.t-noterow');
-        row.hidden = !row.hidden;
-        if (!row.hidden) row.querySelector('input').focus();
+        var nr = rowEl.querySelector('.noterow');
+        nr.hidden = !nr.hidden;
+        if (!nr.hidden) nr.querySelector('input').focus();
       };
-      var ic = cardEl.querySelector('.t-ico');
-      if (ic) ic.onclick = function () {
-        t.icon = ICONS[(ICONS.indexOf(t.icon) + 1) % ICONS.length];
-        save(); paint();
-      };
-      [].slice.call(cardEl.querySelectorAll('.t-mv')).forEach(function (b) {
+      [].slice.call(rowEl.querySelectorAll('[data-mv]')).forEach(function (b) {
         b.onclick = function () {
-          var i = t.__i, d = +b.getAttribute('data-mv');
-          if (i + d < 0 || i + d >= flow.tasks.length) return;
-          var x = flow.tasks[i]; flow.tasks[i] = flow.tasks[i + d]; flow.tasks[i + d] = x;
+          var d = +b.getAttribute('data-mv');
+          if (idx + d < 0 || idx + d >= flow.tasks.length) return;
+          var x = flow.tasks[idx]; flow.tasks[idx] = flow.tasks[idx + d]; flow.tasks[idx + d] = x;
           save(); paint();
         };
       });
-      var del = cardEl.querySelector('.t-x');
+      var del = rowEl.querySelector('[data-del]');
       if (del) del.onclick = function () {
         if (flow.tasks.length <= 1) return;
-        flow.tasks.splice(t.__i, 1);
-        // Delete a task out of the middle and the chain has to close over the
-        // hole: whatever depended on it inherits what IT depended on. Merely
-        // dropping the dead id leaves the next task with no prereq at all, and
-        // a task with no prereq starts at midnight on day 0 -- so removing one
-        // step silently moved everything after it to the wrong day.
+        flow.tasks.splice(idx, 1);
+        // Close the chain over the hole: whatever depended on this inherits
+        // what it depended on, so removing a step does not orphan the next one.
         var inherited = (t.after || []).slice();
         flow.tasks.forEach(function (o) {
           if ((o.after || []).indexOf(t.id) < 0) return;
@@ -813,8 +785,48 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       };
     });
 
+    // Opening hours, which belong to the place rather than to any task.
+    all('#places [data-win]').forEach(function (el) {
+      var p = el.getAttribute('data-win'), w = flow.windows[p];
+      [].slice.call(el.querySelectorAll('[data-wday]')).forEach(function (b) {
+        b.onclick = function () {
+          var d = +b.getAttribute('data-wday');
+          w.days[d] = w.days[d] ? 0 : 1;
+          save(); paint();
+        };
+      });
+      [].slice.call(el.querySelectorAll('[data-wf]')).forEach(function (inp) {
+        inp.oninput = function () { w[inp.getAttribute('data-wf')] = fromHM(inp.value); save(); paint(); };
+      });
+    });
+    all('#places [data-addwin]').forEach(function (b) {
+      b.onclick = function () {
+        flow.windows = flow.windows || {};
+        flow.windows[b.getAttribute('data-addwin')] = { days: [1,1,1,1,1,1,1], open: 8, close: 17 };
+        save(); paint();
+      };
+    });
+    all('#places [data-delwin]').forEach(function (b) {
+      b.onclick = function () { delete flow.windows[b.getAttribute('data-delwin')]; save(); paint(); };
+    });
+    all('#grid .win').forEach(function (b) {
+      b.onclick = function () {
+        var el = document.querySelector('#places [data-win="' + b.getAttribute('data-place') + '"]') ||
+                 document.querySelector('#places [data-addwin="' + b.getAttribute('data-place') + '"]');
+        if (el) { el.scrollIntoView({ block: 'center' }); var i = el.querySelector('input'); if (i) i.focus(); }
+      };
+    });
+
+    var snap = document.getElementById('snap');
+    if (snap) snap.onclick = function () {
+      offences(flow).forEach(function (o) {
+        var w = winOf(flow, o.pl);
+        o.t[o.f] = nextOpen(w, num(o.t[o.f]));
+      });
+      save(); paint();
+    };
+
     all('#grid [data-task]').forEach(function (el) {
-      if (el.classList.contains('leg')) return;
       el.addEventListener('click', function () {
         var c = document.getElementById('task-' + el.getAttribute('data-task'));
         if (!c) return;
@@ -822,18 +834,21 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
         c.scrollIntoView({ block: 'center' });
         window.setTimeout(function () { c.classList.remove('lit'); }, 2600);
       });
-    });
-    all('#grid .grab.leg').forEach(function (el) {
+      if (!el.classList.contains('grab')) return;
+      // Dragging a bar slides the whole task, keeping its length. The times are
+      // typed, so this is a way of typing them.
       el.addEventListener('mousedown', function (ev) {
         var t = r.byId[el.getAttribute('data-task')];
-        if (!t || t.kind !== 'takes') return;
-        var W = el.ownerSVGElement.getBoundingClientRect().width, x0 = ev.clientX, v0 = num(t.dur);
+        if (!t) return;
+        var W = el.ownerSVGElement.getBoundingClientRect().width, x0 = ev.clientX;
+        var s0 = num(t.s), e0 = num(t.e);
         ev.preventDefault();
         function mv(e) {
-          var v = Math.round((v0 + ((e.clientX - x0) / W) * SPAN * 24) * 2) / 2;
-          v = Math.max(0, Math.min(240, v));
-          if (v === num(t.dur)) return;
-          t.dur = v;
+          var d = Math.round(((e.clientX - x0) / W) * SPAN * 24 * 4) / 4;
+          var ns = Math.max(0, s0 + d);
+          if (ns === num(t.s)) return;
+          t.e = ns + (e0 - s0);
+          t.s = ns;
           paint(true);
         }
         function up() {
@@ -859,17 +874,16 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   }
 
   document.addEventListener('click', function () {
-    all('.t-pop').forEach(function (o) { o.hidden = true; });
+    all('.pop').forEach(function (o) { o.hidden = true; });
   });
-
   document.getElementById('add').onclick = function () {
     var flow = cur(), last = flow.tasks[flow.tasks.length - 1];
-    var t = blank('takes', last ? [last.id] : []);
+    var t = blank(last ? [last.id] : [], last ? num(last.e) : 8);
     t.place = last ? last.place : '';
     flow.tasks.push(t);
     save(); paint();
     var c = document.getElementById('task-' + t.id);
-    if (c) { c.scrollIntoView({ block: 'center' }); c.querySelector('.t-name').select(); }
+    if (c) { c.scrollIntoView({ block: 'center' }); c.querySelector('.nm').select(); }
   };
   document.getElementById('reset').onclick = function () {
     F = defaults(); S = { id: 'kona-lettuce', day: 'Sun' }; save(); paint();

@@ -1,85 +1,64 @@
 # Task Vis
 
 A time–distance chart you can edit. Forked out of the freight model's Flow page
-so one flow can be worked on at a time without the rest of that page's argument
-around it.
+so one flow can be worked on at a time.
 
 Open `index.html`. There is no build step and nothing to install.
 
 ## What it draws
 
-Time runs left to right, place runs top to bottom. So a **diagonal is the thing
-moving** and a **flat run is the thing standing still** — which is the whole
+Time runs left to right, place runs top to bottom. So a **sloped bar is the
+thing moving** and a **flat bar is the thing standing still** — which is the
 point, because the waiting is what nobody can see in a list of steps.
 
-A shaded band on a lane is a window somebody else controls: the hours they will
-take it. A flat run that ends where a band begins is that window being shut.
+A shaded band on a lane is that place's opening hours.
 
 ## The data structure
 
-A flow is a set of **tasks** and the links between them. Nothing else.
+A flow is a set of **tasks**, the links between them, and the opening hours of
+the places they happen in.
 
 ```js
 { id, name, place, icon, note,
-  kind: 'at' | 'takes' | 'opens' | 'sails',
+  s,                      // starts: hours from midnight on day 0
+  e,                      // stops:  hours from midnight on day 0
   after: [taskId, ...] }
 ```
 
-Four kinds, which between them say everything the model knows about when
-something happens:
+**Every task carries the same fields**, which is why every row in the list is
+the same grid and the columns line up down the page.
 
-| kind | means | fields |
-|---|---|---|
-| `at` | a clock time on day 0 | `at` |
-| `takes` | N hours after its prereqs | `dur` |
-| `opens` | waits until somebody will take it | `days`, `open`, `close`, `lead` |
-| `sails` | waits for the next scheduled departure | `days`, `at` |
+**Both times are typed, not solved.** `after` records what has to happen first
+and is what the links are drawn from, but it does not push times about: **the
+next start does not have to be the previous stop.** A gap between them is drawn
+as a gap. An overlap — a task starting before the thing it comes after has
+finished — is drawn as a red backwards link, because that is often the truth and
+used to be inexpressible.
 
-**Every task has a start and a stop.** It starts when the last of its prereqs is
-done and stops when its own kind says so, so it draws as a bar rather than a
-point and the gap between the two ends is the task itself — an hour of loading,
-or eleven hours outside a shut door. A hollow tick marks where a task begins.
+What a task *feeds* is those same `after` edges read backwards, so it is derived
+and shown in the popover rather than typed; the two cannot drift apart.
 
-`place` is where the product is when the task **stops**, and those places are
-the vertical axis. A task that stops where it started is standing still, drawn
-flat and printed in orange in the list; a task that stops somewhere else is
-moving, and slopes.
+Deleting a task closes the chain over the hole: whatever depended on it inherits
+what it depended on.
 
-A task is one line in the list. Every control says what it is by its own shape,
-so nothing is captioned; the note is folded behind the ⓘ and rides as the name's
-tooltip, and prereqs are behind the `after` chip.
+## Opening hours belong to a place
 
-**Dependencies are stored one way only.** A task lists what it comes `after`.
-What it *feeds* is those same edges read backwards, so it is derived on the fly
-and shown under each task rather than typed — the two can never drift apart.
+Costco receiving is open 4 to 11 whether or not anything is driving towards it,
+so hours are a property of the **place**, edited in the strip under the chart —
+not of any task.
 
-A task starts when the **last** of its prereqs is done, which is what makes a
-merge behave like a merge.
-
-**A task with no prereqs is counted from midnight on day 0.** That is almost
-never what anyone means, so any task that is not an `at` and has nothing to come
-after is outlined in red and named above the list. Deleting a task out of the
-middle closes the chain over the hole — whatever depended on it inherits what it
-depended on — rather than leaving the next task hanging.
-
-Anything left unresolved is in a dependency circle or points at a task that has
-been deleted; it is called out in red and left off the chart rather than quietly
-dropped.
-
-`lead` is worth knowing about: hours after arrival before the cargo can even be
-collected. Set it to 24 on a `opens` task and the next-business-day rule falls
-out on its own.
+They **gate** the typed times without overriding them. A start or stop that
+falls outside its place's hours is outlined in red, says which window it missed,
+and is listed above the task list with one button to move every offender to the
+next moment that door is open.
 
 ## State
 
-Edits are kept in `localStorage` under `taskvis.flows.v1`. **Back to defaults**
+Edits are kept in `localStorage` under `taskvis.flows.v3`. **Back to defaults**
 restores the seeded flow.
 
-## What it cannot do yet
+## Not here
 
-Scheduling is **forward only**. Every task runs as early as its prereqs allow,
-so a truck that will not be received until 4 AM still leaves at 9 PM and stands
-outside the door all night. The realistic answer — leave as late as you can and
-still make the window — needs a backward pass from the delivery, and there is no
-kind for it. When it comes it should probably be a flag on `takes`
-("as late as possible") rather than a fifth kind.
+Quantities — pounds to Costco Kona, picked up at the gate, and off-island — live
+in the freight model, not in this tool. This one has no data source; it is a
+generic editor.
