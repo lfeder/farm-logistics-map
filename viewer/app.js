@@ -204,9 +204,12 @@
       var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
       var seg = 'x1="' + X(p.s) + '" y1="' + y1 + '" x2="' + X(p.e) + '" y2="' + yOf[p.place] + '"';
       var still = p.from === p.place;
+      // Branches are separate threads until they meet, so they do not share a
+      // colour.
+      var b = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
       if (p.e - p.s > .01 || !still) {
-        if (still) wait += '<line class="wait" ' + seg + '/>';
-        else move += '<line class="move" ' + seg + '/>';
+        if (still) wait += '<line class="wait' + b + '" ' + seg + '/>';
+        else move += '<line class="move' + b + '" ' + seg + '/>';
       }
       svg += '<circle class="tick' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="2.6"><title>' +
         esc(p.t.name) + ' starts ' + stamp(p.s) + '</title></circle>';
@@ -551,7 +554,7 @@
       return;
     }
     var flow = cur();
-    ANCHOR = flow.anchor || 'Sun';
+    ANCHOR = flow.start || 'Sun';
 
     var r = read(flow);
     SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
