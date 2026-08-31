@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Task Vis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme: only light;
+  --ground:#eef1f3; --card:#ffffff; --card-2:#f6f8f9;
+  --ink:#141b1f; --ink-2:#4a5860; --ink-3:#78878f;
+  --line:#d8dfe3; --line-2:#e8edef;
+  --accent:#d4541f; --accent-soft:#fbeee7;
+  --good:#1d7a52; --bad:#b3341c;
+  --band:#e8f2ec; --band-2:#cfe3d8;
+  --shadow:0 1px 2px rgba(20,27,31,.06), 0 8px 24px -12px rgba(20,27,31,.18);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink); font-size:15px; line-height:1.5;
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px; margin:0 auto; padding:32px 24px 80px; display:flex; flex-direction:column; gap:24px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 28px;
+  border-bottom:2px solid var(--ink); padding-bottom:16px}
+h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
+.sub{color:var(--ink-2); font-size:14px; margin:2px 0 0}
+.panel{background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow)}
+.panel-hd{display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:13px 18px;
+  border-bottom:1px solid var(--line-2)}
+.panel-hd h2{margin:0; font-size:12px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-2); font-weight:600}
+.lbl{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.note{font-size:11.5px; color:var(--ink-3)}
+.btn{background:none; border:1px solid var(--line); color:var(--ink-2); font:inherit; font-size:12px;
+  padding:4px 12px; border-radius:6px; cursor:pointer}
+.btn:hover{border-color:var(--accent); color:var(--accent)}
+.btn.solid{background:var(--ink); border-color:var(--ink); color:var(--card); font-weight:600}
+.btn.solid:hover{background:var(--accent); border-color:var(--accent); color:#fff}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.seg a{padding:5px 12px; font-size:12.5px; color:var(--ink-2); cursor:pointer; white-space:nowrap;
+  border-left:1px solid var(--line)}
+.seg a:first-child{border-left:none}
+.seg a.on{background:var(--accent); color:#fff; font-weight:600}
+.seg a:hover:not(.on){background:var(--card-2)}
+
+/* ---------- the chart: time across, place down ---------- */
+.body{padding:14px 18px 14px}
+.axis{display:flex; gap:12px; padding-bottom:2px}
+.gut{flex:0 0 116px; display:flex; flex-direction:column}
+.days{flex:1 1 auto; min-width:0; display:flex}
+.day{flex:1 1 0; text-align:center; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:600; border-left:1px solid var(--line-2); padding-bottom:3px}
+.day:first-child{border-left:none}
+.day.cut{color:var(--accent)}
+.hd{display:flex; align-items:baseline; gap:9px; padding:2px 0 4px}
+.hd b{font-size:14.5px; font-weight:600}
+.hd small{font-size:10.5px; color:var(--ink-3)}
+.res{margin-left:auto; display:flex; align-items:baseline; gap:5px}
+.res b{font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; line-height:1}
+.res small{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.res em{font-style:normal; font-size:10.5px; color:var(--ink-3)}
+.chart{display:flex; gap:12px}
+.lane-lbl{display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
+  font-size:10.5px; font-weight:600; color:var(--ink-2); line-height:1.15; text-align:right}
+.lane-lbl i{margin-top:2px; padding:1px 5px; border:1px solid var(--band-2); border-radius:4px;
+  background:var(--band); color:var(--good); font-family:"IBM Plex Mono",monospace;
+  font-size:9px; font-weight:600; font-style:normal; white-space:nowrap}
+.plot{position:relative; flex:1 1 auto; min-width:0}
+.svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible}
+.svg line{vector-effect:non-scaling-stroke}
+.lane{stroke:var(--line-2); stroke-width:1}
+.col{stroke:var(--line-2); stroke-width:1}
+.band{fill:var(--band); cursor:pointer}
+.band:hover{fill:var(--band-2)}
+.cap{position:absolute; font-size:8.5px; font-weight:600; color:var(--good);
+  white-space:nowrap; padding-left:3px; pointer-events:none; opacity:.85}
+.move{stroke:var(--ink); stroke-width:2; stroke-linecap:round}
+.wait{stroke:var(--ink); stroke-width:2; stroke-dasharray:2 3; opacity:.6}
+.grab{stroke:transparent; stroke-width:13; stroke-linecap:round; cursor:pointer}
+.grab.leg{cursor:ew-resize}
+.grab.leg:hover{stroke:var(--accent); opacity:.22}
+.grab.gate:hover{stroke:var(--good); opacity:.22}
+.dot{position:absolute; width:0; height:0; color:var(--ink); cursor:pointer}
+.dot b{position:absolute; left:-3px; top:-3px; width:6px; height:6px; border-radius:50%;
+  background:currentColor; display:block}
+.dot.end b{left:-4.5px; top:-4.5px; width:9px; height:9px; box-shadow:0 0 0 2px var(--card)}
+.dot span{position:absolute; left:7px; display:flex; align-items:center; gap:3px; white-space:nowrap;
+  font-size:9.5px; font-weight:500; line-height:1.1}
+.dot.s0 span{bottom:2px} .dot.s1 span{top:2px} .dot.s2 span{bottom:13px}
+.dot.flip span{left:auto; right:7px; flex-direction:row-reverse}
+.dot em{font-style:normal; color:var(--ink-3); font-weight:400}
+.dot.end span{font-weight:600}
+.dot:hover b{box-shadow:0 0 0 3px var(--accent-soft)}
+.legend{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; padding-top:14px; margin-top:10px;
+  border-top:1px solid var(--line-2); font-size:11.5px; color:var(--ink-2)}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.sw{display:inline-block; width:11px; height:11px; border-radius:2px}
+.sw.band{background:var(--band); border:1px solid var(--band-2)}
+.sw.mv{width:16px; height:2px; border-radius:0; background:var(--ink-2)}
+.sw.wt{width:16px; height:0; border-radius:0; border-top:2px dashed var(--ink-3)}
+.i{display:inline-block; vertical-align:-2px; flex:0 0 auto}
+
+/* ---------- the builder ---------- */
+.tasks{padding:12px 18px 18px; display:flex; flex-direction:column; gap:9px}
+.task{border:1px solid var(--line); border-radius:9px; background:var(--card-2); overflow:hidden}
+.task.lit{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.task.orphan{border-color:var(--bad)}
+.t-hd{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:9px 11px; background:var(--card)}
+.t-n{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--ink-3); font-weight:600;
+  min-width:18px; text-align:right}
+.t-ico{cursor:pointer; color:var(--ink-2); display:inline-flex; padding:2px}
+.t-ico:hover{color:var(--accent)}
+.t-hd input,.t-hd select,.t-f input,.t-f select{font:inherit; font-size:12.5px; padding:4px 7px;
+  border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink)}
+.t-hd input:focus,.t-f input:focus,.t-hd select:focus{outline:none; border-color:var(--accent)}
+.t-name{flex:1 1 190px; min-width:130px; font-weight:600}
+.t-place{flex:0 1 170px; min-width:120px}
+.t-kind{flex:0 0 auto}
+.t-when{margin-left:auto; font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-2);
+  white-space:nowrap}
+.t-x,.t-mv{background:none; border:1px solid var(--line); color:var(--ink-3); font:inherit; font-size:12px;
+  width:24px; height:24px; border-radius:5px; cursor:pointer; padding:0; line-height:1}
+.t-x:hover{border-color:var(--bad); color:var(--bad)}
+.t-mv:hover:not(:disabled){border-color:var(--accent); color:var(--accent)}
+.t-mv:disabled{opacity:.35; cursor:default}
+.t-body{display:flex; flex-wrap:wrap; gap:10px 18px; padding:10px 11px 11px; border-top:1px solid var(--line-2)}
+.t-f{display:flex; align-items:center; gap:7px}
+.t-f>span:first-child:not(.feeds):not(.chips){font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.t-f i{font-style:normal; font-size:11px; color:var(--ink-3)}
+.t-f.wide{flex:1 1 100%}
+.t-f.wide input{flex:1 1 auto}
+.dcell{display:inline-flex; gap:2px}
+.d{width:21px; height:23px; border:1px solid var(--line); background:var(--card); color:var(--ink-3);
+  font-family:inherit; font-size:10.5px; font-weight:600; border-radius:4px; cursor:pointer; padding:0}
+.d.on{background:var(--good); border-color:var(--good); color:#fff}
+.d:hover{border-color:var(--accent)}
+/* Prereqs are stored; what a task feeds is the same edges read backwards, so it
+   is derived and shown rather than typed, and the two can never disagree. */
+.chips{display:flex; flex-wrap:wrap; gap:4px}
+.chip{border:1px solid var(--line); background:var(--card); color:var(--ink-3); font:inherit;
+  font-size:11px; padding:2px 8px; border-radius:11px; cursor:pointer; white-space:nowrap}
+.chip.on{background:var(--ink); border-color:var(--ink); color:var(--card); font-weight:600}
+.chip:hover:not(.on){border-color:var(--accent); color:var(--accent)}
+.feeds{font-size:11.5px; color:var(--ink-3)}
+.feeds b{color:var(--ink-2); font-weight:600}
+.warn{margin:0 18px 14px; padding:9px 12px; border:1px solid var(--bad); border-radius:7px;
+  background:var(--accent-soft); color:var(--bad); font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Task Vis</h1>
+      <p class="sub" id="sub">One flow at a time. Time runs across, place runs down — so a diagonal is movement and a flat run is waiting.</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="panel-hd">
+      <h2>Flow</h2>
+      <span class="seg" id="pick"></span>
+      <span class="lbl">Day 0</span>
+      <span class="seg" id="day"></span>
+      <button class="btn" id="reset" style="margin-left:auto">Back to defaults</button>
+    </div>
+    <div class="body">
+      <div class="axis" id="axis"></div>
+      <div id="grid"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <!-- A flow is a set of tasks and the prereqs between them. Nothing about it
+       is written into the code: change a task here and the chart is the answer. -->
+  <section class="panel">
+    <div class="panel-hd">
+      <h2>Tasks</h2>
+      <span class="note" id="tnote"></span>
+      <button class="btn solid" id="add" style="margin-left:auto">Add a task</button>
+    </div>
+    <div id="warn"></div>
+    <div class="tasks" id="tasks"></div>
+  </section>
+</div>
+<script>
+(function () {
+  "use strict";
+
+  var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var STORE = 'taskvis.flows.v1';
+
+  var ICON = {
+    box:   '<path d="M2 5.2 8 2.4l6 2.8v5.6L8 13.6 2 10.8z"/><path d="M2 5.2 8 8l6-2.8M8 8v5.6"/>',
+    truck: '<path d="M1 4.5h8.2v6H1z"/><path d="M9.2 6.6h2.6L14.4 9v1.5H9.2z"/><circle cx="4.2" cy="11.6" r="1.5"/><circle cx="11.3" cy="11.6" r="1.5"/>',
+    plane: '<path d="M1.6 8.4 14.4 3.6l-3 5.2 1.1 4.4-2.4-1.5-2.2 1.9-.4-3.1z"/>',
+    ship:  '<path d="M2.4 9.6h11.2l-1.7 3.8H4.1z"/><path d="M4.3 9.6V5.8h7.4v3.8M8 5.8V3.2"/>',
+    depot: '<path d="M1.8 6.8 8 3.4l6.2 3.4v6.4H1.8z"/><path d="M5.6 13.2V9h4.8v4.2"/>',
+    store: '<path d="M2 6.4h12v6.8H2z"/><path d="M2 6.4 3.4 3h9.2L14 6.4"/><path d="M6.4 13.2V9.4h3.2v3.8"/>',
+    clock: '<circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.6"/>'
+  };
+  var ICONS = ['box', 'truck', 'plane', 'ship', 'depot', 'store', 'clock'];
+  function ico(k) {
+    return '<svg class="i" viewBox="0 0 16 16" width="14" height="14" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">' +
+      (ICON[k] || ICON.clock) + '</svg>';
+  }
+
+  // ── What a task is ────────────────────────────────────────────────────────
+  // Four kinds, which between them say everything this model knows about when
+  // a thing happens:
+  //
+  //   at      a clock time on day 0. A task with no prereqs needs one of these.
+  //   takes   N hours after its prereqs are all done. Loading, driving, flying.
+  //   opens   waits until somebody will take it: which days, what hours, and
+  //           how long after arrival before it can even be collected.
+  //   sails   waits for the next scheduled departure on given weekdays.
+  //
+  // Each task also names the place the product is in when the task ends, and
+  // those places are the chart's vertical axis. A task ending where its prereq
+  // ended is a wait; a task ending somewhere else is a move.
+  //
+  // Dependencies are stored one way only. A task lists what it comes `after`;
+  // what it feeds is those same edges read backwards, so it is derived on the
+  // fly and the two can never drift apart. A task starts when the LAST of its
+  // prereqs is done, which is what makes a merge behave like a merge.
+  var KINDS = [
+    ['at',    'At a time'],
+    ['takes', 'Takes'],
+    ['opens', 'Waits for a window'],
+    ['sails', 'Waits for a departure']
+  ];
+
+  function defaults() {
+    return [{
+      id: 'kona-lettuce',
+      name: 'Lettuce → Costco Kona',
+      note: 'Our own box truck. No carrier at all, so the only thing between packing and the customer is who is awake.',
+      days: ['Sun', 'Mon', 'Wed', 'Thu'],
+      tasks: [
+        { id: 'pack',  name: 'Packing ends',     place: 'Packhouse',   icon: 'box',   kind: 'at',
+          at: 18, after: [] },
+        { id: 'crew',  name: 'Crew on shift',    place: 'Packhouse',   icon: 'depot', kind: 'opens',
+          days: [1,1,1,1,1,1,1], open: 6, close: 19, lead: 0, after: ['pack'],
+          note: 'Nobody is here to load a truck outside these hours.' },
+        { id: 'load',  name: 'Truck loaded',     place: 'Packhouse',   icon: 'truck', kind: 'takes',
+          dur: 1, after: ['crew'],
+          note: 'A box truck cannot stand loaded overnight, so it is loaded right before it drives.' },
+        { id: 'drive', name: 'Drive to Kona',    place: 'Costco Kona', icon: 'truck', kind: 'takes',
+          dur: 2, after: ['load'] },
+        { id: 'recv',  name: 'Costco receiving', place: 'Costco Kona', icon: 'store', kind: 'opens',
+          days: [0,1,1,1,1,1,1], open: 4, close: 11, lead: 0, after: ['drive'],
+          note: 'The back door. Shut Sundays.' }
+      ]
+    }];
+  }
+
+  var F = defaults(), S = { id: 'kona-lettuce', day: 'Sun' };
+  try {
+    var sv = JSON.parse(window.localStorage.getItem(STORE) || 'null');
+    if (sv && sv.flows && sv.flows.length) F = sv.flows;
+    if (sv && sv.pick) S = sv.pick;
+  } catch (e) { /* nothing stored, or junk in the slot */ }
+  function save() {
+    try { window.localStorage.setItem(STORE, JSON.stringify({ flows: F, pick: S })); } catch (e) {}
+  }
+  function cur() {
+    for (var i = 0; i < F.length; i++) if (F[i].id === S.id) return F[i];
+    S.id = F[0].id;
+    return F[0];
+  }
+
+  // ── Clock ─────────────────────────────────────────────────────────────────
+  var SPAN = 3, ANCHOR = 'Sun';
+  var dowIdx = function (n) { return DOW.indexOf(n); };
+  function clock(h) {
+    var t = ((Math.round(h * 2) / 2 % 24) + 24) % 24, hh = Math.floor(t), m = t - hh === .5 ? ':30' : '';
+    return (hh % 12 === 0 ? 12 : hh % 12) + m + ' ' + (hh < 12 ? 'AM' : 'PM');
+  }
+  function stamp(h) { return DOW[(dowIdx(ANCHOR) + Math.floor(h / 24)) % 7] + ' ' + clock(h); }
+  function hhmm(h) {
+    var t = ((h % 24) + 24) % 24, hr = Math.floor(t), mn = Math.round((t - hr) * 60);
+    return (hr < 10 ? '0' : '') + hr + ':' + (mn < 10 ? '0' : '') + mn;
+  }
+  function fromHM(s) {
+    var p = String(s || '').split(':'), h = parseFloat(p[0]), m = parseFloat(p[1] || 0);
+    return isNaN(h) ? 0 : Math.max(0, Math.min(23.98, h + (isNaN(m) ? 0 : m / 60)));
+  }
+  function num(v, d) { var n = parseFloat(v); return isNaN(n) ? (d || 0) : n; }
+  function winSpan(t) {
+    var a = clock(num(t.open)), b = clock(num(t.close));
+    return a.slice(-2) === b.slice(-2) ? a.slice(0, -3) + '–' + b : a + '–' + b;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function all(q) { return [].slice.call(document.querySelectorAll(q)); }
+  function uid(p) { return p + '-' + Math.random().toString(36).slice(2, 7); }
+
+  // ── Walking the graph ─────────────────────────────────────────────────────
+  function nextOpen(t, h) {
+    h += num(t.lead, 0);
+    for (var i = 0; i < 28; i++) {
+      var d = Math.floor(h / 24) + i, dw = (dowIdx(ANCHOR) + d) % 7;
+      if (!t.days || !t.days[dw]) continue;
+      var o = d * 24 + num(t.open), c = d * 24 + num(t.close);
+      if (h <= o) return o;
+      if (h < c) return h;
+    }
+    return h;
+  }
+  function nextDeparture(t, h) {
+    for (var i = 0; i < 28; i++) {
+      var d = Math.floor(h / 24) + i, dw = (dowIdx(ANCHOR) + d) % 7;
+      if (!t.days || !t.days[dw]) continue;
+      var x = d * 24 + num(t.at);
+      if (x >= h) return x;
+    }
+    return h;
+  }
+  function endOf(t, base) {
+    if (t.kind === 'at') return num(t.at);
+    if (t.kind === 'takes') return base + num(t.dur);
+    if (t.kind === 'opens') return nextOpen(t, base);
+    if (t.kind === 'sails') return nextDeparture(t, base);
+    return base;
+  }
+  // A task runs when the LAST of its prereqs is done, so a merge waits for
+  // everything feeding it. Anything still unresolved after no further progress
+  // is in a cycle or points at a task that is gone; it is reported, not hidden.
+  function walk(flow) {
+    var byId = {}, at = {}, order = [];
+    flow.tasks.forEach(function (t) { byId[t.id] = t; });
+    var pending = flow.tasks.slice(), guard = 0;
+    while (pending.length && guard++ < 999) {
+      var moved = false;
+      for (var i = 0; i < pending.length; i++) {
+        var t = pending[i];
+        var pre = (t.after || []).filter(function (id) { return byId[id]; });
+        var ready = pre.every(function (id) { return at[id] !== undefined; });
+        if (!ready) continue;
+        var base = pre.length ? Math.max.apply(null, pre.map(function (id) { return at[id]; })) : 0;
+        at[t.id] = endOf(t, base);
+        order.push(t.id);
+        pending.splice(i, 1); i--; moved = true;
+      }
+      if (!moved) break;
+    }
+    var pts = order.map(function (id) {
+      var t = byId[id];
+      return { id: id, t: t, h: at[id], place: t.place || 'Somewhere' };
+    });
+    var ends = pts.map(function (p) { return p.h; });
+    var start = ends.length ? Math.min.apply(null, ends) : 0;
+    var end = ends.length ? Math.max.apply(null, ends) : 0;
+    // Edges, and the hours spent standing still on them.
+    var edges = [], idle = 0;
+    flow.tasks.forEach(function (t) {
+      (t.after || []).forEach(function (id) {
+        if (at[id] === undefined || at[t.id] === undefined) return;
+        var a = byId[id];
+        var e = { from: id, to: t.id, h0: at[id], h1: at[t.id],
+                  p0: a.place || 'Somewhere', p1: t.place || 'Somewhere' };
+        edges.push(e);
+        if (e.p0 === e.p1) idle += Math.max(0, e.h1 - e.h0);
+      });
+    });
+    return {
+      at: at, byId: byId, pts: pts, edges: edges, stuck: pending.map(function (t) { return t.id; }),
+      start: start, end: end,
+      days: Math.floor(end / 24) - Math.floor(start / 24),
+      hrs: Math.round(end - start), idle: Math.round(idle)
+    };
+  }
+  // Places, in the order the walk first reaches them, so the vertical axis
+  // reads top to bottom the way the product actually travels.
+  function places(r) {
+    var seen = {}, out = [];
+    r.pts.forEach(function (p) { if (!seen[p.place]) { seen[p.place] = 1; out.push(p.place); } });
+    return out;
+  }
+  function feedsOf(flow, id) {
+    return flow.tasks.filter(function (t) { return (t.after || []).indexOf(id) >= 0; });
+  }
+  function gateAt(flow, place) {
+    for (var i = 0; i < flow.tasks.length; i++) {
+      var t = flow.tasks[i];
+      if (t.kind === 'opens' && (t.place || 'Somewhere') === place) return t;
+    }
+    return null;
+  }
+
+  // ── Drawing ───────────────────────────────────────────────────────────────
+  var LANE_H = 38, PAD_T = 14, PAD_B = 18, PLOT_PX = 1060;
+  var X = function (h) { return (h / (SPAN * 24)) * 1000; };
+  var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
+
+  function chart(flow, r) {
+    var lanes = places(r), yOf = {};
+    lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
+    var H = PAD_T + lanes.length * LANE_H + PAD_B;
+
+    var svg = '';
+    for (var c = 1; c < SPAN; c++) {
+      svg += '<line class="col" x1="' + X(c * 24) + '" x2="' + X(c * 24) + '" y1="0" y2="' + H + '"/>';
+    }
+
+    var busy = {}, caps = '';
+    r.pts.forEach(function (p) { (busy[p.place] || (busy[p.place] = [])).push(PCT(p.h)); });
+    lanes.forEach(function (l, i) {
+      var y = PAD_T + i * LANE_H;
+      svg += '<line class="lane" x1="0" x2="1000" y1="' + (y + LANE_H / 2) + '" y2="' + (y + LANE_H / 2) + '"/>';
+      var g = gateAt(flow, l);
+      if (!g) return;
+      var open = [];
+      for (var d = 0; d < SPAN; d++) {
+        if (!g.days[(dowIdx(ANCHOR) + d) % 7]) continue;
+        open.push(d);
+        var x0 = X(d * 24 + num(g.open)), x1 = X(d * 24 + num(g.close));
+        svg += '<rect class="band" x="' + x0 + '" width="' + Math.max(0, x1 - x0) +
+          '" y="' + (y + 5) + '" height="' + (LANE_H - 10) + '" data-task="' + esc(g.id) +
+          '"><title>' + esc(g.name) + ' — ' + winSpan(g) + '. Click to open the task.</title></rect>';
+      }
+      if (!open.length) return;
+      var mine = busy[l] || [], pick = open[0];
+      for (var oi = 0; oi < open.length; oi++) {
+        var px = PCT(open[oi] * 24 + num(g.open)), clear = true;
+        for (var bi = 0; bi < mine.length; bi++) if (Math.abs(mine[bi] - px) < 15) clear = false;
+        if (clear) { pick = open[oi]; break; }
+      }
+      caps += '<div class="cap" style="left:' + PCT(pick * 24 + num(g.open)) + '%;top:' + (y + 3) + 'px">' +
+        esc(g.name) + '</div>';
+    });
+
+    // One line per dependency, which is why a merge draws as a merge.
+    var move = '', wait = '', grabs = '';
+    r.edges.forEach(function (e) {
+      var seg = 'x1="' + X(e.h0) + '" y1="' + yOf[e.p0] + '" x2="' + X(e.h1) + '" y2="' + yOf[e.p1] + '"';
+      var t = r.byId[e.to];
+      if (e.p0 === e.p1) {
+        wait += '<line class="wait" ' + seg + '/>';
+        if (e.h1 - e.h0 > .4) grabs += '<line class="grab gate" ' + seg + ' data-task="' + esc(e.to) +
+          '"><title>' + Math.round(e.h1 - e.h0) + ' h standing still, waiting on ' + esc(t.name) +
+          '. Click to open it.</title></line>';
+      } else {
+        move += '<line class="move" ' + seg + '/>';
+        if (t.kind === 'takes') grabs += '<line class="grab leg" ' + seg + ' data-task="' + esc(e.to) +
+          '"><title>' + esc(t.name) + ' — ' + num(t.dur) + ' h. Drag the bar to change it.</title></line>';
+      }
+    });
+    svg += wait + move + grabs;
+
+    var dots = '', placed = {};
+    r.pts.forEach(function (p, i) {
+      var x = PCT(p.h), last = p.h === r.end;
+      var nm = p.t.name || 'Task', tm = clock(p.h);
+      var wpc = (30 + (nm.length + tm.length) * 5.3) / PLOT_PX * 100;
+      var flip = x + wpc > 99;
+      var lo = flip ? x - wpc : x, hi = flip ? x : x + wpc;
+      var lane = placed[p.place] || (placed[p.place] = []), slot = 0;
+      for (; slot < 3; slot++) {
+        var free = true;
+        for (var q = 0; q < lane.length; q++) {
+          var o = lane[q];
+          if (o.slot === slot && lo < o.hi + .5 && o.lo < hi + .5) { free = false; break; }
+        }
+        if (free) break;
+      }
+      lane.push({ lo: lo, hi: hi, slot: slot });
+      var fed = feedsOf(flow, p.id);
+      dots += '<div class="dot s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
+        '" style="left:' + x + '%;top:' + yOf[p.place] + 'px" data-task="' + esc(p.id) + '"' +
+        ' title="' + esc(nm) + ' — ' + stamp(p.h) + (p.t.note ? '. ' + esc(p.t.note) : '') +
+        (fed.length ? '. Feeds ' + esc(fed.map(function (x2) { return x2.name; }).join(', ')) : '') +
+        '. Click to open the task.">' +
+        '<b></b><span>' + ico(p.t.icon) + esc(nm) + '<em>' + tm + '</em></span></div>';
+    });
+
+    var lbl = lanes.map(function (l) {
+      var g = gateAt(flow, l);
+      return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) +
+        (g ? '<i>' + winSpan(g) + '</i>' : '') + '</div>';
+    }).join('');
+
+    return '<div class="hd"><b>' + esc(flow.name) + '</b><small>' + esc(flow.note || '') + '</small>' +
+      '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') + '</small>' +
+      '<em>' + r.hrs + ' h, ' + r.idle + ' waiting</em></div></div>' +
+      '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
+      '<div class="plot" style="height:' + H + 'px">' +
+      '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
+      caps + dots + '</div></div>';
+  }
+
+  // ── The builder ───────────────────────────────────────────────────────────
+  function card(t, i, flow, r) {
+    var when = r.at[t.id] === undefined ? '—' : stamp(r.at[t.id]);
+    var pre = (t.after || []).filter(function (id) { return r.byId[id]; });
+    var base = pre.length && pre.every(function (id) { return r.at[id] !== undefined; })
+      ? Math.max.apply(null, pre.map(function (id) { return r.at[id]; })) : null;
+    var held = base !== null && r.at[t.id] !== undefined &&
+      pre.some(function (id) { return (r.byId[id].place || '') === (t.place || ''); })
+      ? Math.round(r.at[t.id] - base) : 0;
+
+    var f = '';
+    if (t.kind === 'at') {
+      f = fld('Clock time', '<input type="time" step="900" value="' + hhmm(num(t.at)) + '" data-f="at">');
+    } else if (t.kind === 'takes') {
+      f = fld('Hours', '<input type="number" min="0" max="240" step="0.5" value="' + num(t.dur) +
+        '" data-f="dur"><i>h</i>');
+    } else if (t.kind === 'opens') {
+      f = fld('Days', dayBtns(t)) +
+          fld('Opens', '<input type="time" step="900" value="' + hhmm(num(t.open)) + '" data-f="open">') +
+          fld('Closes', '<input type="time" step="900" value="' + hhmm(num(t.close)) + '" data-f="close">') +
+          fld('After arrival', '<input type="number" min="0" max="240" step="1" value="' + num(t.lead) +
+              '" data-f="lead"><i>h</i>');
+    } else {
+      f = fld('Days', dayBtns(t)) +
+          fld('Departs', '<input type="time" step="900" value="' + hhmm(num(t.at)) + '" data-f="at">');
+    }
+
+    var others = flow.tasks.filter(function (o) { return o.id !== t.id; });
+    var chips = others.length
+      ? others.map(function (o) {
+          return '<button class="chip' + ((t.after || []).indexOf(o.id) >= 0 ? ' on' : '') +
+            '" data-after="' + esc(o.id) + '">' + esc(o.name) + '</button>';
+        }).join('')
+      : '<span class="feeds">nothing else to depend on yet</span>';
+    var fed = feedsOf(flow, t.id);
+    var feeds = '<span class="feeds">' + (fed.length
+      ? 'Feeds <b>' + fed.map(function (o) { return esc(o.name); }).join('</b>, <b>') + '</b>'
+      : (r.at[t.id] === r.end ? 'Feeds nothing — this is the end of the flow' : 'Feeds nothing yet')) +
+      '</span>';
+
+    var orphan = r.at[t.id] === undefined;
+    return '<div class="task' + (orphan ? ' orphan' : '') + '" id="task-' + esc(t.id) + '">' +
+      '<div class="t-hd">' +
+      '<span class="t-n">' + (i + 1) + '</span>' +
+      '<span class="t-ico" data-ico="1" title="Change the icon">' + ico(t.icon) + '</span>' +
+      '<input class="t-name" value="' + esc(t.name) + '" data-f="name" placeholder="Name this task">' +
+      '<select class="t-kind" data-f="kind">' + KINDS.map(function (k) {
+        return '<option value="' + k[0] + '"' + (t.kind === k[0] ? ' selected' : '') + '>' + k[1] + '</option>';
+      }).join('') + '</select>' +
+      '<input class="t-place" value="' + esc(t.place) + '" data-f="place" list="places" placeholder="Where it ends up">' +
+      '<span class="t-when">' + when + (held ? ' · ' + held + ' h waiting' : '') + '</span>' +
+      '<button class="t-mv" data-mv="-1" title="Move up"' + (i ? '' : ' disabled') + '>&#8593;</button>' +
+      '<button class="t-mv" data-mv="1" title="Move down"' +
+        (i === flow.tasks.length - 1 ? ' disabled' : '') + '>&#8595;</button>' +
+      '<button class="t-x" data-del="1" title="Remove this task">&times;</button>' +
+      '</div><div class="t-body">' + f +
+      '<div class="t-f wide"><span>After</span><span class="chips">' + chips + '</span></div>' +
+      '<div class="t-f wide">' + feeds + '</div>' +
+      '<label class="t-f wide"><span>Note</span><input value="' + esc(t.note || '') +
+      '" data-f="note" placeholder="Why this task is here"></label>' +
+      '</div></div>';
+  }
+  function fld(label, inner) {
+    return '<label class="t-f"><span>' + label + '</span>' + inner + '</label>';
+  }
+  function dayBtns(t) {
+    return '<span class="dcell">' + DOW.map(function (dn, d) {
+      return '<button class="d' + (t.days && t.days[d] ? ' on' : '') + '" data-day="' + d +
+        '" title="' + dn + '">' + dn[0] + '</button>';
+    }).join('') + '</span>';
+  }
+  function blank(kind, after) {
+    var t = { id: uid('t'), name: 'New task', place: '', icon: 'clock', kind: kind || 'takes',
+              dur: 1, after: after || [] };
+    if (kind === 'opens') { t.days = [1,1,1,1,1,1,1]; t.open = 8; t.close = 17; t.lead = 0; }
+    if (kind === 'sails') { t.days = [0,0,1,0,0,1,0]; t.at = 18; }
+    if (kind === 'at') t.at = 18;
+    return t;
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function paint(chartOnly) {
+    var flow = cur();
+    if (flow.days.indexOf(S.day) < 0) S.day = flow.days[0];
+    ANCHOR = S.day;
+
+    var r = walk(flow);
+    SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
+    r = walk(flow);
+
+    var ax = '';
+    for (var i = 0; i < SPAN; i++) {
+      ax += '<div class="day' + (i === 0 ? ' cut' : '') + '">' + DOW[(dowIdx(ANCHOR) + i) % 7] + '</div>';
+    }
+    document.getElementById('axis').innerHTML = '<div class="gut"></div><div class="days">' + ax + '</div>';
+    document.getElementById('grid').innerHTML = chart(flow, r);
+    document.getElementById('legend').innerHTML =
+      '<span><i class="sw band"></i>a green box is one day of a window this flow waits for</span>' +
+      '<span><i class="sw mv"></i>moving</span>' +
+      '<span><i class="sw wt"></i>waiting</span>' +
+      '<span class="note">Drag a solid bar to change how long that leg takes. ' +
+      'Click any dot, band or flat run to open its task.</span>';
+    document.getElementById('warn').innerHTML = r.stuck.length
+      ? '<div class="warn">' + r.stuck.length + ' task' + (r.stuck.length > 1 ? 's are' : ' is') +
+        ' unreachable: ' + r.stuck.map(function (id) {
+          return esc((r.byId[id] || {}).name || id);
+        }).join(', ') + '. Either they depend on each other in a circle, or on a task that ' +
+        'has been deleted. They are outlined in red below and left off the chart.</div>'
+      : '';
+    document.getElementById('tnote').textContent =
+      flow.tasks.length + ' tasks · ' + places(r).length + ' places · ' + r.edges.length +
+      ' links · ' + r.hrs + ' h, of which ' + r.idle + ' standing still';
+
+    if (!chartOnly) {
+      seg('pick', F.map(function (x) { return [x.id, x.name]; }), S.id,
+        function (v) { S.id = v; save(); paint(); });
+      seg('day', flow.days.map(function (d) { return [d, d]; }), S.day,
+        function (v) { S.day = v; save(); paint(); });
+      document.getElementById('tasks').innerHTML =
+        '<datalist id="places">' + places(r).map(function (p) {
+          return '<option value="' + esc(p) + '">';
+        }).join('') + '</datalist>' +
+        flow.tasks.map(function (t, i) { return card(t, i, flow, r); }).join('');
+    } else {
+      // A keystroke must not retype the form under the cursor, so only the
+      // times each card reports are refreshed.
+      flow.tasks.forEach(function (t) {
+        var el = document.querySelector('#task-' + cssId(t.id) + ' .t-when');
+        if (el) el.textContent = r.at[t.id] === undefined ? '—' : stamp(r.at[t.id]);
+      });
+    }
+    wire(flow, r);
+  }
+  function cssId(id) { return String(id).replace(/[^A-Za-z0-9_-]/g, '\\$&'); }
+
+  function wire(flow, r) {
+    all('#tasks .task').forEach(function (cardEl) {
+      var id = cardEl.id.replace(/^task-/, '');
+      var t = null;
+      flow.tasks.forEach(function (x, i) { if (x.id === id) { t = x; t.__i = i; } });
+      if (!t) return;
+      [].slice.call(cardEl.querySelectorAll('[data-f]')).forEach(function (el) {
+        el.oninput = function () {
+          var f = el.getAttribute('data-f');
+          if (f === 'kind') {
+            var fresh = blank(el.value, t.after);
+            fresh.id = t.id; fresh.name = t.name; fresh.place = t.place;
+            fresh.icon = t.icon; fresh.note = t.note;
+            flow.tasks[t.__i] = fresh;
+            save(); paint();
+            return;
+          }
+          if (f === 'name' || f === 'place' || f === 'note') t[f] = el.value;
+          else if (el.type === 'time') t[f] = fromHM(el.value);
+          else t[f] = Math.max(0, num(el.value));
+          save(); paint(true);
+        };
+      });
+      [].slice.call(cardEl.querySelectorAll('.d')).forEach(function (b) {
+        b.onclick = function () {
+          var d = +b.getAttribute('data-day');
+          t.days[d] = t.days[d] ? 0 : 1;
+          b.classList.toggle('on');
+          save(); paint(true);
+        };
+      });
+      [].slice.call(cardEl.querySelectorAll('.chip')).forEach(function (b) {
+        b.onclick = function () {
+          var dep = b.getAttribute('data-after');
+          t.after = t.after || [];
+          var k = t.after.indexOf(dep);
+          if (k >= 0) t.after.splice(k, 1); else t.after.push(dep);
+          save(); paint();
+        };
+      });
+      var ic = cardEl.querySelector('.t-ico');
+      if (ic) ic.onclick = function () {
+        t.icon = ICONS[(ICONS.indexOf(t.icon) + 1) % ICONS.length];
+        save(); paint();
+      };
+      [].slice.call(cardEl.querySelectorAll('.t-mv')).forEach(function (b) {
+        b.onclick = function () {
+          var i = t.__i, d = +b.getAttribute('data-mv');
+          if (i + d < 0 || i + d >= flow.tasks.length) return;
+          var x = flow.tasks[i]; flow.tasks[i] = flow.tasks[i + d]; flow.tasks[i + d] = x;
+          save(); paint();
+        };
+      });
+      var del = cardEl.querySelector('.t-x');
+      if (del) del.onclick = function () {
+        if (flow.tasks.length <= 1) return;
+        flow.tasks.splice(t.__i, 1);
+        // A deleted task cannot go on being a prereq, or everything after it
+        // silently falls off the chart.
+        flow.tasks.forEach(function (o) {
+          o.after = (o.after || []).filter(function (x) { return x !== t.id; });
+        });
+        save(); paint();
+      };
+    });
+
+    all('#grid [data-task]').forEach(function (el) {
+      if (el.classList.contains('leg')) return;
+      el.addEventListener('click', function () {
+        var c = document.getElementById('task-' + el.getAttribute('data-task'));
+        if (!c) return;
+        c.classList.add('lit');
+        c.scrollIntoView({ block: 'center' });
+        window.setTimeout(function () { c.classList.remove('lit'); }, 2600);
+      });
+    });
+    all('#grid .grab.leg').forEach(function (el) {
+      el.addEventListener('mousedown', function (ev) {
+        var t = r.byId[el.getAttribute('data-task')];
+        if (!t || t.kind !== 'takes') return;
+        var W = el.ownerSVGElement.getBoundingClientRect().width, x0 = ev.clientX, v0 = num(t.dur);
+        ev.preventDefault();
+        function mv(e) {
+          var v = Math.round((v0 + ((e.clientX - x0) / W) * SPAN * 24) * 2) / 2;
+          v = Math.max(0, Math.min(240, v));
+          if (v === num(t.dur)) return;
+          t.dur = v;
+          paint(true);
+        }
+        function up() {
+          window.removeEventListener('mousemove', mv);
+          window.removeEventListener('mouseup', up);
+          save(); paint();
+        }
+        window.addEventListener('mousemove', mv);
+        window.addEventListener('mouseup', up);
+      });
+    });
+  }
+
+  function seg(id, opts, sel, cb) {
+    var el = document.getElementById(id);
+    el.innerHTML = opts.map(function (o) {
+      return '<a data-v="' + esc(o[0]) + '"' + (String(o[0]) === String(sel) ? ' class="on"' : '') +
+        '>' + esc(o[1]) + '</a>';
+    }).join('');
+    [].slice.call(el.querySelectorAll('a')).forEach(function (a) {
+      a.onclick = function () { cb(a.getAttribute('data-v')); };
+    });
+  }
+
+  document.getElementById('add').onclick = function () {
+    var flow = cur(), last = flow.tasks[flow.tasks.length - 1];
+    var t = blank('takes', last ? [last.id] : []);
+    t.place = last ? last.place : '';
+    flow.tasks.push(t);
+    save(); paint();
+    var c = document.getElementById('task-' + t.id);
+    if (c) { c.scrollIntoView({ block: 'center' }); c.querySelector('.t-name').select(); }
+  };
+  document.getElementById('reset').onclick = function () {
+    F = defaults(); S = { id: 'kona-lettuce', day: 'Sun' }; save(); paint();
+  };
+
+  paint();
+})();
+</script>
+</body>
+</html>
