@@ -235,3 +235,32 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .dot.b0{color:var(--ink)} .dot.b1{color:var(--accent)}
 .dot.b2{color:var(--good)} .dot.b3{color:var(--ink-3)}
 .sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}
+
+/* ---------- the two pack days ---------- */
+/* Hours across, in the order they are packed. The dashed line is the 6.5 h day,
+   so a bar running past it is a day that does not fit. */
+.packdays{padding:0 0 16px}
+.pd{display:flex; align-items:center; gap:12px; padding:5px 0}
+.pd-l{flex:0 0 84px; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:600}
+.pd-bar{position:relative; flex:1 1 auto; min-width:0; height:26px; display:flex;
+  background:var(--card-2); border:1px solid var(--line-2); border-radius:5px; overflow:hidden}
+.pd-s{display:flex; align-items:center; justify-content:center; overflow:hidden; white-space:nowrap;
+  font-size:10px; font-weight:600; color:#fff}
+.pd-s.k{background:var(--ink)}
+.pd-s.o{background:var(--accent)}
+.pd-s.f{background:var(--good)}
+.pd-s.r{background:var(--ink-3)}
+.pd-cap{position:absolute; top:-2px; bottom:-2px; width:0; border-left:2px dashed var(--bad)}
+.pd-h{flex:0 0 76px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:12px;
+  font-weight:600; color:var(--ink)}
+.pd-h.over{color:var(--bad)}
+.pd-lb{flex:0 0 82px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:11px;
+  color:var(--ink-3)}
+.pd-key{display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center; padding:8px 0 0 96px;
+  font-size:11px; color:var(--ink-3)}
+.pd-key span{display:inline-flex; align-items:center; gap:5px}
+.pd-sw{display:inline-block; width:11px; height:11px; border-radius:2px}
+.pd-sw.k{background:var(--ink)} .pd-sw.o{background:var(--accent)}
+.pd-sw.f{background:var(--good)} .pd-sw.r{background:var(--ink-3)}
+.pd-note{color:var(--bad)}

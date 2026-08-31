@@ -62,9 +62,12 @@ that is not a day, an icon that is not an icon, a journey with no entry in
 ## Tabs
 
 - **Flow** — the chart and the task list for one journey.
-- **Orders** — cases on order by case type and destination, three types against
-  on-island and off-island, with minutes per case at the top and the minutes
-  each column needs in the first row.
+- **Orders** — the two pack days as a horizontal bar, then cases on order by
+  case type and destination. Day 1 is a 6.5 h shift filled in a fixed order:
+  all of Kona's LW, then as much off-island LW as still fits, then all the LF
+  and all the trays. Day 2 is the off-island LW that did not fit. Pounds packed
+  are shown for each day. The dashed line on the bar is the 6.5 h day, so a bar
+  running past it is a day that does not fit.
 - **Hours** — everybody's clock, whether or not the journey on screen goes
   through them: the farm, Aloha Air's Kona counter, Young Brothers at Kawaihae,
   Honolulu and Kahului, HFA at both ends, Costco Kona receiving and the

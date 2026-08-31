@@ -359,6 +359,55 @@
       });
     });
 
+    // ── The two pack days ────────────────────────────────────────────────
+    // Day 1 is a 6.5 hour shift filled in a fixed order: all of Kona's LW,
+    // then as much off-island LW as still fits, then all the LF and all the
+    // trays for both days. Day 2 is the off-island LW that did not fit.
+    var DAY1 = 6.5;
+    var LB = { LW: 10.5, LF: 10, TRAY: 2.25 };
+    var konaLW = n ? tot.onLW / n : 0;
+    var offLW = n ? tot.offLW / n : 0;
+    var lf = n ? (tot.onLF + tot.offLF) / n : 0;
+    var tray = n ? (tot.onTRAY + tot.offTRAY) / n : 0;
+    var hKona = mins(konaLW, R.LW) / 60, hLF = mins(lf, R.LF) / 60, hR = mins(tray, R.TRAY) / 60;
+    var room = DAY1 - (hKona + hLF + hR);
+    var offLW1 = R.LW > 0 ? Math.max(0, Math.min(offLW, room * 60 / R.LW)) : 0;
+    var offLW2 = offLW - offLW1;
+    var segs1 = [
+      ['Kona LW', konaLW, hKona, konaLW * LB.LW, 'k'],
+      ['Off-island LW', offLW1, mins(offLW1, R.LW) / 60, offLW1 * LB.LW, 'o'],
+      ['LF', lf, hLF, lf * LB.LF, 'f'],
+      ['LR/AR/WR', tray, hR, tray * LB.TRAY, 'r']
+    ].filter(function (x) { return x[1] > 0.5; });
+    var segs2 = [['Off-island LW', offLW2, mins(offLW2, R.LW) / 60, offLW2 * LB.LW, 'o']]
+      .filter(function (x) { return x[1] > 0.5; });
+    function dayRow(label, segs, over) {
+      var h = segs.reduce(function (a, x) { return a + x[2]; }, 0);
+      var lb = segs.reduce(function (a, x) { return a + x[3]; }, 0);
+      var wide = Math.max(hKona + hLF + hR + mins(offLW1, R.LW) / 60,
+                          mins(offLW2, R.LW) / 60, DAY1) || 1;
+      return '<div class="pd"><span class="pd-l">' + label + '</span>' +
+        '<span class="pd-bar">' +
+        segs.map(function (x) {
+          return '<span class="pd-s ' + x[4] + '" style="width:' + (x[2] / wide * 100).toFixed(2) +
+            '%" title="' + esc(x[0]) + ' — ' + Math.round(x[1]).toLocaleString() + ' cs, ' +
+            showMins(x[2] * 60) + ', ' + Math.round(x[3]).toLocaleString() + ' lb">' +
+            (x[2] / wide > .07 ? esc(x[0]) : '') + '</span>';
+        }).join('') +
+        '<span class="pd-cap" style="left:' + (DAY1 / wide * 100).toFixed(2) + '%"></span>' +
+        '</span>' +
+        '<span class="pd-h' + (over ? ' over' : '') + '">' + showMins(h * 60) + '</span>' +
+        '<span class="pd-lb">' + Math.round(lb).toLocaleString() + ' lb</span></div>';
+    }
+    var packBar = '<div class="packdays">' +
+      dayRow('Pack day 1', segs1, hKona + hLF + hR > DAY1 + .01) +
+      dayRow('Pack day 2', segs2, false) +
+      '<div class="pd-key">' +
+      [['k', 'Kona LW'], ['o', 'Off-island LW'], ['f', 'LF'], ['r', 'LR/AR/WR']].map(function (x) {
+        return '<span><i class="pd-sw ' + x[0] + '"></i>' + x[1] + '</span>';
+      }).join('') +
+      '<span class="pd-note">Dashed line is the ' + DAY1 + ' h day.</span></div></div>';
+
     var rateRow = '<div class="rates"><span class="lbl">Minutes per case</span>' +
       GROUPS.map(function (g) {
         return '<label class="rate">' + esc(g[1]) +
@@ -394,7 +443,7 @@
         }).join('');
       }).join('') + '</tr>';
 
-    return rateRow +
+    return packBar + rateRow +
       '<table class="otbl orders"><thead>' +
       '<tr><th></th><th></th>' +
       DESTS.map(function (d) { return '<th colspan="3" class="grp2">' + d[1] + '</th>'; }).join('') +
