@@ -63,16 +63,24 @@ being positioned by hand.
 ## legs.csv
 
 ```
-journey,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note
-Costco Kona Lettuce,0,1,Packing,PH,"Sun, 10:00",Cold Storage,"Sun, 18:00",box,
-Costco Kona Lettuce,0,2,FS-incubate,Lab,"Sun, 14:00",Lab,"Sun, 20:00",clock,
+crop,fob,transport,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note
+Lettuce,140,Air,0,1,Packing,PH,"Sun, 10:00",Storage,"Sun, 14:00",box,
+Lettuce,140,Air,0,2,Hypercell,Lab,"Sun, 14:00",Lab,"Sun, 21:00",clock,
 ```
 
 A leg carries **where it starts as well as where it ends**, so its bar has a
 real slope rather than one inferred from whatever came before it.
 
-**start_day** groups the rows into variants: the same journey run on a Sunday
-cut and on a Wednesday one, each its own picture, picked from the dropdown.
+**crop, fob and transport name the journey; start_day says which run of it
+this is.** Those four columns group the rows into pictures, and they are also
+the picker: one toggle each, in that order. A toggle with one answer is not a
+question and is not drawn — which is why there is no crop toggle while we only
+grow lettuce, and no transport toggle on a destination reached one way.
+
+`transport` is the clearance regime as much as the vehicle. **Air** means the
+product goes the moment test-and-hold clears, which for a customer collecting
+at our dock is the same thing. **Barge** is the old, longer hold. Comparing
+the two on one destination is the point of the toggle.
 
 **branch** is what makes parallel work expressible. Branch 1 is the pallet;
 branch 2 is the food-safety clock running beside it. Within a branch the rows
@@ -85,9 +93,10 @@ bare `S` is rejected: it could be either end of the week.
 **The next start does not have to be the previous stop.** Leave a gap and the
 gap is drawn; overlap two legs and the overlap is drawn.
 
-The build refuses a file it cannot trust and says which row: a bad time, a day
-that is not a day, an icon that is not an icon, a journey with no entry in
-`reference.json`.
+The reader refuses a sheet it cannot trust and says which row: a bad time, a
+day that is not a day, a header that names no journey. It then draws the
+committed `legs.csv` instead and prints the reason above the chart, so a typo
+in the sheet cannot blank the page and cannot hide either.
 
 ## Tabs
 

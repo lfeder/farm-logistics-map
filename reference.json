@@ -1,24 +1,6 @@
 {
   "_": "Hand-edited. Everything here changes rarely: what a journey is, who is open when, and which boat goes where. The legs themselves live in legs.csv.",
   "legs_sheet": "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv",
-  "journeys": {
-    "Lettuce-BI-Costco": {
-      "to": "140",
-      "by": ""
-    },
-    "Lettuce-BI-Pickup": {
-      "to": "Pickup",
-      "by": ""
-    },
-    "Lettuce-Air": {
-      "to": "OffIsland",
-      "by": "Air"
-    },
-    "Lettuce-Barge": {
-      "to": "OffIsland",
-      "by": "Barge"
-    }
-  },
   "hours": [
     {
       "place": "PH",

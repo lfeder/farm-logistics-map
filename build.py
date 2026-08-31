@@ -57,10 +57,16 @@ REF = json.load(open(os.path.join(HERE, "reference.json")))
 # every build so the two cannot drift, fall back to the snapshot when the
 # network is not there, and always write what was pulled so the change shows up
 # in the diff rather than only on the screen.
-SHEET_COLS = {"journey": "journey", "start day": "start_day", "branch": "branch",
+# What a journey IS is three columns -- crop, where it is going, how it gets
+# there -- and when it runs is a fourth. Together they name the picture; the
+# rest of the row is one leg of it.
+SHEET_COLS = {"crop": "crop", "fob": "fob", "transport": "transport",
+              "start day": "start_day", "branch": "branch",
               "leg": "leg", "start location": "start_location", "start dt": "start_dt",
               "end location": "end_location", "end dt": "end_dt",
               "icon": "icon", "note": "note"}
+COLS = ["crop", "fob", "transport", "start_day", "branch", "leg",
+        "start_location", "start_dt", "end_location", "end_dt", "icon", "note"]
 
 
 def pull_sheet(url):
@@ -69,19 +75,24 @@ def pull_sheet(url):
     rows = [r for r in csv.reader(io.StringIO(body))]
     # The sheet has its own margins: blank leading columns and blank rows above
     # the header. Find the header by looking for the row that names a journey.
+    def names(r):
+        return {(c or "").strip().lower() for c in r}
     head_i = next((i for i, r in enumerate(rows)
-                   if any((c or "").strip().lower() == "journey" for c in r)), None)
+                   if {"leg", "start dt"} <= names(r)), None)
     if head_i is None:
-        raise ValueError("no header row with a 'Journey' column")
+        raise ValueError("no header row naming both Leg and Start dt")
     head = [(c or "").strip().lower() for c in rows[head_i]]
     keep = [(i, SHEET_COLS[h]) for i, h in enumerate(head) if h in SHEET_COLS]
-    missing = [v for v in ("journey", "leg", "start_dt", "end_dt") if v not in [k[1] for k in keep]]
+    got = [k[1] for k in keep]
+    missing = [v for v in ("leg", "start_dt", "end_dt") if v not in got]
     if missing:
         raise ValueError("sheet is missing: " + ", ".join(missing))
+    if not [v for v in ("crop", "fob", "transport") if v in got]:
+        raise ValueError("sheet names no journey: needs Crop, FOB or Transport")
     out = []
     for r in rows[head_i + 1:]:
         rec = {name: (r[i].strip() if i < len(r) and r[i] else "") for i, name in keep}
-        if rec.get("journey") and rec.get("leg"):
+        if rec.get("leg"):
             out.append(rec)
     return out
 
@@ -112,8 +123,7 @@ sheet_url = (REF.get("legs_sheet") or "").strip()
 if sheet_url:
     try:
         pulled = pull_sheet(sheet_url)
-        cols = ["journey", "start_day", "branch", "leg", "start_location",
-                "start_dt", "end_location", "end_dt", "icon", "note"]
+        cols = COLS
         for r in pulled:
             r["icon"] = r.get("icon") or icon_for(r.get("leg"))
         with open(os.path.join(HERE, "legs.csv"), "w", newline="") as fh:
@@ -198,11 +208,7 @@ for r in REF.get("sailings", []):
 legs_text = open(os.path.join(HERE, "legs.csv")).read()
 
 data = json.load(open(os.path.join(HERE, "orders.json")))
-# journeys says what a journey IS -- where it delivers and what carries it --
-# as against the sheet, which says when it runs. The picker in the viewer is
-# built from whatever values turn up here.
-ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings,
-       "journeys": REF.get("journeys", {})}
+ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell

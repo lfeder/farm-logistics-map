@@ -296,6 +296,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
       <div class="panel-hd">
         <h2>Journey</h2>
         <span class="seg" id="pick-when"></span>
+        <span class="seg" id="pick-crop"></span>
         <span class="seg" id="pick-to"></span>
         <span class="seg" id="pick-by"></span>
         <span class="note" id="src" style="margin-left:auto"></span>
@@ -335,10 +336,10 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 </div>
 
 <script>
-window.LEGS  = "journey,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note\nLettuce-140-Air,0,1,Packing,PH,\"Sun, 10:00\",Storage,\"Sun, 14:00\",box,\nLettuce-140-Air,0,1,BOL,Storage,\"Sun, 18:00\",Storage,\"Sun, 18:30\",clock,\nLettuce-140-Air,0,1,Load box-> 140,Storage,\"Mon, 07:00\",140,\"Mon, 08:30\",truck,\nLettuce-140-Air,0,2,Hypercell,Lab,\"Sun, 14:00\",Lab,\"Sun, 21:00\",clock,\nLettuce-140-Air,0,2,Azzule submit,Lab,\"Sun, 21:00\",Seattle,\"Mon, 00:00\",clock,\nLettuce-140-Air,0,2,Azzule clearance,Seattle,\"Mon, 00:00\",140,\"Mon, 00:00\",depot,\nLettuce-140-Air,3,1,Packing,PH,\"Wed, 10:00\",Storage,\"Wed, 14:00\",box,\nLettuce-140-Air,3,1,BOL,Storage,\"Wed, 18:00\",Storage,\"Wed, 18:30\",clock,\nLettuce-140-Air,3,1,Load box-> 140,Storage,\"Thu, 07:00\",140,\"Thu, 08:30\",truck,\nLettuce-140-Air,3,2,Hypercell,Lab,\"Wed, 14:00\",Lab,\"Wed, 21:00\",clock,\nLettuce-140-Air,3,2,Azzule submit,Lab,\"Wed, 21:00\",Seattle,\"Thu, 00:00\",clock,\nLettuce-140-Air,3,2,Azzule clearance,Seattle,\"Thu, 00:00\",140,\"Thu, 00:00\",depot,\nLettuce-BI-Pickup,0,1,Packing,PH,\"Sun, 14:00\",Storage,\"Sun, 18:00\",box,\nLettuce-BI-Pickup,0,1,BOL,Storage,\"Sun, 18:00\",Storage,\"Sun, 18:30\",clock,\nLettuce-BI-Pickup,0,1,Pickup,Storage,\"Mon, 13:00\",Storage,\"Mon, 13:30\",truck,\nLettuce-BI-Pickup,3,1,Packing,PH,\"Wed, 14:00\",Storage,\"Wed, 18:00\",box,\nLettuce-BI-Pickup,3,1,BOL,Storage,\"Wed, 18:00\",Storage,\"Wed, 18:30\",clock,\nLettuce-BI-Pickup,3,1,Pickup,Storage,\"Thu, 13:00\",Storage,\"Thu, 13:30\",truck,\nLettuce-Air,0,1,Packing,PH,\"Sun, 14:00\",Storage,\"Sun, 18:00\",box,\nLettuce-Air,0,1,Packing,PH,\"Mon, 10:00\",Storage,\"Mon, 18:00\",box,\nLettuce-Air,0,1,BOL,Storage,\"Mon, 18:00\",Storage,\"Mon, 18:30\",clock,\nLettuce-Air,0,1,Load box -> KOA,Storage,\"Tue, 07:00\",KOA,\"Tue, 11:00\",truck,\nLettuce-Air,0,1,KOA-HNL,KOA,\"Tue, 11:00\",HNL,\"Tue, 15:00\",clock,\nLettuce-Air,0,1,HFA pickup,HNL,\"Tue, 16:00\",HFA,\"Tue, 17:00\",truck,\nLettuce-Air,0,1,Customer deliveries,HFA,\"Wed, 05:00\",Customer receiving,\"Wed, 10:00\",truck,\nLettuce-Air,0,2,Hypercell,Lab,\"Tue, 07:00\",Lab,\"Tue, 14:00\",clock,\nLettuce-Air,0,2,Azzule submit,Lab,\"Tue, 14:00\",Seattle,\"Tue, 17:00\",clock,\nLettuce-Air,0,2,Azzule clearance,Seattle,\"Tue, 17:00\",Customer receiving,\"Tue, 17:00\",depot,\nLettuce-Air,3,1,Packing,PH,\"Wed, 14:00\",Storage,\"Wed, 18:00\",box,\nLettuce-Air,3,1,Packing,PH,\"Thu, 10:00\",Storage,\"Thu, 18:00\",box,\nLettuce-Air,3,1,BOL,Storage,\"Thu, 18:00\",Storage,\"Thu, 18:30\",clock,\nLettuce-Air,3,1,Load box -> KOA,Storage,\"Fri, 07:00\",KOA,\"Fri, 11:00\",truck,\nLettuce-Air,3,1,KOA-HNL,KOA,\"Fri, 11:00\",HNL,\"Fri, 15:00\",clock,\nLettuce-Air,3,1,HFA pickup,HNL,\"Fri, 16:00\",HFA,\"Fri, 17:00\",truck,\nLettuce-Air,3,1,Customer deliveries,HFA,\"Sat, 05:00\",Customer receiving,\"Sat, 10:00\",truck,\nLettuce-Air,3,2,Hypercell,Lab,\"Fri, 07:00\",Lab,\"Fri, 14:00\",clock,\nLettuce-Air,3,2,Azzule submit,Lab,\"Fri, 14:00\",Seattle,\"Fri, 17:00\",clock,\nLettuce-Air,3,2,Azzule clearance,Seattle,\"Fri, 17:00\",Customer receiving,\"Fri, 17:00\",depot,\nLettuce-Barge,0,1,Packing,PH,\"Sun, 14:00\",Storage,\"Sun, 18:00\",box,\nLettuce-Barge,0,1,Packing,PH,\"Mon, 10:00\",Storage,\"Mon, 18:00\",box,\nLettuce-Barge,0,1,BOL,Storage,\"Mon, 18:00\",Storage,\"Mon, 18:30\",clock,\nLettuce-Barge,0,1,Load container,Storage,\"Mon, 18:30\",Container,\"Mon, 19:00\",truck,\nLettuce-Barge,0,1,Container->KWH,Container,\"Tue, 07:00\",Kawaihae,\"Tue, 08:00\",clock,\nLettuce-Barge,0,1,Load box->KWH,Storage,\"Tue, 07:00\",Kawaihae,\"Tue, 08:00\",truck,\nLettuce-Barge,0,1,KWH-HNL,Kawaihae,\"Tue, 18:00\",YBHNL,\"Wed, 12:00\",clock,\nLettuce-Barge,0,1,HFA pickup,YBHNL,\"Thu, 08:00\",HFA,\"Thu, 10:00\",truck,\nLettuce-Barge,0,1,Customer deliveries,HFA,\"Fri, 06:00\",Customer receiving,\"Fri, 10:00\",truck,\nLettuce-Barge,0,2,Hypercell,Lab,\"Tue, 07:00\",Lab,\"Tue, 14:00\",clock,\nLettuce-Barge,0,2,Azzule submit,Lab,\"Tue, 14:00\",Seattle,\"Tue, 17:00\",clock,\nLettuce-Barge,0,2,Azzule clearance,Seattle,\"Tue, 17:00\",Customer receiving,\"Tue, 17:00\",depot,\nLettuce-Barge,3,1,Packing,PH,\"Wed, 14:00\",Storage,\"Wed, 18:00\",box,\nLettuce-Barge,3,1,Packing,PH,\"Thu, 10:00\",Storage,\"Thu, 18:00\",box,\nLettuce-Barge,3,1,BOL,Storage,\"Thu, 18:00\",Storage,\"Thu, 18:30\",clock,\nLettuce-Barge,3,1,Load container,Storage,\"Thu, 18:30\",Container,\"Thu, 19:00\",truck,\nLettuce-Barge,3,1,Container->KWH,Container,\"Fri, 07:00\",Kawaihae,\"Fri, 08:00\",clock,\nLettuce-Barge,3,1,Load box->KWH,Storage,\"Fri, 07:00\",Kawaihae,\"Fri, 08:00\",truck,\nLettuce-Barge,3,1,KWH-HNL,Kawaihae,\"Fri, 18:00\",YBHNL,\"Sat, 12:00\",clock,\nLettuce-Barge,3,1,HFA pickup,YBHNL,\"Mon, 08:00\",HFA,\"Mon, 10:00\",truck,\nLettuce-Barge,3,1,Customer deliveries,HFA,\"Tue, 06:00\",Customer receiving,\"Tue, 10:00\",truck,\nLettuce-Barge,3,2,Hypercell,Lab,\"Fri, 07:00\",Lab,\"Fri, 14:00\",clock,\nLettuce-Barge,3,2,Azzule submit,Lab,\"Fri, 14:00\",Seattle,\"Fri, 17:00\",clock,\nLettuce-Barge,3,2,Azzule clearance,Seattle,\"Fri, 17:00\",Customer receiving,\"Fri, 17:00\",depot,\nLettuce-140-Barge,0,1,Packing,PH,\"Sun, 10:00\",Storage,\"Sun, 14:00\",box,\nLettuce-140-Barge,0,1,BOL,Storage,\"Sun, 18:00\",Storage,\"Sun, 18:30\",clock,\nLettuce-140-Barge,0,1,Load box-> 140,Storage,\"Thu, 07:00\",140,\"Thu, 08:30\",truck,\nLettuce-140-Barge,0,2,Hypercell,Lab,\"Sun, 14:00\",Lab,\"Sun, 21:00\",clock,\nLettuce-140-Barge,0,2,Azzule submit,Lab,\"Sun, 21:00\",Seattle,\"Mon, 00:00\",clock,\nLettuce-140-Barge,0,2,Azzule clearance,Seattle,\"Mon, 00:00\",140,\"Mon, 00:00\",depot,\nLettuce-140-Barge,3,1,Packing,PH,\"Wed, 10:00\",Storage,\"Wed, 14:00\",box,\nLettuce-140-Barge,3,1,BOL,Storage,\"Wed, 18:00\",Storage,\"Wed, 18:30\",clock,\nLettuce-140-Barge,3,1,Load box-> 140,Storage,\"Mon, 07:00\",140,\"Mon, 08:30\",truck,\nLettuce-140-Barge,3,2,Hypercell,Lab,\"Wed, 14:00\",Lab,\"Wed, 21:00\",clock,\nLettuce-140-Barge,3,2,Azzule submit,Lab,\"Wed, 21:00\",Seattle,\"Thu, 00:00\",clock,\nLettuce-140-Barge,3,2,Azzule clearance,Seattle,\"Thu, 00:00\",140,\"Thu, 00:00\",depot,\n";
+window.LEGS  = "crop,fob,transport,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note\nLettuce,140,Air,0,1,Packing,PH,\"Sun, 10:00\",Storage,\"Sun, 14:00\",box,\nLettuce,140,Air,0,1,BOL,Storage,\"Sun, 18:00\",Storage,\"Sun, 18:30\",clock,\nLettuce,140,Air,0,1,Load box-> 140,Storage,\"Mon, 07:00\",140,\"Mon, 08:30\",truck,\nLettuce,140,Air,0,2,Hypercell,Lab,\"Sun, 14:00\",Lab,\"Sun, 21:00\",clock,\nLettuce,140,Air,0,2,Azzule submit,Lab,\"Sun, 21:00\",Seattle,\"Mon, 00:00\",clock,\nLettuce,140,Air,0,2,Azzule clearance,Seattle,\"Mon, 00:00\",140,\"Mon, 00:00\",depot,\nLettuce,140,Air,3,1,Packing,PH,\"Wed, 10:00\",Storage,\"Wed, 14:00\",box,\nLettuce,140,Air,3,1,BOL,Storage,\"Wed, 18:00\",Storage,\"Wed, 18:30\",clock,\nLettuce,140,Air,3,1,Load box-> 140,Storage,\"Thu, 07:00\",140,\"Thu, 08:30\",truck,\nLettuce,140,Air,3,2,Hypercell,Lab,\"Wed, 14:00\",Lab,\"Wed, 21:00\",clock,\nLettuce,140,Air,3,2,Azzule submit,Lab,\"Wed, 21:00\",Seattle,\"Thu, 00:00\",clock,\nLettuce,140,Air,3,2,Azzule clearance,Seattle,\"Thu, 00:00\",140,\"Thu, 00:00\",depot,\nLettuce,HF,Air,0,1,Packing,PH,\"Sun, 14:00\",Storage,\"Sun, 18:00\",box,\nLettuce,HF,Air,0,1,BOL,Storage,\"Sun, 18:00\",Storage,\"Sun, 18:30\",clock,\nLettuce,HF,Air,0,1,Pickup,Storage,\"Mon, 13:00\",Storage,\"Mon, 13:30\",truck,\nLettuce,HF,Air,3,1,Packing,PH,\"Wed, 14:00\",Storage,\"Wed, 18:00\",box,\nLettuce,HF,Air,3,1,BOL,Storage,\"Wed, 18:00\",Storage,\"Wed, 18:30\",clock,\nLettuce,HF,Air,3,1,Pickup,Storage,\"Thu, 13:00\",Storage,\"Thu, 13:30\",truck,\nLettuce,Oahu,Air,0,1,Packing,PH,\"Sun, 14:00\",Storage,\"Sun, 18:00\",box,\nLettuce,Oahu,Air,0,1,Packing,PH,\"Mon, 10:00\",Storage,\"Mon, 18:00\",box,\nLettuce,Oahu,Air,0,1,BOL,Storage,\"Mon, 18:00\",Storage,\"Mon, 18:30\",clock,\nLettuce,Oahu,Air,0,1,Load box -> KOA,Storage,\"Tue, 07:00\",KOA,\"Tue, 11:00\",truck,\nLettuce,Oahu,Air,0,1,KOA-HNL,KOA,\"Tue, 11:00\",HNL,\"Tue, 15:00\",clock,\nLettuce,Oahu,Air,0,1,HFA pickup,HNL,\"Tue, 16:00\",HFA,\"Tue, 17:00\",truck,\nLettuce,Oahu,Air,0,1,Customer deliveries,HFA,\"Wed, 05:00\",Customer receiving,\"Wed, 10:00\",truck,\nLettuce,Oahu,Air,0,2,Hypercell,Lab,\"Tue, 07:00\",Lab,\"Tue, 14:00\",clock,\nLettuce,Oahu,Air,0,2,Azzule submit,Lab,\"Tue, 14:00\",Seattle,\"Tue, 17:00\",clock,\nLettuce,Oahu,Air,0,2,Azzule clearance,Seattle,\"Tue, 17:00\",Customer receiving,\"Tue, 17:00\",depot,\nLettuce,Oahu,Air,3,1,Packing,PH,\"Wed, 14:00\",Storage,\"Wed, 18:00\",box,\nLettuce,Oahu,Air,3,1,Packing,PH,\"Thu, 10:00\",Storage,\"Thu, 18:00\",box,\nLettuce,Oahu,Air,3,1,BOL,Storage,\"Thu, 18:00\",Storage,\"Thu, 18:30\",clock,\nLettuce,Oahu,Air,3,1,Load box -> KOA,Storage,\"Fri, 07:00\",KOA,\"Fri, 11:00\",truck,\nLettuce,Oahu,Air,3,1,KOA-HNL,KOA,\"Fri, 11:00\",HNL,\"Fri, 15:00\",clock,\nLettuce,Oahu,Air,3,1,HFA pickup,HNL,\"Fri, 16:00\",HFA,\"Fri, 17:00\",truck,\nLettuce,Oahu,Air,3,1,Customer deliveries,HFA,\"Sat, 05:00\",Customer receiving,\"Sat, 10:00\",truck,\nLettuce,Oahu,Air,3,2,Hypercell,Lab,\"Fri, 07:00\",Lab,\"Fri, 14:00\",clock,\nLettuce,Oahu,Air,3,2,Azzule submit,Lab,\"Fri, 14:00\",Seattle,\"Fri, 17:00\",clock,\nLettuce,Oahu,Air,3,2,Azzule clearance,Seattle,\"Fri, 17:00\",Customer receiving,\"Fri, 17:00\",depot,\nLettuce,Oahu,Barge,0,1,Packing,PH,\"Sun, 14:00\",Storage,\"Sun, 18:00\",box,\nLettuce,Oahu,Barge,0,1,Packing,PH,\"Mon, 10:00\",Storage,\"Mon, 18:00\",box,\nLettuce,Oahu,Barge,0,1,BOL,Storage,\"Mon, 18:00\",Storage,\"Mon, 18:30\",clock,\nLettuce,Oahu,Barge,0,1,Load container,Storage,\"Mon, 18:30\",Container,\"Mon, 19:00\",truck,\nLettuce,Oahu,Barge,0,1,Container->KWH,Container,\"Tue, 07:00\",Kawaihae,\"Tue, 08:00\",clock,\nLettuce,Oahu,Barge,0,1,Load box->KWH,Storage,\"Tue, 07:00\",Kawaihae,\"Tue, 08:00\",truck,\nLettuce,Oahu,Barge,0,1,KWH-HNL,Kawaihae,\"Tue, 18:00\",YBHNL,\"Wed, 12:00\",clock,\nLettuce,Oahu,Barge,0,1,HFA pickup,YBHNL,\"Thu, 08:00\",HFA,\"Thu, 10:00\",truck,\nLettuce,Oahu,Barge,0,1,Customer deliveries,HFA,\"Fri, 06:00\",Customer receiving,\"Fri, 10:00\",truck,\nLettuce,Oahu,Barge,0,2,Hypercell,Lab,\"Tue, 07:00\",Lab,\"Tue, 14:00\",clock,\nLettuce,Oahu,Barge,0,2,Azzule submit,Lab,\"Tue, 14:00\",Seattle,\"Tue, 17:00\",clock,\nLettuce,Oahu,Barge,0,2,Azzule clearance,Seattle,\"Tue, 17:00\",Customer receiving,\"Tue, 17:00\",depot,\nLettuce,Oahu,Barge,3,1,Packing,PH,\"Wed, 14:00\",Storage,\"Wed, 18:00\",box,\nLettuce,Oahu,Barge,3,1,Packing,PH,\"Thu, 10:00\",Storage,\"Thu, 18:00\",box,\nLettuce,Oahu,Barge,3,1,BOL,Storage,\"Thu, 18:00\",Storage,\"Thu, 18:30\",clock,\nLettuce,Oahu,Barge,3,1,Load container,Storage,\"Thu, 18:30\",Container,\"Thu, 19:00\",truck,\nLettuce,Oahu,Barge,3,1,Container->KWH,Container,\"Fri, 07:00\",Kawaihae,\"Fri, 08:00\",clock,\nLettuce,Oahu,Barge,3,1,Load box->KWH,Storage,\"Fri, 07:00\",Kawaihae,\"Fri, 08:00\",truck,\nLettuce,Oahu,Barge,3,1,KWH-HNL,Kawaihae,\"Fri, 18:00\",YBHNL,\"Sat, 12:00\",clock,\nLettuce,Oahu,Barge,3,1,HFA pickup,YBHNL,\"Mon, 08:00\",HFA,\"Mon, 10:00\",truck,\nLettuce,Oahu,Barge,3,1,Customer deliveries,HFA,\"Tue, 06:00\",Customer receiving,\"Tue, 10:00\",truck,\nLettuce,Oahu,Barge,3,2,Hypercell,Lab,\"Fri, 07:00\",Lab,\"Fri, 14:00\",clock,\nLettuce,Oahu,Barge,3,2,Azzule submit,Lab,\"Fri, 14:00\",Seattle,\"Fri, 17:00\",clock,\nLettuce,Oahu,Barge,3,2,Azzule clearance,Seattle,\"Fri, 17:00\",Customer receiving,\"Fri, 17:00\",depot,\nLettuce,140,Barge,0,1,Packing,PH,\"Sun, 10:00\",Storage,\"Sun, 14:00\",box,\nLettuce,140,Barge,0,1,BOL,Storage,\"Sun, 18:00\",Storage,\"Sun, 18:30\",clock,\nLettuce,140,Barge,0,1,Load box-> 140,Storage,\"Thu, 07:00\",140,\"Thu, 08:30\",truck,\nLettuce,140,Barge,0,2,Hypercell,Lab,\"Sun, 14:00\",Lab,\"Sun, 21:00\",clock,\nLettuce,140,Barge,0,2,Azzule submit,Lab,\"Sun, 21:00\",Seattle,\"Mon, 00:00\",clock,\nLettuce,140,Barge,0,2,Azzule clearance,Seattle,\"Mon, 00:00\",140,\"Mon, 00:00\",depot,\nLettuce,140,Barge,3,1,Packing,PH,\"Wed, 10:00\",Storage,\"Wed, 14:00\",box,\nLettuce,140,Barge,3,1,BOL,Storage,\"Wed, 18:00\",Storage,\"Wed, 18:30\",clock,\nLettuce,140,Barge,3,1,Load box-> 140,Storage,\"Mon, 07:00\",140,\"Mon, 08:30\",truck,\nLettuce,140,Barge,3,2,Hypercell,Lab,\"Wed, 14:00\",Lab,\"Wed, 21:00\",clock,\nLettuce,140,Barge,3,2,Azzule submit,Lab,\"Wed, 21:00\",Seattle,\"Thu, 00:00\",clock,\nLettuce,140,Barge,3,2,Azzule clearance,Seattle,\"Thu, 00:00\",140,\"Thu, 00:00\",depot,\n";
 window.SHEET = "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv";
 window.DATA = {"generated_from":"farm-freight-model data.json (sales_po x sales_po_line x sales_fob)","window":{"first":"2026-07-17","last":"2026-08-28"},"on_island_customer":"140 Kona","sales":[{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":578,"cases":119},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"off","lbs":1834,"cases":230},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"other","lbs":5,"cases":2},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":489,"cases":111},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"off","lbs":3411,"cases":374},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"other","lbs":17,"cases":4},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":506,"cases":115},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"off","lbs":3323,"cases":382},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":582,"cases":114},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"off","lbs":2975,"cases":351},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"other","lbs":20,"cases":5},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":618,"cases":122},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"off","lbs":3405,"cases":415},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":677,"cases":128},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"off","lbs":2945,"cases":331},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"other","lbs":20,"cases":5},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":521,"cases":104},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"off","lbs":3259,"cases":350},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":603,"cases":127},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"off","lbs":2717,"cases":303},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"other","lbs":22,"cases":6},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":739,"cases":146},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"off","lbs":2933,"cases":322},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"other","lbs":7,"cases":3},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":1165,"cases":291},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"off","lbs":3114,"cases":344},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"other","lbs":33,"cases":11},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":659,"cases":139},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"off","lbs":1438,"cases":164},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"kona","lbs":210,"cases":20},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":534,"cases":110},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"off","lbs":2498,"cases":287},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"other","lbs":26,"cases":8},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"kona","lbs":630,"cases":60},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":647,"cases":149},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"off","lbs":2183,"cases":261},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"kona","lbs":420,"cases":40},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":597,"cases":124},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"off","lbs":2778,"cases":316},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"other","lbs":31,"cases":10},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"kona","lbs":4032,"cases":252},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":13566,"cases":1030},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"off","lbs":22076,"cases":1473},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"kona","lbs":3456,"cases":216},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":6854,"cases":501},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"off","lbs":17056,"cases":1154},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"other","lbs":240,"cases":18},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"kona","lbs":4512,"cases":282},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":7775,"cases":531},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"off","lbs":27684,"cases":1843},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"kona","lbs":3072,"cases":192},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":6240,"cases":437},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"off","lbs":20576,"cases":1388},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"other","lbs":240,"cases":18},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"kona","lbs":3936,"cases":246},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":6347,"cases":434},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"off","lbs":26140,"cases":1748},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"kona","lbs":4128,"cases":258},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":6338,"cases":442},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"off","lbs":22980,"cases":1529},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"other","lbs":200,"cases":15},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"kona","lbs":4128,"cases":258},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":7054,"cases":483},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"off","lbs":22804,"cases":1511},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"kona","lbs":3840,"cases":240},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":6664,"cases":469},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"off","lbs":23636,"cases":1569},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"other","lbs":248,"cases":20},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"kona","lbs":3360,"cases":210},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":7187,"cases":495},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"off","lbs":26000,"cases":1726},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"kona","lbs":3456,"cases":216},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":5763,"cases":422},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"off","lbs":22712,"cases":1536},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"other","lbs":308,"cases":23},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"kona","lbs":5664,"cases":354},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":6974,"cases":473},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"off","lbs":23416,"cases":1556},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"kona","lbs":4704,"cases":294},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":5904,"cases":429},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"off","lbs":18740,"cases":1263},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"other","lbs":308,"cases":23},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"kona","lbs":4032,"cases":252},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":7011,"cases":487},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"off","lbs":23480,"cases":1588},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"other","lbs":112,"cases":8},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"kona","lbs":4320,"cases":270},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":5865,"cases":422},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"off","lbs":24932,"cases":1689},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"other","lbs":284,"cases":21}],"packs":[{"wk":"2026-07-12","half":"early","on":{"LW":56,"LF":23,"TRAY":82},"off":{"LW":122,"LF":40,"TRAY":68}},{"wk":"2026-07-12","half":"late","on":{"LW":54,"LF":17,"TRAY":84},"off":{"LW":302,"LF":10,"TRAY":62}},{"wk":"2026-07-19","half":"early","on":{"LW":73,"LF":18,"TRAY":84},"off":{"LW":262,"LF":39,"TRAY":81}},{"wk":"2026-07-19","half":"late","on":{"LW":76,"LF":26,"TRAY":77},"off":{"LW":262,"LF":3,"TRAY":86}},{"wk":"2026-07-26","half":"early","on":{"LW":81,"LF":22,"TRAY":82},"off":{"LW":262,"LF":40,"TRAY":113}},{"wk":"2026-07-26","half":"late","on":{"LW":60,"LF":30,"TRAY":83},"off":{"LW":262,"LF":5,"TRAY":64}},{"wk":"2026-08-02","half":"early","on":{"LW":76,"LF":20,"TRAY":71},"off":{"LW":262,"LF":40,"TRAY":48}},{"wk":"2026-08-02","half":"late","on":{"LW":55,"LF":26,"TRAY":92},"off":{"LW":242,"LF":5,"TRAY":56}},{"wk":"2026-08-09","half":"early","on":{"LW":74,"LF":38,"TRAY":97},"off":{"LW":263,"LF":5,"TRAY":54}},{"wk":"2026-08-09","half":"late","on":{"LW":53,"LF":53,"TRAY":236},"off":{"LW":262,"LF":23,"TRAY":59}},{"wk":"2026-08-16","half":"early","on":{"LW":70,"LF":34,"TRAY":95},"off":{"LW":123,"LF":7,"TRAY":34}},{"wk":"2026-08-16","half":"late","on":{"LW":35,"LF":22,"TRAY":81},"off":{"LW":202,"LF":24,"TRAY":61}},{"wk":"2026-08-23","half":"early","on":{"LW":78,"LF":21,"TRAY":110},"off":{"LW":184,"LF":10,"TRAY":67}},{"wk":"2026-08-23","half":"late","on":{"LW":57,"LF":24,"TRAY":93},"off":{"LW":243,"LF":8,"TRAY":65}}],"pack_groups":[["LW","LW"],["LF","LF"],["TRAY","LR/AR/WR"]]};
-window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0,"lead":0,"note":"Hawaii Farming packhouse. Nobody is here to load a truck outside these hours."},{"place":"Cold Storage","days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334,"lead":0,"note":"Always open \u2014 it is our own cooler."},{"place":"Lettuce loading dock","days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0,"lead":0,"note":""},{"place":"Costco receiving dock","days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0,"lead":0,"note":"Receiving. The only gate on-island."},{"place":"Lab","days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334,"lead":0,"note":"The incubation runs whether or not anyone is watching it."},{"place":"Kona airport","days":[1,1,1,1,1,1,0],"open":6.0,"close":17.0,"lead":0,"note":"Aloha Air Cargo counter. Six days \u2014 dark Saturday."},{"place":"Kawaihae","days":[0,1,1,1,1,1,0],"open":7.0,"close":16.0,"lead":0,"note":"Young Brothers. Cargo acceptance ahead of the sailing."},{"place":"Honolulu","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"Kahului","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"HFA Honolulu","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"HFA Kahului","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"Off-island customer","days":[0,1,1,1,1,1,1],"open":5.0,"close":12.0,"lead":0,"note":"The back door at the other end."}],"sailings":[{"route":"Kawaihae to Honolulu","departs":"Tue 18:00","arrives":"Wed 06:00","connects":"","note":""},{"route":"Kawaihae to Honolulu","departs":"Fri 18:00","arrives":"Sat 06:00","connects":"","note":""},{"route":"Honolulu to Kahului","departs":"Wed 16:00","arrives":"Thu 06:00","connects":"the Tuesday sailing","note":"Maui is level with Oahu off this one."},{"route":"Honolulu to Kahului","departs":"Mon 16:00","arrives":"Tue 06:00","connects":"the Friday sailing","note":"Maui falls a day behind Oahu off this one."},{"route":"Honolulu to Nawiliwili","departs":"Mon","arrives":"Tue","connects":"the Friday sailing","note":"Kauai. Accepted in Honolulu Mon, Wed & Thu until 11am; available at Nawiliwili the next business day after arrival."},{"route":"Honolulu to Nawiliwili","departs":"Thu","arrives":"Fri","connects":"the Tuesday sailing","note":"Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday \u2014 level with Oahu."}],"journeys":{"Lettuce-BI-Costco":{"to":"140","by":""},"Lettuce-BI-Pickup":{"to":"Pickup","by":""},"Lettuce-Air":{"to":"OffIsland","by":"Air"},"Lettuce-Barge":{"to":"OffIsland","by":"Barge"}}};
+window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0,"lead":0,"note":"Hawaii Farming packhouse. Nobody is here to load a truck outside these hours."},{"place":"Cold Storage","days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334,"lead":0,"note":"Always open \u2014 it is our own cooler."},{"place":"Lettuce loading dock","days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0,"lead":0,"note":""},{"place":"Costco receiving dock","days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0,"lead":0,"note":"Receiving. The only gate on-island."},{"place":"Lab","days":[1,1,1,1,1,1,1],"open":0.0,"close":23.983333333333334,"lead":0,"note":"The incubation runs whether or not anyone is watching it."},{"place":"Kona airport","days":[1,1,1,1,1,1,0],"open":6.0,"close":17.0,"lead":0,"note":"Aloha Air Cargo counter. Six days \u2014 dark Saturday."},{"place":"Kawaihae","days":[0,1,1,1,1,1,0],"open":7.0,"close":16.0,"lead":0,"note":"Young Brothers. Cargo acceptance ahead of the sailing."},{"place":"Honolulu","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"Kahului","days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0,"lead":24,"note":"Young Brothers. Available the next business day after arrival."},{"place":"HFA Honolulu","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"HFA Kahului","days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0,"lead":0,"note":"Collects, then runs the route."},{"place":"Off-island customer","days":[0,1,1,1,1,1,1],"open":5.0,"close":12.0,"lead":0,"note":"The back door at the other end."}],"sailings":[{"route":"Kawaihae to Honolulu","departs":"Tue 18:00","arrives":"Wed 06:00","connects":"","note":""},{"route":"Kawaihae to Honolulu","departs":"Fri 18:00","arrives":"Sat 06:00","connects":"","note":""},{"route":"Honolulu to Kahului","departs":"Wed 16:00","arrives":"Thu 06:00","connects":"the Tuesday sailing","note":"Maui is level with Oahu off this one."},{"route":"Honolulu to Kahului","departs":"Mon 16:00","arrives":"Tue 06:00","connects":"the Friday sailing","note":"Maui falls a day behind Oahu off this one."},{"route":"Honolulu to Nawiliwili","departs":"Mon","arrives":"Tue","connects":"the Friday sailing","note":"Kauai. Accepted in Honolulu Mon, Wed & Thu until 11am; available at Nawiliwili the next business day after arrival."},{"route":"Honolulu to Nawiliwili","departs":"Thu","arrives":"Fri","connects":"the Tuesday sailing","note":"Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday \u2014 level with Oahu."}]};
 </script>
 <script>
 (function () {
@@ -410,7 +411,8 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   // Both spellings of every column, so the sheet's headings and the snapshot's
   // read the same and neither has to be rewritten to match the other.
   var COL = {
-    'journey': 'journey', 'start day': 'start_day', 'start_day': 'start_day',
+    'crop': 'crop', 'fob': 'fob', 'transport': 'transport',
+    'start day': 'start_day', 'start_day': 'start_day',
     'branch': 'branch', 'leg': 'leg',
     'start location': 'from', 'start_location': 'from',
     'start dt': 's', 'start_dt': 's',
@@ -421,29 +423,36 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
   function legRows(text) {
-    var rows = csvRows(text), head = -1, i, j;
+    var rows = csvRows(text), head = -1, i;
     // The sheet keeps its own margins -- blank columns to the left, blank rows
-    // above -- so the header is found by name rather than by position.
+    // above -- so the header is found by what it names rather than by where it
+    // sits. Every layout has a leg and a time it starts.
     for (i = 0; i < rows.length && head < 0; i++) {
-      for (j = 0; j < rows[i].length; j++) {
-        if (rows[i][j].trim().toLowerCase() === 'journey') { head = i; break; }
-      }
+      var seen = {};
+      rows[i].forEach(function (c) { seen[c.trim().toLowerCase()] = 1; });
+      if (seen.leg && seen['start dt']) head = i;
     }
-    if (head < 0) throw new Error('no header row with a Journey column');
+    if (head < 0) throw new Error('no header row naming both Leg and Start dt');
     var keep = [];
     rows[head].forEach(function (h, k) {
       var name = h.trim().toLowerCase();
       if (has(COL, name)) keep.push([k, COL[name]]);
     });
-    ['journey', 'leg', 's', 'e'].forEach(function (k) {
-      for (var n = 0; n < keep.length; n++) if (keep[n][1] === k) return;
-      throw new Error('no column for ' + k);
+    function got(k) {
+      for (var n = 0; n < keep.length; n++) if (keep[n][1] === k) return true;
+      return false;
+    }
+    ['leg', 's', 'e'].forEach(function (k) {
+      if (!got(k)) throw new Error('no column for ' + k);
     });
+    if (!got('crop') && !got('fob') && !got('transport')) {
+      throw new Error('nothing names the journey: needs Crop, FOB or Transport');
+    }
     var out = [];
     for (i = head + 1; i < rows.length; i++) {
       var r = rows[i], rec = {};
       keep.forEach(function (pair) { rec[pair[1]] = (r[pair[0]] || '').trim(); });
-      if (rec.journey && rec.leg) out.push(rec);
+      if (rec.leg) out.push(rec);
     }
     if (!out.length) throw new Error('no legs under the header');
     return out;
@@ -504,13 +513,18 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     var hours = {};
     ((window.REF || {}).hours || []).forEach(function (h) { hours[h.place] = h; });
     var groups = {}, order = [];
+    // Crop, where it is going and how it gets there name the journey; the
+    // start day says which run of it this is. Four columns, one picture.
+    function name(r) {
+      return [r.crop, r.fob, r.transport].filter(function (v) { return v; }).join('-') || 'Journey';
+    }
     rows.forEach(function (r) {
-      var key = r.journey + '\u0000' + (r.start_day || '0');
+      var key = name(r) + '\u0000' + (r.start_day || '0');
       if (!has(groups, key)) { groups[key] = []; order.push(key); }
       groups[key].push(r);
     });
     return order.map(function (key) {
-      var rs = groups[key], jn = rs[0].journey;
+      var rs = groups[key], jn = name(rs[0]);
       var where0 = jn + ' / start day ' + (rs[0].start_day || '0');
       // The first leg names the day the journey starts, and every other time
       // is counted forward from there -- so one definition draws as a Sunday
@@ -549,6 +563,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
         });
       });
       return { id: slug(jn) + '-' + slug(DOW[anchor]), name: jn, start: DOW[anchor],
+        crop: rs[0].crop || '', fob: rs[0].fob || '', transport: rs[0].transport || '',
         branches: branches, tasks: tasks, windows: wins };
     });
   }
@@ -1183,17 +1198,10 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   // The same eight are three questions: which cut, where it is going, and what
   // carries it. A question with only one answer is not a question and is not
   // drawn, which is what keeps the freight toggle off the on-island journeys.
-  // A journey's name carries its facets: Product-Destination-Carrier, so
-  // Lettuce-140-Barge goes to 140 by barge and Lettuce-Pickup has no carrier
-  // to choose. reference.json overrides a name that does not follow that yet;
-  // that table is meant to empty out as the sheet gets renamed.
+  // The sheet says what a journey is in its own columns, so nothing here has
+  // to take a name apart to find out.
   function facets(f) {
-    var over = ((window.REF || {}).journeys || {})[f.name];
-    if (over) return { when: f.start, to: over.to || f.name, by: over.by || '' };
-    var part = String(f.name).split('-');
-    return { when: f.start,
-      to: part.length > 1 ? part[1] : f.name,
-      by: part.length > 2 ? part.slice(2).join('-') : '' };
+    return { when: f.start, crop: f.crop || '', to: f.fob || '', by: f.transport || '' };
   }
 
   // We cut on the anchor day and the day after, and both feed the same
@@ -1213,43 +1221,46 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
 
   // Answer as much of the wanted combination as exists, giving up the freight
   // before the destination and the cut before either.
+  var KEYS = ['crop', 'to', 'by', 'when'];
   function match(want) {
-    var i, x;
-    for (i = 0; i < F.length; i++) {
-      x = facets(F[i]);
-      if (x.when === want.when && x.to === want.to && (!want.by || x.by === want.by)) return F[i];
-    }
-    for (i = 0; i < F.length; i++) {
-      x = facets(F[i]);
-      if (x.when === want.when && x.to === want.to) return F[i];
-    }
-    for (i = 0; i < F.length; i++) {
-      x = facets(F[i]);
-      if (x.to === want.to) return F[i];
+    // Give up one answer at a time, in the order they matter least: the cut
+    // first, then the freight, then the destination. Whatever survives is the
+    // journey drawn.
+    for (var give = 0; give <= KEYS.length; give++) {
+      for (var i = 0; i < F.length; i++) {
+        var x = facets(F[i]), ok = true;
+        for (var k = 0; k < KEYS.length - give; k++) {
+          if (x[KEYS[k]] !== want[KEYS[k]]) { ok = false; break; }
+        }
+        if (ok) return F[i];
+      }
     }
     return F[0];
   }
 
   function picker(flow) {
     var now = facets(flow);
-    function go(want) {
-      var f = match(want);
-      if (f) { S.id = f.id; save(); paint(); }
+    function ask(id, key, from, label) {
+      var opts = uniq(from.map(function (f) { return facets(f)[key]; }));
+      // One answer is not a question. That is what keeps the freight toggle
+      // off a destination with only one way to reach it, and the crop toggle
+      // away entirely while we only grow lettuce.
+      seg(id, opts.length > 1 ? opts.map(function (v) {
+        return [v, label ? label(v) : v];
+      }) : [], now[key], function (v) {
+        var want = { crop: now.crop, to: now.to, by: now.by, when: now.when };
+        want[key] = v;
+        var f = match(want);
+        if (f) { S.id = f.id; save(); paint(); }
+      });
     }
-    seg('pick-when', uniq(F.map(function (f) { return f.start; })).map(function (d) {
-      return [d, cutLabel(d)];
-    }), now.when, function (v) { go({ when: v, to: now.to, by: now.by }); });
-
-    seg('pick-to', uniq(F.map(function (f) { return facets(f).to; })).map(function (t) {
-      return [t, t];
-    }), now.to, function (v) { go({ when: now.when, to: v, by: now.by }); });
-
-    // Only the freight this destination actually offers, and only if it offers
-    // more than one.
-    var by = uniq(F.filter(function (f) { return facets(f).to === now.to; })
-      .map(function (f) { return facets(f).by; }));
-    seg('pick-by', by.length > 1 ? by.map(function (b) { return [b, b]; }) : [],
-      now.by, function (v) { go({ when: now.when, to: now.to, by: v }); });
+    ask('pick-when', 'when', F, cutLabel);
+    ask('pick-crop', 'crop', F);
+    ask('pick-to', 'to', F.filter(function (f) { return facets(f).crop === now.crop; }));
+    ask('pick-by', 'by', F.filter(function (f) {
+      var x = facets(f);
+      return x.crop === now.crop && x.to === now.to;
+    }));
   }
 
   function seg(id, opts, sel, cb) {

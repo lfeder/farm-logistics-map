@@ -67,7 +67,8 @@
   // Both spellings of every column, so the sheet's headings and the snapshot's
   // read the same and neither has to be rewritten to match the other.
   var COL = {
-    'journey': 'journey', 'start day': 'start_day', 'start_day': 'start_day',
+    'crop': 'crop', 'fob': 'fob', 'transport': 'transport',
+    'start day': 'start_day', 'start_day': 'start_day',
     'branch': 'branch', 'leg': 'leg',
     'start location': 'from', 'start_location': 'from',
     'start dt': 's', 'start_dt': 's',
@@ -78,29 +79,36 @@
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
   function legRows(text) {
-    var rows = csvRows(text), head = -1, i, j;
+    var rows = csvRows(text), head = -1, i;
     // The sheet keeps its own margins -- blank columns to the left, blank rows
-    // above -- so the header is found by name rather than by position.
+    // above -- so the header is found by what it names rather than by where it
+    // sits. Every layout has a leg and a time it starts.
     for (i = 0; i < rows.length && head < 0; i++) {
-      for (j = 0; j < rows[i].length; j++) {
-        if (rows[i][j].trim().toLowerCase() === 'journey') { head = i; break; }
-      }
+      var seen = {};
+      rows[i].forEach(function (c) { seen[c.trim().toLowerCase()] = 1; });
+      if (seen.leg && seen['start dt']) head = i;
     }
-    if (head < 0) throw new Error('no header row with a Journey column');
+    if (head < 0) throw new Error('no header row naming both Leg and Start dt');
     var keep = [];
     rows[head].forEach(function (h, k) {
       var name = h.trim().toLowerCase();
       if (has(COL, name)) keep.push([k, COL[name]]);
     });
-    ['journey', 'leg', 's', 'e'].forEach(function (k) {
-      for (var n = 0; n < keep.length; n++) if (keep[n][1] === k) return;
-      throw new Error('no column for ' + k);
+    function got(k) {
+      for (var n = 0; n < keep.length; n++) if (keep[n][1] === k) return true;
+      return false;
+    }
+    ['leg', 's', 'e'].forEach(function (k) {
+      if (!got(k)) throw new Error('no column for ' + k);
     });
+    if (!got('crop') && !got('fob') && !got('transport')) {
+      throw new Error('nothing names the journey: needs Crop, FOB or Transport');
+    }
     var out = [];
     for (i = head + 1; i < rows.length; i++) {
       var r = rows[i], rec = {};
       keep.forEach(function (pair) { rec[pair[1]] = (r[pair[0]] || '').trim(); });
-      if (rec.journey && rec.leg) out.push(rec);
+      if (rec.leg) out.push(rec);
     }
     if (!out.length) throw new Error('no legs under the header');
     return out;
@@ -161,13 +169,18 @@
     var hours = {};
     ((window.REF || {}).hours || []).forEach(function (h) { hours[h.place] = h; });
     var groups = {}, order = [];
+    // Crop, where it is going and how it gets there name the journey; the
+    // start day says which run of it this is. Four columns, one picture.
+    function name(r) {
+      return [r.crop, r.fob, r.transport].filter(function (v) { return v; }).join('-') || 'Journey';
+    }
     rows.forEach(function (r) {
-      var key = r.journey + '\u0000' + (r.start_day || '0');
+      var key = name(r) + '\u0000' + (r.start_day || '0');
       if (!has(groups, key)) { groups[key] = []; order.push(key); }
       groups[key].push(r);
     });
     return order.map(function (key) {
-      var rs = groups[key], jn = rs[0].journey;
+      var rs = groups[key], jn = name(rs[0]);
       var where0 = jn + ' / start day ' + (rs[0].start_day || '0');
       // The first leg names the day the journey starts, and every other time
       // is counted forward from there -- so one definition draws as a Sunday
@@ -206,6 +219,7 @@
         });
       });
       return { id: slug(jn) + '-' + slug(DOW[anchor]), name: jn, start: DOW[anchor],
+        crop: rs[0].crop || '', fob: rs[0].fob || '', transport: rs[0].transport || '',
         branches: branches, tasks: tasks, windows: wins };
     });
   }
@@ -840,17 +854,10 @@
   // The same eight are three questions: which cut, where it is going, and what
   // carries it. A question with only one answer is not a question and is not
   // drawn, which is what keeps the freight toggle off the on-island journeys.
-  // A journey's name carries its facets: Product-Destination-Carrier, so
-  // Lettuce-140-Barge goes to 140 by barge and Lettuce-Pickup has no carrier
-  // to choose. reference.json overrides a name that does not follow that yet;
-  // that table is meant to empty out as the sheet gets renamed.
+  // The sheet says what a journey is in its own columns, so nothing here has
+  // to take a name apart to find out.
   function facets(f) {
-    var over = ((window.REF || {}).journeys || {})[f.name];
-    if (over) return { when: f.start, to: over.to || f.name, by: over.by || '' };
-    var part = String(f.name).split('-');
-    return { when: f.start,
-      to: part.length > 1 ? part[1] : f.name,
-      by: part.length > 2 ? part.slice(2).join('-') : '' };
+    return { when: f.start, crop: f.crop || '', to: f.fob || '', by: f.transport || '' };
   }
 
   // We cut on the anchor day and the day after, and both feed the same
@@ -870,43 +877,46 @@
 
   // Answer as much of the wanted combination as exists, giving up the freight
   // before the destination and the cut before either.
+  var KEYS = ['crop', 'to', 'by', 'when'];
   function match(want) {
-    var i, x;
-    for (i = 0; i < F.length; i++) {
-      x = facets(F[i]);
-      if (x.when === want.when && x.to === want.to && (!want.by || x.by === want.by)) return F[i];
-    }
-    for (i = 0; i < F.length; i++) {
-      x = facets(F[i]);
-      if (x.when === want.when && x.to === want.to) return F[i];
-    }
-    for (i = 0; i < F.length; i++) {
-      x = facets(F[i]);
-      if (x.to === want.to) return F[i];
+    // Give up one answer at a time, in the order they matter least: the cut
+    // first, then the freight, then the destination. Whatever survives is the
+    // journey drawn.
+    for (var give = 0; give <= KEYS.length; give++) {
+      for (var i = 0; i < F.length; i++) {
+        var x = facets(F[i]), ok = true;
+        for (var k = 0; k < KEYS.length - give; k++) {
+          if (x[KEYS[k]] !== want[KEYS[k]]) { ok = false; break; }
+        }
+        if (ok) return F[i];
+      }
     }
     return F[0];
   }
 
   function picker(flow) {
     var now = facets(flow);
-    function go(want) {
-      var f = match(want);
-      if (f) { S.id = f.id; save(); paint(); }
+    function ask(id, key, from, label) {
+      var opts = uniq(from.map(function (f) { return facets(f)[key]; }));
+      // One answer is not a question. That is what keeps the freight toggle
+      // off a destination with only one way to reach it, and the crop toggle
+      // away entirely while we only grow lettuce.
+      seg(id, opts.length > 1 ? opts.map(function (v) {
+        return [v, label ? label(v) : v];
+      }) : [], now[key], function (v) {
+        var want = { crop: now.crop, to: now.to, by: now.by, when: now.when };
+        want[key] = v;
+        var f = match(want);
+        if (f) { S.id = f.id; save(); paint(); }
+      });
     }
-    seg('pick-when', uniq(F.map(function (f) { return f.start; })).map(function (d) {
-      return [d, cutLabel(d)];
-    }), now.when, function (v) { go({ when: v, to: now.to, by: now.by }); });
-
-    seg('pick-to', uniq(F.map(function (f) { return facets(f).to; })).map(function (t) {
-      return [t, t];
-    }), now.to, function (v) { go({ when: now.when, to: v, by: now.by }); });
-
-    // Only the freight this destination actually offers, and only if it offers
-    // more than one.
-    var by = uniq(F.filter(function (f) { return facets(f).to === now.to; })
-      .map(function (f) { return facets(f).by; }));
-    seg('pick-by', by.length > 1 ? by.map(function (b) { return [b, b]; }) : [],
-      now.by, function (v) { go({ when: now.when, to: now.to, by: v }); });
+    ask('pick-when', 'when', F, cutLabel);
+    ask('pick-crop', 'crop', F);
+    ask('pick-to', 'to', F.filter(function (f) { return facets(f).crop === now.crop; }));
+    ask('pick-by', 'by', F.filter(function (f) {
+      var x = facets(f);
+      return x.crop === now.crop && x.to === now.to;
+    }));
   }
 
   function seg(id, opts, sel, cb) {
