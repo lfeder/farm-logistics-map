@@ -35,9 +35,19 @@ something happens:
 | `opens` | waits until somebody will take it | `days`, `open`, `close`, `lead` |
 | `sails` | waits for the next scheduled departure | `days`, `at` |
 
-`place` is where the product is when the task ends, and those places are the
-vertical axis. A task ending where its prereq ended is a wait; a task ending
-somewhere else is a move.
+**Every task has a start and a stop.** It starts when the last of its prereqs is
+done and stops when its own kind says so, so it draws as a bar rather than a
+point and the gap between the two ends is the task itself — an hour of loading,
+or eleven hours outside a shut door. A hollow tick marks where a task begins.
+
+`place` is where the product is when the task **stops**, and those places are
+the vertical axis. A task that stops where it started is standing still, drawn
+flat and printed in orange in the list; a task that stops somewhere else is
+moving, and slopes.
+
+A task is one line in the list. Every control says what it is by its own shape,
+so nothing is captioned; the note is folded behind the ⓘ and rides as the name's
+tooltip, and prereqs are behind the `after` chip.
 
 **Dependencies are stored one way only.** A task lists what it comes `after`.
 What it *feeds* is those same edges read backwards, so it is derived on the fly
