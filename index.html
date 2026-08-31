@@ -777,7 +777,9 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       '<tr class="maxrow"><th></th><th class="hf">Max</th>' +
       DESTS.map(function (d) {
         return GROUPS.map(function (g) {
-          return '<td class="fig">' + peak[d[0] + g[0]].toLocaleString() + '</td>';
+          var c = peak[d[0] + g[0]];
+          return '<td class="fig" title="' + c.toLocaleString() + ' cases">' +
+            showMins(mins(c, R[g[0]])) + '</td>';
         }).join('');
       }).join('') + '</tr>';
 
