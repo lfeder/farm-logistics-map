@@ -299,7 +299,7 @@ with open(path, "w") as fh:
 
 for f in flows:
     unknown = sorted({p for t in f["tasks"] for p in (t["from"], t["place"])} - set(hours))
-    print("%-22s %-4s start  %2d legs, %d branch%s, %d places%s"
+    print("%-22s %-4s start  %2d legs, %d branch%s, %d timed%s"
           % (f["name"], f["start"], len(f["tasks"]), len(f["branches"]),
              "" if len(f["branches"]) == 1 else "es", len(f["windows"]),
              "" if not unknown else "  (no hours: %s)" % ", ".join(unknown)))
