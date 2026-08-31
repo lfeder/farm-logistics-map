@@ -196,9 +196,14 @@
         var br = (r.branch || '1').trim() || '1';
         if (branches.indexOf(br) < 0) branches.push(br);
         var ic = (r.icon || '').toLowerCase();
+        // Keep the weekday the leg was written on as well as the hour it lands
+        // at for this journey's own anchor. One of them draws a single journey
+        // from its cut; the other hangs every journey on the same week.
+        var ds = dayTime(r.s, where), de = dayTime(r.e, where);
         tasks.push({ id: 't' + tasks.length, name: r.leg, branch: br,
           from: r.from || 'Somewhere', place: r.place || 'Somewhere',
           s: at(r.s), e: at(r.e),
+          sd: ds.d, sh: ds.h, ed: de.d, eh: de.h,
           icon: ICONS.indexOf(ic) < 0 ? iconFor(r.leg) : ic,
           note: r.note || '' });
       });
@@ -225,13 +230,13 @@
   }
 
   var F = [], DATA = window.DATA || {};
-  var S = { id: '', tab: 'flow' };
+  var S = { sel: {}, tab: 'flow' };
   // Where the drawn schedule came from, so the line above the chart can say.
   var SRC = { live: false, at: null, why: '' };
   try {
     var sv = JSON.parse(window.localStorage.getItem(STORE) || 'null');
     if (sv) {
-      if (sv.id) S.id = sv.id;
+      if (sv.sel) S.sel = sv.sel;
       if (sv.tab) S.tab = sv.tab;
       if (sv.rates) S.rates = sv.rates;
     }
@@ -241,9 +246,8 @@
     try { window.localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {}
   }
   function cur() {
-    for (var i = 0; i < F.length; i++) if (F[i].id === S.id) return F[i];
-    S.id = F.length ? F[0].id : '';
-    return F[0];
+    var list = shown();
+    return list.length === 1 ? list[0] : null;
   }
 
   // ── Clock ─────────────────────────────────────────────────────────────────
@@ -397,7 +401,7 @@
     // A leg carries three labels: the hour at each end, against its own dot, and
     // the name on the bar between them. Hanging the name off one end made a
     // flat bar read as though the name belonged to the far end of it.
-    var dots = '', taken = [];
+    var dots = '', taken = [], said = {};
     r.pts.forEach(function (p) {
       var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
       var y2 = yOf[p.place];
@@ -421,19 +425,31 @@
       // A name wraps at every word, so it is as wide as its longest word and
       // as tall as it has words. Time is the scarce axis here and place is
       // not, which is the whole reason to spend height to buy width.
+      // Several journeys share the same first legs -- one packing run feeds
+      // both the air and the barge picture -- so the same name at the same
+      // place and hour is one event, said once.
+      var once = nm + '|' + p.from + '|' + p.place + '|' + p.s + '|' + p.e;
+      if (said[once]) return;
+      said[once] = 1;
+
       var ROW = 12;
       var words = nm.split(/[\s\/]+/).filter(function (w) { return w; });
       var wLen = 0;
       words.forEach(function (w) { if (w.length > wLen) wLen = w.length; });
       var wpc = (12 + wLen * 5.6) / PLOT_PX * 100;
-      var hh = Math.max(1, words.length) * ROW;
+      // Plus the padding the box actually carries, so a step really does clear
+      // the name it stepped over.
+      var hh = Math.max(1, words.length) * ROW + 2;
       var lo = PCT(p.s) + .6, hi = lo + wpc;
       // Sloped, the name sits centred on the start dot's row. Flat, it sits
       // clear above the dot -- which for a stack means its bottom edge does,
       // not its middle. A name that has to move moves by its whole height,
       // because moving by less would only overlap itself.
       var base = y1 === y2 ? -(hh / 2 + 2) : 0;
-      var STEPS = [0, -1, -2, 1];
+      // Keep stepping until there is room. Two journeys can put a dozen legs
+      // on one lane in one hour, and a name that gives up lands on top of
+      // another. Up is tried before down, since that is where a name reads.
+      var STEPS = [0, -1, -2, -3, -4, -5, 1, 2, 3, 4];
       var ly = null;
       for (var k = 0; k < STEPS.length; k++) {
         var cand = y1 + base + STEPS[k] * hh, free = true;
@@ -456,9 +472,12 @@
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
-    return '<div class="hd"><b>' + esc(flow.name) + '</b>' +
-      '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') + '</small>' +
-      '<em>' + r.hrs + ' h end to end, ' + r.still + ' standing still</em></div></div>' +
+    // How long it takes is a fact about one journey. Several of them have no
+    // single duration between them, so there is nothing to put here.
+    var res = flow.many ? '' :
+      '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') +
+      '</small><em>' + r.hrs + ' h end to end, ' + r.still + ' standing still</em></div>';
+    return '<div class="hd"><b>' + esc(flow.name) + '</b>' + res + '</div>' +
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
@@ -497,7 +516,15 @@
   // ── The task list, which is a reading of the Markdown ─────────────────────
   var COLS = ['', '', 'Task', 'Place', 'Starts', 'Stops', 'Takes', 'After', 'Note'];
   function taskTable(flow, r) {
+    var head = '';
     var body = flow.tasks.map(function (t, i) {
+      // With several journeys in one list, a row has to say which it is from.
+      // A line between them says it once instead of once per row.
+      var mark = '';
+      if (t.journey && t.journey !== head) {
+        head = t.journey;
+        mark = '<div class="grp">' + esc(head) + '</div>';
+      }
       var p = null;
       r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
       var len = num(t.e) - num(t.s);
@@ -505,7 +532,7 @@
       var pre = (t.after || []).filter(function (id) { return r.byId[id]; });
       var badS = outside(flow, t.place || 'Somewhere', num(t.s));
       var badE = outside(flow, t.place || 'Somewhere', num(t.e));
-      return '<div class="row' + (len < 0 ? ' bad' : '') + '" id="task-' + esc(t.id) + '">' +
+      return mark + '<div class="row' + (len < 0 ? ' bad' : '') + '" id="task-' + esc(t.id) + '">' +
         '<div class="cell n">' + (i + 1) + '</div>' +
         '<div class="cell ico">' + ico(t.icon) + '</div>' +
         '<div class="cell nm">' + esc(t.name) + '</div>' +
@@ -710,7 +737,8 @@
             '<td class="nt">' + mark(x.note || '') + '</td></tr>';
         }).join('') + '</tbody></table>';
     }
-    // What this journey actually uses, which is a subset and worth seeing apart.
+    // What this journey actually uses, which is a subset and worth seeing
+    // apart -- and only means anything while one journey is on screen.
     var flow = cur();
     var pl = flow ? places(flow).filter(function (p) { return winOf(flow, p); }) : [];
     if (pl.length) {
@@ -758,14 +786,25 @@
       document.getElementById('src').innerHTML = srcLine();
       return;
     }
-    var flow = cur();
-    ANCHOR = flow.start || 'Sun';
+    var list = shown();
+    picker();
+    document.getElementById('key').innerHTML =
+      '<i class="sw mv"></i>moving<i class="sw wt"></i>standing still';
+    document.getElementById('src').innerHTML = srcLine();
+    if (!list.length) {
+      document.getElementById('grid').innerHTML =
+        '<p class="hint">Nothing is both of those.</p>';
+      document.getElementById('axis').innerHTML = '';
+      document.getElementById('tasks').innerHTML = '';
+      return;
+    }
+    var flow = merge(list);
+    // One journey is drawn from its own cut; several share the week, because
+    // that is the only axis they have in common.
+    ANCHOR = flow.many ? 'Sun' : (flow.start || 'Sun');
 
     var r = read(flow);
-    SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
-
-    picker(flow);
-    document.getElementById('src').innerHTML = srcLine();
+    SPAN = flow.many ? 7 : Math.max(2, Math.ceil(r.end / 24) + 1);
 
     var ax = '';
     for (var i = 0; i < SPAN; i++) {
@@ -782,13 +821,6 @@
       '<div class="axrow"><div class="gut"></div><div class="days">' + ax + '</div></div>' +
       '<div class="axrow"><div class="gut"></div><div class="hours-axis">' + hx + '</div></div>';
     document.getElementById('grid').innerHTML = chart(flow, r);
-    document.getElementById('legend').innerHTML =
-      '<span><i class="sw mv"></i>moving</span>' +
-      '<span><i class="sw wt"></i>standing still</span>' +
-      ((flow.branches || []).length > 1
-        ? (flow.branches || []).map(function (b, i) {
-            return '<span><i class="sw b' + (i % 4) + '"></i>branch ' + esc(b) + '</span>';
-          }).join('') : '');
 
     var off = offences(flow), warn = '';
     if (r.broken.length) {
@@ -878,53 +910,90 @@
   // Answer as much of the wanted combination as exists, giving up the freight
   // before the destination and the cut before either.
   var KEYS = ['crop', 'to', 'by', 'when'];
-  function match(want) {
-    // Give up one answer at a time, in the order they matter least: the cut
-    // first, then the freight, then the destination. Whatever survives is the
-    // journey drawn.
-    for (var give = 0; give <= KEYS.length; give++) {
-      for (var i = 0; i < F.length; i++) {
-        var x = facets(F[i]), ok = true;
-        for (var k = 0; k < KEYS.length - give; k++) {
-          if (x[KEYS[k]] !== want[KEYS[k]]) { ok = false; break; }
-        }
-        if (ok) return F[i];
+
+  // Each question holds a set of answers rather than one. An empty set asks
+  // nothing, so turning every answer off is how you say "the whole week".
+  function shown() {
+    var sel = S.sel || {};
+    return F.filter(function (f) {
+      var x = facets(f);
+      for (var i = 0; i < KEYS.length; i++) {
+        var list = sel[KEYS[i]] || [];
+        if (list.length && list.indexOf(x[KEYS[i]]) < 0) return false;
       }
-    }
-    return F[0];
+      return true;
+    });
   }
 
-  function picker(flow) {
-    var now = facets(flow);
-    function ask(id, key, from, label) {
-      var opts = uniq(from.map(function (f) { return facets(f)[key]; }));
+  // Several journeys are drawn as one picture: the same lanes, and one week
+  // rather than each journey's own first day. A leg keeps the weekday it was
+  // written on, so this is a re-hanging, not a recalculation.
+  function merge(list) {
+    if (list.length === 1) return list[0];
+    var tasks = [], branches = [], windows = {};
+    list.forEach(function (f, i) {
+      var pre = 'f' + i + ':';
+      f.tasks.forEach(function (t) {
+        var c = {}, k;
+        for (k in t) if (has(t, k)) c[k] = t[k];
+        c.id = pre + t.id;
+        c.after = (t.after || []).map(function (a) { return pre + a; });
+        c.journey = f.name + ' \u00b7 ' + cutLabel(f.start);
+        c.s = t.sd * 24 + t.sh;
+        c.e = t.ed * 24 + t.eh;
+        // A leg that runs past midnight on Saturday lands before its own start
+        // once the week wraps. It still takes as long as it took.
+        while (c.e < c.s) c.e += 24;
+        tasks.push(c);
+      });
+      (f.branches || []).forEach(function (b) { if (branches.indexOf(b) < 0) branches.push(b); });
+      for (var p in f.windows) if (has(f.windows, p)) windows[p] = f.windows[p];
+    });
+    return { id: 'many', name: sharedName(list), start: 'Sun', many: list.length,
+      branches: branches, tasks: tasks, windows: windows };
+  }
+
+  // Name the picture by what every journey in it has in common, which is the
+  // only thing that is true of all of them.
+  function sharedName(list) {
+    var parts = [];
+    KEYS.forEach(function (k) {
+      var v = uniq(list.map(function (f) { return facets(f)[k]; }));
+      if (v.length === 1 && v[0]) parts.push(k === 'when' ? cutLabel(v[0]) : v[0]);
+    });
+    return parts.length ? parts.join(' \u00b7 ') : 'The week';
+  }
+
+  function picker() {
+    function ask(id, key, label) {
+      var opts = uniq(F.map(function (f) { return facets(f)[key]; }));
       // One answer is not a question. That is what keeps the freight toggle
       // off a destination with only one way to reach it, and the crop toggle
       // away entirely while we only grow lettuce.
       seg(id, opts.length > 1 ? opts.map(function (v) {
         return [v, label ? label(v) : v];
-      }) : [], now[key], function (v) {
-        var want = { crop: now.crop, to: now.to, by: now.by, when: now.when };
-        want[key] = v;
-        var f = match(want);
-        if (f) { S.id = f.id; save(); paint(); }
+      }) : [], S.sel[key] || [], function (v) {
+        var list = (S.sel[key] || []).slice(), at = list.indexOf(v);
+        if (at < 0) list.push(v); else list.splice(at, 1);
+        S.sel[key] = list;
+        save();
+        paint();
       });
     }
-    ask('pick-when', 'when', F, cutLabel);
-    ask('pick-crop', 'crop', F);
-    ask('pick-to', 'to', F.filter(function (f) { return facets(f).crop === now.crop; }));
-    ask('pick-by', 'by', F.filter(function (f) {
-      var x = facets(f);
-      return x.crop === now.crop && x.to === now.to;
-    }));
+    ask('pick-when', 'when', cutLabel);
+    ask('pick-crop', 'crop');
+    ask('pick-to', 'to');
+    ask('pick-by', 'by');
   }
 
   function seg(id, opts, sel, cb) {
     var el = document.getElementById(id);
     if (!el) return;
     el.style.display = opts.length ? '' : 'none';
+    var chosen = Object.prototype.toString.call(sel) === '[object Array]' ? sel : [sel];
     el.innerHTML = opts.map(function (o) {
-      return '<a data-v="' + esc(o[0]) + '"' + (String(o[0]) === String(sel) ? ' class="on"' : '') +
+      var on = chosen.some(function (c) { return String(o[0]) === String(c); });
+      return '<a data-v="' + esc(o[0]) + '"' + (on ? ' class="on"' : '') +
         '>' + esc(o[1]) + '</a>';
     }).join('');
     [].slice.call(el.querySelectorAll('a')).forEach(function (a) {
@@ -959,10 +1028,21 @@
     }
     F = built;
     SRC = { live: live, at: new Date(), why: why || '' };
-    var want = S.id;
-    S.id = '';
-    for (var i = 0; i < F.length; i++) if (F[i].id === want) S.id = want;
-    if (!S.id && F.length) S.id = F[0].id;
+    // A stored answer that the sheet no longer offers is dropped rather than
+    // silently narrowing the picture to nothing.
+    S.sel = S.sel || {};
+    var have = {};
+    KEYS.forEach(function (k) { have[k] = uniq(F.map(function (f) { return facets(f)[k]; })); });
+    var any = false;
+    KEYS.forEach(function (k) {
+      S.sel[k] = (S.sel[k] || []).filter(function (v) { return have[k].indexOf(v) >= 0; });
+      if (S.sel[k].length) any = true;
+    });
+    // Open on one journey rather than on everything at once.
+    if (!any && F.length) {
+      var first = facets(F[0]);
+      KEYS.forEach(function (k) { S.sel[k] = first[k] ? [first[k]] : []; });
+    }
     paint();
   }
 

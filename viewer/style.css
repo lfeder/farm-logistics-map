@@ -268,3 +268,16 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
    on whatever row the placement rule gave it. */
 .ln{transform:translate(0,-50%); margin-left:7px}
 .ln:hover{outline:2px solid var(--accent-soft)}
+
+/* A journey's name, said once above its own run of rows. */
+.grid .grp{grid-column:1/-1; padding:12px 0 3px; font-size:11px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
+.grid .grp:first-child{padding-top:2px}
+
+/* The key rides on the toggle line rather than taking a strip of its own
+   under the plot, where it had nothing to do but collide with a name. */
+.panel-hd .lgd{margin-left:auto; display:flex; align-items:center; gap:5px;
+  font-size:11px; color:var(--ink-3); white-space:nowrap}
+.panel-hd .lgd .sw{margin-left:9px}
+.panel-hd .lgd .sw:first-child{margin-left:0}
+.panel-hd #src{margin-left:16px}
