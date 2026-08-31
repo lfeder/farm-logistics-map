@@ -265,6 +265,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   background:var(--card); padding:1px 4px; border-radius:3px}
 .ln.b0{color:var(--ink)} .ln.b1{color:var(--accent)}
 .ln.b2{color:var(--good)} .ln.b3{color:var(--ink-3)}
-.ln{transform:translate(0,-50%); margin-left:8px}
+.ln{transform:translate(-50%,-50%)}
 .ln.n0{margin-top:-11px} .ln.n1{margin-top:11px}
 .ln:hover{outline:2px solid var(--accent-soft)}

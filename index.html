@@ -275,7 +275,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   background:var(--card); padding:1px 4px; border-radius:3px}
 .ln.b0{color:var(--ink)} .ln.b1{color:var(--accent)}
 .ln.b2{color:var(--good)} .ln.b3{color:var(--ink-3)}
-.ln{transform:translate(0,-50%); margin-left:8px}
+.ln{transform:translate(-50%,-50%)}
 .ln.n0{margin-top:-11px} .ln.n1{margin-top:11px}
 .ln:hover{outline:2px solid var(--accent-soft)}
 
@@ -286,7 +286,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   <header>
     <div>
       <h1>Task Vis</h1>
-      <p class="sub" id="sub">Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.</p>
     </div>
     <nav class="seg tabs" id="tabs"></nav>
   </header>
@@ -570,31 +569,40 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
 
       // The name sits at the middle of the bar, stepped off it when two names
       // would land on each other.
-      // The name rides its own bar. When it collides it slides ALONG the leg
-      // rather than jumping vertically -- a label moved a whole lane up reads
-      // as belonging to the leg above it, which is worse than a collision.
+      // ── Where a leg's name goes ──────────────────────────────────────
+      // One rule, applied to every leg the same way: try these anchors in
+      // order and take the first that hits nothing already placed. The list is
+      // the preference, so the common case -- a leg with room -- always lands
+      // centred on its own bar, and only a crowded one walks down the list.
+      //
+      //   1. centred on the bar, above it
+      //   2. centred, below
+      //   3. two thirds along, above / below
+      //   4. nine tenths along, above / below
+      //   5. one third along, above / below
+      //
+      // Every anchor is a point ON the leg, so a name can never drift into a
+      // lane it does not belong to however crowded the chart gets.
       var wpc = (30 + nm.length * 5.6) / PLOT_PX * 100;
+      var ANCHORS = [[.5, -1], [.5, 1], [.67, -1], [.67, 1],
+                     [.9, -1], [.9, 1], [.33, -1], [.33, 1]];
       var best = null;
-      for (var k = 0; k < 6 && !best; k++) {
-        var t = 0.5 + k * 0.09;
-        if (t > 0.94) t = 0.94;
+      for (var k = 0; k < ANCHORS.length && !best; k++) {
+        var t = ANCHORS[k][0], up = ANCHORS[k][1];
         var cx = PCT(p.s + (p.e - p.s) * t), cy = y1 + (y2 - y1) * t;
-        for (var v = 0; v < 2 && !best; v++) {
-          var off = v === 0 ? -11 : 11;
-          var lo2 = cx + 0.6, hi2 = cx + 0.6 + wpc, ly2 = cy + off, free2 = true;
-          for (var q2 = 0; q2 < taken.length; q2++) {
-            var o = taken[q2];
-            if (Math.abs(o.y - ly2) < 12 && lo2 < o.hi + .4 && o.lo < hi2 + .4) { free2 = false; break; }
-          }
-          if (free2) best = { x: cx, y: cy, off: off, lo: lo2, hi: hi2, ly: ly2 };
+        var lo2 = cx - wpc / 2, hi2 = cx + wpc / 2, ly2 = cy + up * 11, free2 = true;
+        for (var q2 = 0; q2 < taken.length; q2++) {
+          var o = taken[q2];
+          if (Math.abs(o.y - ly2) < 12 && lo2 < o.hi + .4 && o.lo < hi2 + .4) { free2 = false; break; }
         }
+        if (free2) best = { x: cx, y: cy, up: up, lo: lo2, hi: hi2, ly: ly2 };
       }
       if (!best) {
         var fx = PCT((p.s + p.e) / 2), fy = (y1 + y2) / 2;
-        best = { x: fx, y: fy, off: -11, lo: fx + 0.6, hi: fx + 0.6 + wpc, ly: fy - 11 };
+        best = { x: fx, y: fy, up: -1, lo: fx - wpc / 2, hi: fx + wpc / 2, ly: fy - 11 };
       }
       taken.push({ y: best.ly, lo: best.lo, hi: best.hi });
-      var mx = best.x, my = best.y, slot = best.off < 0 ? 0 : 1;
+      var mx = best.x, my = best.y, slot = best.up < 0 ? 0 : 1;
       dots += '<div class="ln n' + slot + db + '" style="left:' + mx + '%;top:' + my + 'px"' +
         ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
         stamp(p.e) + ', ' + dur(p.e - p.s) + (p.t.note ? '. ' + esc(p.t.note) : '') + '">' +

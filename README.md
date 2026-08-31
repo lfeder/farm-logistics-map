@@ -30,6 +30,33 @@ moving**; a **flat bar is the thing standing still**. That is the point, because
 the waiting is what nobody can see in a list of steps. Faint lines every four
 hours give a leg something to be measured against.
 
+## How the chart places labels
+
+Not per-leg tweaks — one rule set, applied to every leg the same way.
+
+**Hours.** A leg's start hour prints to the left of its start dot; its stop hour
+prints to the right of its stop dot. One label per moment: a leg's stop is
+usually the next one's start, in the same place at the same minute, and that
+gets one label, not two on top of each other.
+
+**Names.** Each name tries these anchors in order and takes the first that hits
+nothing already placed:
+
+1. centred on the bar, above it
+2. centred, below
+3. two thirds along, above / below
+4. nine tenths along, above / below
+5. one third along, above / below
+
+The list is the preference, so a leg with room around it always lands centred on
+its own bar and only a crowded one walks down. **Every anchor is a point on the
+leg**, so a name can never drift into a lane it does not belong to, however
+crowded the chart gets — a label a lane out of place reads as belonging to the
+wrong leg, which is worse than a collision.
+
+Add legs, rename places, change times: the placement follows without anything
+being positioned by hand.
+
 ## legs.csv
 
 ```
