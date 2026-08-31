@@ -328,7 +328,7 @@
   var DESTS = [['on', 'On-island'], ['off', 'Off-island']];
   // Minutes per case, not cases per minute: a tray takes six minutes, it does
   // not come off the line six at a time.
-  var RATE_DEF = { LW: 8, LF: 6, TRAY: 6 };
+  var RATE_DEF = { LW: 2, LF: 1, TRAY: 1 };
 
   function rates() {
     var r = {};
@@ -394,7 +394,6 @@
             showMins(x[2] * 60) + ', ' + Math.round(x[3]).toLocaleString() + ' lb">' +
             (x[2] / wide > .07 ? esc(x[0]) : '') + '</span>';
         }).join('') +
-        '<span class="pd-cap" style="left:' + (DAY1 / wide * 100).toFixed(2) + '%"></span>' +
         '</span>' +
         '<span class="pd-h' + (over ? ' over' : '') + '">' + showMins(h * 60) + '</span>' +
         '<span class="pd-lb">' + Math.round(lb).toLocaleString() + ' lb</span></div>';

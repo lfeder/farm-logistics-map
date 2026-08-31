@@ -239,8 +239,8 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}
 
 /* ---------- the two pack days ---------- */
-/* Hours across, in the order they are packed. The dashed line is the 6.5 h day,
-   so a bar running past it is a day that does not fit. */
+/* Hours across, in the order they are packed. The 6.5 h day still decides how
+   much off-island LW lands on day 1; it is just no longer drawn. */
 .packdays{padding:0 0 16px}
 .pd{display:flex; align-items:center; gap:12px; padding:5px 0}
 .pd-l{flex:0 0 84px; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
@@ -253,7 +253,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pd-s.o{background:var(--accent)}
 .pd-s.f{background:var(--good)}
 .pd-s.r{background:var(--ink-3)}
-.pd-cap{position:absolute; top:-2px; bottom:-2px; width:0; border-left:2px dashed var(--bad)}
 .pd-h{flex:0 0 76px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:12px;
   font-weight:600; color:var(--ink)}
 .pd-h.over{color:var(--bad)}
