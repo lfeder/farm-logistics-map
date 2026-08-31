@@ -539,12 +539,14 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
 
     var dots = '', placed = {};
     r.pts.forEach(function (p) {
-      var x = PCT(p.e), last = p.e === r.end;
-      var nm = p.t.name || 'Task', tm = clock(p.e);
+      // A leg is named where it begins, not where it ends: the label reads as
+      // the thing about to happen rather than as a receipt for it.
+      var x = PCT(p.s), last = p.e === r.end;
+      var nm = p.t.name || 'Task', tm = clock(p.s);
       var wpc = (30 + (nm.length + tm.length) * 5.3) / PLOT_PX * 100;
       var flip = x + wpc > 99;
       var lo = flip ? x - wpc : x, hi = flip ? x : x + wpc;
-      var lane = placed[p.place] || (placed[p.place] = []), slot = 0;
+      var lane = placed[p.from] || (placed[p.from] = []), slot = 0;
       for (; slot < 3; slot++) {
         var free = true;
         for (var q = 0; q < lane.length; q++) {
@@ -557,7 +559,8 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       var fed = feedsOf(flow, p.id);
       var db = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
       dots += '<div class="dot' + db + ' s' + slot + (last ? ' end' : '') + (flip ? ' flip' : '') +
-        '" style="left:' + x + '%;top:' + yOf[p.place] + 'px" data-task="' + esc(p.id) + '"' +
+        '" style="left:' + x + '%;top:' + (yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from]) +
+        'px" data-task="' + esc(p.id) + '"' +
         ' title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
         (p.t.note ? '. ' + esc(p.t.note) : '') +
         (fed.length ? '. Feeds ' + esc(fed.map(function (x2) { return x2.name; }).join(', ')) : '') +
