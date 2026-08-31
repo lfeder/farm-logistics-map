@@ -212,10 +212,17 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 /* Branches. Two threads leaving the same morning -- the pallet and the clock
    running beside it -- and the whole point is that they are separate until they
    meet, so they do not share a colour. */
-.move.b0,.wait.b0{stroke:var(--ink)}
-.move.b1,.wait.b1{stroke:var(--accent)}
-.move.b2,.wait.b2{stroke:var(--good)}
-.move.b3,.wait.b3{stroke:var(--ink-3)}
+/* One colour per journey. Ten of them, because that is how many the week
+   holds; an eleventh would wrap and share, which is better than running out. */
+:root{
+  --j0:#141b1f; --j1:#d4541f; --j2:#1d6fb8; --j3:#1d7a52; --j4:#8b3fb5;
+  --j5:#9a7209; --j6:#b3341c; --j7:#0f8b8d; --j8:#a0489a; --j9:#5a6b7a;
+}
+.move.j0,.wait.j0{stroke:var(--j0)} .move.j1,.wait.j1{stroke:var(--j1)}
+.move.j2,.wait.j2{stroke:var(--j2)} .move.j3,.wait.j3{stroke:var(--j3)}
+.move.j4,.wait.j4{stroke:var(--j4)} .move.j5,.wait.j5{stroke:var(--j5)}
+.move.j6,.wait.j6{stroke:var(--j6)} .move.j7,.wait.j7{stroke:var(--j7)}
+.move.j8,.wait.j8{stroke:var(--j8)} .move.j9,.wait.j9{stroke:var(--j9)}
 .sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}
 
 /* ---------- the two pack days ---------- */
@@ -254,16 +261,20 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
    the bar between them. Hanging the name off one end made a flat bar read as
    though the name belonged to the far end of it. */
 .pt{fill:var(--card); stroke-width:2}
-.pt.b0{stroke:var(--ink)} .pt.b1{stroke:var(--accent)}
-.pt.b2{stroke:var(--good)} .pt.b3{stroke:var(--ink-3)}
+.pt.j0{stroke:var(--j0)} .pt.j1{stroke:var(--j1)} .pt.j2{stroke:var(--j2)}
+.pt.j3{stroke:var(--j3)} .pt.j4{stroke:var(--j4)} .pt.j5{stroke:var(--j5)}
+.pt.j6{stroke:var(--j6)} .pt.j7{stroke:var(--j7)} .pt.j8{stroke:var(--j8)}
+.pt.j9{stroke:var(--j9)}
 .ln{position:absolute; display:flex; align-items:center; gap:3px;
   font-size:10px; font-weight:600; line-height:1.2; cursor:pointer;
   background:var(--card); padding:1px 4px; border-radius:3px}
 /* Wrapped at every word: as wide as the longest word, as tall as it has
    words. Time is the crowded axis, place is not. */
 .ln .nw{width:min-content}
-.ln.b0{color:var(--ink)} .ln.b1{color:var(--accent)}
-.ln.b2{color:var(--good)} .ln.b3{color:var(--ink-3)}
+.ln.j0{color:var(--j0)} .ln.j1{color:var(--j1)} .ln.j2{color:var(--j2)}
+.ln.j3{color:var(--j3)} .ln.j4{color:var(--j4)} .ln.j5{color:var(--j5)}
+.ln.j6{color:var(--j6)} .ln.j7{color:var(--j7)} .ln.j8{color:var(--j8)}
+.ln.j9{color:var(--j9)}
 /* A name hangs off its leg's start dot, so it is anchored left and centred
    on whatever row the placement rule gave it. */
 .ln{transform:translate(0,-50%); margin-left:7px}

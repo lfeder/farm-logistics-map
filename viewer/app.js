@@ -223,6 +223,10 @@
           }
         });
       });
+      // The journey a leg belongs to, which is what it is coloured by. The
+      // start day is not part of it: the same journey run on Sunday and on
+      // Wednesday is one thing happening twice, and reads better as one.
+      tasks.forEach(function (t) { t.def = jn; });
       return { id: slug(jn) + '-' + slug(DOW[anchor]), name: jn, start: DOW[anchor],
         crop: rs[0].crop || '', fob: rs[0].fob || '', transport: rs[0].transport || '',
         branches: branches, tasks: tasks, windows: wins };
@@ -326,12 +330,20 @@
   function places(flow) {
     var seen = {}, out = [];
     flow.tasks.forEach(function (t) {
+      var b = t.branch || '1';
       [t.from, t.place].forEach(function (p) {
         p = p || 'Somewhere';
-        if (!seen[p]) { seen[p] = 1; out.push(p); }
+        if (!has(seen, p)) { seen[p] = { b: b, i: out.length }; out.push(p); }
+        else if (b < seen[p].b) seen[p].b = b;
       });
     });
-    return out;
+    // Branch 1 is the pallet and branch 2 is the clock running beside it, so
+    // the places only the clock touches go underneath -- the product's own
+    // path then reads as one block rather than being interrupted by the lab.
+    return out.sort(function (a, b) {
+      if (seen[a].b !== seen[b].b) return seen[a].b < seen[b].b ? -1 : 1;
+      return seen[a].i - seen[b].i;
+    });
   }
   function feedsOf(flow, id) {
     return flow.tasks.filter(function (t) { return (t.after || []).indexOf(id) >= 0; });
@@ -348,6 +360,14 @@
   var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
 
   function chart(flow, r) {
+    // One colour per journey, so a thread can be followed across a busy week.
+    var hue = {}, hues = 0;
+    flow.tasks.forEach(function (t) {
+      var d = t.def || flow.name;
+      if (!has(hue, d)) hue[d] = hues++;
+    });
+    function jc(t) { return ' j' + (hue[t.def || flow.name] % 10); }
+
     var lanes = places(flow), yOf = {};
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
@@ -385,7 +405,7 @@
       var still = p.from === p.place;
       // Branches are separate threads until they meet, so they do not share a
       // colour.
-      var b = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
+      var b = jc(p.t);
       if (p.e - p.s > .01 || !still) {
         if (still) wait += '<line class="wait' + b + '" ' + seg + '/>';
         else move += '<line class="move' + b + '" ' + seg + '/>';
@@ -405,7 +425,7 @@
     r.pts.forEach(function (p) {
       var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
       var y2 = yOf[p.place];
-      var db = ' b' + ((flow.branches || ['1']).indexOf(p.t.branch || '1') % 4);
+      var db = jc(p.t);
       var nm = p.t.name || 'Task';
       // One leg's stop is usually the next one's start, in the same place at
       // the same minute, and printing the hour twice on top of itself is how
@@ -433,7 +453,12 @@
       said[once] = 1;
 
       var ROW = 12;
-      var words = nm.split(/[\s\/]+/).filter(function (w) { return w; });
+      // Where the browser is allowed to break: at a space, and after a slash
+      // or a hyphen -- which stay on the line they end. Guessing this wrong
+      // makes a name shorter and taller than the model thinks, and then two
+      // names a step apart still touch.
+      var words = nm.replace(/([\/-])/g, '$1\u0000').split(/[\s\u0000]+/)
+        .filter(function (w) { return w; });
       var wLen = 0;
       words.forEach(function (w) { if (w.length > wLen) wLen = w.length; });
       var wpc = (12 + wLen * 5.6) / PLOT_PX * 100;
