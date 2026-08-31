@@ -160,9 +160,10 @@
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
 
     var svg = '';
-    // Every four hours, faint, so a bar can be read off the grid rather than
-    // off its label. The day boundaries keep their own heavier line.
-    for (var q = 4; q < SPAN * 24; q += 4) {
+    // Every two hours, faint. With no times written in the grid this is how a
+    // bar is read, so it is the finest ruling that stays quiet. The day
+    // boundaries keep their own heavier line.
+    for (var q = 2; q < SPAN * 24; q += 2) {
       if (q % 24 === 0) continue;
       svg += '<line class="hr" x1="' + X(q) + '" x2="' + X(q) + '" y1="0" y2="' + H + '"/>';
     }
@@ -207,7 +208,7 @@
     // A leg carries three labels: the hour at each end, against its own dot, and
     // the name on the bar between them. Hanging the name off one end made a
     // flat bar read as though the name belonged to the far end of it.
-    var dots = '', taken = [], stamped = {};
+    var dots = '', taken = [];
     r.pts.forEach(function (p) {
       var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
       var y2 = yOf[p.place];
@@ -216,30 +217,6 @@
       // One leg's stop is usually the next one's start, in the same place at
       // the same minute, and printing the hour twice on top of itself is how
       // that reads. Each moment gets one label.
-      function hourLbl(h, y, side) {
-        var k = y + '|' + h;
-        if (stamped[k]) return '';
-        stamped[k] = 1;
-        var w = (clock(h).length * 5.2 + 10) / PLOT_PX * 100, x = PCT(h);
-        var lo = side === 's' ? x - w : x, hi = side === 's' ? x : x + w;
-        // Two hours close together on one lane would print over each other, so
-        // the later one steps clear -- up if it opens a leg, down if it closes
-        // one, which keeps it on the side its own bar is heading.
-        var dy = 0;
-        for (var v = 0; v < 3; v++) {
-          dy = v === 0 ? 0 : (side === 's' ? -10 : 10) * v;
-          var clash = false;
-          for (var i2 = 0; i2 < taken.length; i2++) {
-            var o = taken[i2];
-            if (Math.abs(o.y - (y + dy)) < 9 && lo < o.hi + .4 && o.lo < hi + .4) { clash = true; break; }
-          }
-          if (!clash) break;
-        }
-        taken.push({ y: y + dy, lo: lo, hi: hi });
-        return '<div class="lt ' + side + db + '" style="left:' + x + '%;top:' + (y + dy) + 'px">' +
-          clock(h) + '</div>';
-      }
-      dots += hourLbl(p.s, y1, 's') + hourLbl(p.e, y2, 'e');
 
       // ── Where a leg's name goes ──────────────────────────────────────
       // The shape of the leg decides it, not the crowding:

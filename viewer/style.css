@@ -256,10 +256,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pt{fill:var(--card); stroke-width:2}
 .pt.b0{stroke:var(--ink)} .pt.b1{stroke:var(--accent)}
 .pt.b2{stroke:var(--good)} .pt.b3{stroke:var(--ink-3)}
-.lt{position:absolute; font-family:"IBM Plex Mono",monospace; font-size:9px; color:var(--ink-3);
-  white-space:nowrap; pointer-events:none}
-.lt.s{transform:translate(-100%,-50%); padding-right:7px}
-.lt.e{transform:translate(0,-50%); padding-left:7px}
 .ln{position:absolute; display:flex; align-items:center; gap:3px; white-space:nowrap;
   font-size:10px; font-weight:600; line-height:1; cursor:pointer;
   background:var(--card); padding:1px 4px; border-radius:3px}
