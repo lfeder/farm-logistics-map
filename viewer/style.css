@@ -65,6 +65,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .svg line{vector-effect:non-scaling-stroke}
 .lane{stroke:var(--line-2); stroke-width:1}
 .col{stroke:var(--line-2); stroke-width:1}
+.hr{stroke:var(--line-2); stroke-width:1; opacity:.45}
 .band{fill:var(--band)}
 .cap{position:absolute; font-size:8.5px; font-weight:600; color:var(--good);
   white-space:nowrap; padding-left:3px; pointer-events:none; opacity:.85}

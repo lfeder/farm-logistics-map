@@ -160,6 +160,12 @@
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
 
     var svg = '', caps = '', busy = {};
+    // Every four hours, faint, so a bar can be read off the grid rather than
+    // off its label. The day boundaries keep their own heavier line.
+    for (var q = 4; q < SPAN * 24; q += 4) {
+      if (q % 24 === 0) continue;
+      svg += '<line class="hr" x1="' + X(q) + '" x2="' + X(q) + '" y1="0" y2="' + H + '"/>';
+    }
     for (var c = 1; c < SPAN; c++) {
       svg += '<line class="col" x1="' + X(c * 24) + '" x2="' + X(c * 24) + '" y1="0" y2="' + H + '"/>';
     }

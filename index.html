@@ -75,6 +75,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .svg line{vector-effect:non-scaling-stroke}
 .lane{stroke:var(--line-2); stroke-width:1}
 .col{stroke:var(--line-2); stroke-width:1}
+.hr{stroke:var(--line-2); stroke-width:1; opacity:.45}
 .band{fill:var(--band)}
 .cap{position:absolute; font-size:8.5px; font-weight:600; color:var(--good);
   white-space:nowrap; padding-left:3px; pointer-events:none; opacity:.85}
@@ -497,6 +498,12 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
 
     var svg = '', caps = '', busy = {};
+    // Every four hours, faint, so a bar can be read off the grid rather than
+    // off its label. The day boundaries keep their own heavier line.
+    for (var q = 4; q < SPAN * 24; q += 4) {
+      if (q % 24 === 0) continue;
+      svg += '<line class="hr" x1="' + X(q) + '" x2="' + X(q) + '" y1="0" y2="' + H + '"/>';
+    }
     for (var c = 1; c < SPAN; c++) {
       svg += '<line class="col" x1="' + X(c * 24) + '" x2="' + X(c * 24) + '" y1="0" y2="' + H + '"/>';
     }
