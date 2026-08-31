@@ -131,45 +131,12 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   justify-content:flex-end; padding-right:3px}
 .ico{cursor:pointer; color:var(--ink-2); justify-content:center}
 .ico:hover{color:var(--accent)}
-.cell input,.cell select{width:100%; font-family:inherit; font-size:12.5px; padding:3px 6px;
-  border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink)}
-.cell input:focus,.cell select:focus{outline:none; border-color:var(--accent)}
-.cell input.nm{font-weight:600}
-.cell input[type=time],.cell select.dsel{font-family:"IBM Plex Mono",monospace; font-size:11px;
-  padding:3px 2px}
 .dur{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3);
   justify-content:flex-end; white-space:nowrap}
 /* A task that stops where it started is standing still, and that is the one
    thing on this screen worth spotting from across the room. */
 .dur.still{color:var(--accent); font-weight:600}
 .dur.bad{color:var(--bad); font-weight:600}
-.mini{background:none; border:1px solid var(--line); color:var(--ink-3); font-family:inherit;
-  font-size:11px; width:22px; height:22px; border-radius:5px; cursor:pointer; padding:0; line-height:1}
-.mini:hover:not(:disabled){border-color:var(--accent); color:var(--accent)}
-.mini.x:hover{border-color:var(--bad); color:var(--bad)}
-.mini:disabled{opacity:.35; cursor:default}
-.mini.has{border-color:var(--ink-3); color:var(--ink-2)}
-.afterwrap{position:relative; justify-content:flex-start}
-.after{background:var(--card-2); border:1px solid var(--line); color:var(--ink-3); font-family:inherit;
-  font-size:11px; padding:3px 8px; border-radius:11px; cursor:pointer; max-width:100%;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.after.on{color:var(--ink-2); border-color:var(--ink-3)}
-.after:hover{border-color:var(--accent); color:var(--accent)}
-.pop{position:absolute; z-index:20; top:26px; right:0; width:280px; padding:9px;
-  background:var(--card); border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow);
-  display:flex; flex-wrap:wrap; gap:4px}
-.pop[hidden]{display:none}
-.chip{border:1px solid var(--line); background:var(--card); color:var(--ink-3); font-family:inherit;
-  font-size:11px; padding:2px 8px; border-radius:11px; cursor:pointer; white-space:nowrap}
-.chip.on{background:var(--ink); border-color:var(--ink); color:var(--card); font-weight:600}
-.chip:hover:not(.on){border-color:var(--accent); color:var(--accent)}
-.feeds{flex:1 1 100%; font-size:11px; color:var(--ink-3); padding-top:3px;
-  border-top:1px solid var(--line-2); margin-top:2px}
-.feeds b{color:var(--ink-2); font-weight:600}
-.noterow{grid-column:3 / -1; padding:0 0 7px}
-.noterow[hidden]{display:none}
-.noterow input{width:100%; font-family:inherit; font-size:12px; padding:3px 7px;
-  border:1px solid var(--line); border-radius:5px; background:var(--card-2); color:var(--ink-2)}
 .noterow input:focus{outline:none; border-color:var(--accent); background:var(--card)}
 .warn{margin:12px 18px 0; padding:9px 12px; border:1px solid var(--bad); border-radius:7px;
   background:var(--accent-soft); color:var(--bad); font-size:12.5px}
@@ -177,19 +144,68 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 /* ---------- opening hours, which belong to a place ---------- */
 /* A window is a fact about a door, not about a task: Costco receiving is open
    4 to 11 whether or not anything is driving towards it. */
-.places{display:flex; flex-wrap:wrap; gap:8px; padding:11px 18px 14px; border-top:1px solid var(--line-2)}
-.pl{display:flex; align-items:center; gap:5px; border:1px solid var(--line); border-radius:8px;
-  padding:5px 9px; background:var(--card-2)}
-.pl b{font-size:11.5px; font-weight:600; color:var(--ink-2)}
-.pl input[type=time]{width:88px; font-family:"IBM Plex Mono",monospace; font-size:11px; padding:2px 2px;
-  border:1px solid var(--line); border-radius:4px; background:var(--card); color:var(--ink)}
-.pl .dash{color:var(--ink-3); font-size:11px}
 .dcell{display:inline-flex; gap:1px}
 .d{width:17px; height:20px; border:1px solid var(--line); background:var(--card); color:var(--ink-3);
   font-family:inherit; font-size:9.5px; font-weight:600; border-radius:3px; cursor:pointer; padding:0}
 .d.on{background:var(--good); border-color:var(--good); color:#fff}
 .d:hover{border-color:var(--accent)}
 @media (max-width:1150px){ .tasks{overflow-x:auto} .grid{min-width:1120px} }
+
+/* ---------- tabs ---------- */
+.tabs{margin-left:auto}
+.page{display:flex; flex-direction:column; gap:24px}
+.page[hidden]{display:none}
+code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--card-2);
+  border:1px solid var(--line-2); border-radius:4px; padding:0 4px}
+
+/* ---------- the task list, now a reading rather than a form ---------- */
+.grid{display:grid; gap:0 10px; align-items:center;
+  grid-template-columns:22px 24px minmax(130px,1.2fr) minmax(90px,.8fr)
+    118px 118px 62px minmax(90px,.9fr) minmax(0,1.6fr);}
+.cell{padding:6px 0; border-bottom:1px solid var(--line-2); height:100%;
+  display:flex; align-items:center; min-width:0}
+.cell.nm{font-weight:600; font-size:13px}
+.cell.plc{font-size:12.5px; color:var(--ink-2)}
+.cell.tm{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-2)}
+.cell.tm.out{color:var(--bad); font-weight:600}
+.cell.aft{font-size:11.5px; color:var(--ink-3)}
+.cell.nt{font-size:11.5px; color:var(--ink-3); line-height:1.35; padding-right:2px}
+.cell.nt em{font-style:normal; color:var(--ink-3)}
+.row.lit .cell{background:var(--accent-soft)}
+.row.bad .cell{background:var(--accent-soft)}
+.tasks{padding:0 18px 18px}
+
+/* ---------- orders and hours ---------- */
+.otbl{width:100%; border-collapse:collapse}
+.otbl th,.otbl td{text-align:right; padding:5px 10px 5px 0; white-space:nowrap; border:none}
+.otbl thead th{font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:600; padding-bottom:6px; border-bottom:2px solid var(--ink)}
+.otbl tbody th{text-align:left; font-size:12px; font-weight:600; color:var(--ink-2)}
+.otbl th.wk{vertical-align:middle; font-family:"IBM Plex Mono",monospace; font-size:11px}
+.otbl th.hf{font-weight:500; color:var(--ink-3); font-size:11.5px}
+.otbl tr.wkstart th,.otbl tr.wkstart td{border-top:1px solid var(--line-2)}
+.otbl tr.grp th{font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  border-top:2px solid var(--ink); padding-top:10px; text-align:left}
+.otbl td b{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+  font-size:14px; font-weight:600; color:var(--ink)}
+.otbl td s{text-decoration:none; margin-left:4px; font-family:"IBM Plex Mono",monospace;
+  font-size:10px; color:var(--ink-3)}
+.otbl td u{text-decoration:none; color:var(--ink-3); font-size:14px}
+.otbl .barcell{width:110px; padding-right:0}
+.obar{display:block; height:9px; margin-left:auto; background:var(--band);
+  border-right:2px solid var(--band-2)}
+.otbl.hrs td.dcell,.otbl.hrs td.mono,.otbl.hrs td.nt{text-align:left}
+.otbl.hrs .mono{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-2)}
+.otbl.hrs .d{display:inline-block; width:17px; height:20px; line-height:19px; text-align:center;
+  border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink-3);
+  font-size:9.5px; font-weight:600; margin-right:1px}
+.otbl.hrs .d.on{background:var(--good); border-color:var(--good); color:#fff}
+.body h4{margin:18px 0 8px; font-size:11px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-2); font-weight:600}
+.body h4:first-child{margin-top:0}
+.hint{margin:14px 0 0; font-size:11.5px; color:var(--ink-3); line-height:1.5}
+.hint b{color:var(--ink-2); font-weight:600}
+
 </style>
 </head>
 <body>
@@ -197,42 +213,68 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   <header>
     <div>
       <h1>Task Vis</h1>
-      <p class="sub" id="sub">One flow at a time. Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.</p>
+      <p class="sub" id="sub">Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.</p>
     </div>
+    <nav class="seg tabs" id="tabs"></nav>
   </header>
 
-  <section class="panel">
-    <div class="panel-hd">
-      <h2>Flow</h2>
-      <span class="seg" id="pick"></span>
-      <span class="lbl">Day 0</span>
-      <span class="seg" id="day"></span>
-      <button class="btn" id="reset" style="margin-left:auto">Back to defaults</button>
+  <!-- Flow -->
+  <section class="page" id="page-flow">
+    <div class="panel">
+      <div class="panel-hd">
+        <h2>Journey</h2>
+        <span class="seg" id="pick"></span>
+        <span class="lbl">Day 0</span>
+        <span class="seg" id="day"></span>
+        <span class="note" id="src" style="margin-left:auto"></span>
+      </div>
+      <div class="body">
+        <div class="axis" id="axis"></div>
+        <div id="grid"></div>
+        <div class="legend" id="legend"></div>
+      </div>
     </div>
-    <div class="body">
-      <div class="axis" id="axis"></div>
-      <div id="grid"></div>
-      <div class="legend" id="legend"></div>
+    <div class="panel">
+      <div class="panel-hd"><h2>Tasks</h2><span class="note" id="tnote"></span></div>
+      <div id="warn"></div>
+      <div class="tasks" id="tasks"></div>
     </div>
-    <div class="places" id="places"></div>
   </section>
 
-  <section class="panel">
-    <div class="panel-hd">
-      <h2>Tasks</h2>
-      <span class="note" id="tnote"></span>
-      <button class="btn solid" id="add" style="margin-left:auto">Add a task</button>
+  <!-- Orders -->
+  <section class="page" id="page-orders" hidden>
+    <div class="panel">
+      <div class="panel-hd">
+        <h2>Orders by destination</h2>
+        <span class="seg" id="ocrop"></span>
+        <span class="note" id="onote" style="margin-left:auto"></span>
+      </div>
+      <div class="body"><div id="orders"></div></div>
     </div>
-    <div id="warn"></div>
-    <div class="tasks" id="tasks"></div>
+  </section>
+
+  <!-- Hours -->
+  <section class="page" id="page-hours" hidden>
+    <div class="panel">
+      <div class="panel-hd">
+        <h2>Opening hours</h2>
+        <span class="note">A window belongs to a place, not to a task — Costco receiving is open 4 to 11 whether or not anything is driving towards it.</span>
+      </div>
+      <div class="body"><div id="hours"></div></div>
+    </div>
   </section>
 </div>
+
+<script>
+window.FLOWS = [{"id":"lettuce-costco-kona","name":"Lettuce \u2192 Costco Kona","note":"Our own box truck. No carrier at all, so the only thing between packing and the customer is who is awake.","days":["Sun","Mon","Wed","Thu"],"windows":{"Packhouse":{"days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0},"Costco Kona":{"days":[0,1,1,1,1,1,1],"open":4.0,"close":11.0}},"tasks":[{"id":"t0","name":"Packing","place":"Packhouse","s":10.0,"e":18.0,"icon":"box","note":"Ends at 6 PM, which is the clock everything else answers to.","after":[]},{"id":"t1","name":"Waits for the crew","place":"Packhouse","s":18.0,"e":30.0,"icon":"clock","note":"Nobody is at the packhouse overnight, so it stands here until six.","after":["t0"]},{"id":"t2","name":"Load the truck","place":"Packhouse","s":30.0,"e":31.0,"icon":"truck","note":"A box truck cannot stand loaded overnight, so it is loaded right before it drives.","after":["t1"]},{"id":"t3","name":"Drive to Kona","place":"Costco Kona","s":31.0,"e":33.0,"icon":"truck","note":"","after":["t2"]},{"id":"t4","name":"Costco receiving","place":"Costco Kona","s":33.0,"e":33.5,"icon":"store","note":"Inside the 4-11 window, so it goes straight in.","after":["t3"]}]},{"id":"lettuce-oahu-barge","name":"Lettuce \u2192 Oahu, barge","note":"The container is shut the evening we pack and stands loaded, so it leaves as soon as it is closed and does its waiting in somebody else's yard.","days":["Sun","Mon","Wed","Thu"],"windows":{"Packhouse":{"days":[1,1,1,1,1,1,1],"open":6.0,"close":19.0},"Kawaihae":{"days":[0,1,1,1,1,1,0],"open":7.0,"close":16.0},"Honolulu":{"days":[0,1,1,1,1,1,1],"open":7.0,"close":15.0},"HFA":{"days":[0,1,1,1,1,1,0],"open":6.0,"close":15.0},"Customer":{"days":[0,1,1,1,1,1,1],"open":5.0,"close":12.0}},"tasks":[{"id":"t0","name":"Packing","place":"Packhouse","s":10.0,"e":18.0,"icon":"box","note":"","after":[]},{"id":"t1","name":"Load the container","place":"Packhouse","s":18.0,"e":20.0,"icon":"box","note":"It stands loaded from here, which is why it can leave at once.","after":["t0"]},{"id":"t2","name":"Drive to Kawaihae","place":"Kawaihae","s":20.0,"e":23.0,"icon":"truck","note":"","after":["t1"]},{"id":"t3","name":"Waits for acceptance","place":"Kawaihae","s":23.0,"e":31.0,"icon":"clock","note":"Young Brothers take cargo from seven.","after":["t2"]},{"id":"t4","name":"Waits for the boat","place":"Kawaihae","s":31.0,"e":42.0,"icon":"clock","note":"Sails Tuesday and Friday.","after":["t3"]},{"id":"t5","name":"Sails to Honolulu","place":"Honolulu","s":42.0,"e":54.0,"icon":"ship","note":"","after":["t4"]},{"id":"t6","name":"Waits to be released","place":"Honolulu","s":54.0,"e":79.0,"icon":"clock","note":"Available the next business day after arrival.","after":["t5"]},{"id":"t7","name":"HFA collects","place":"HFA","s":79.0,"e":80.0,"icon":"depot","note":"","after":["t6"]},{"id":"t8","name":"HFA runs the route","place":"Customer","s":80.0,"e":101.0,"icon":"truck","note":"","after":["t7"]},{"id":"t9","name":"Customer receiving","place":"Customer","s":101.0,"e":101.5,"icon":"store","note":"","after":["t8"]}]}];
+window.DATA = {"generated_from":"farm-freight-model data.json (sales_po x sales_po_line x sales_fob)","window":{"first":"2026-07-17","last":"2026-08-28"},"on_island_customer":"140 Kona","sales":[{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"kona","lbs":420},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":578},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"off","lbs":1834},{"crop":"lettuce","wk":"2026-07-12","half":"early","bucket":"other","lbs":5},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"kona","lbs":420},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":489},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"off","lbs":3411},{"crop":"lettuce","wk":"2026-07-12","half":"late","bucket":"other","lbs":17},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"kona","lbs":630},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":506},{"crop":"lettuce","wk":"2026-07-19","half":"early","bucket":"off","lbs":3323},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"kona","lbs":630},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":582},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"off","lbs":2975},{"crop":"lettuce","wk":"2026-07-19","half":"late","bucket":"other","lbs":20},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"kona","lbs":630},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":618},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"off","lbs":3405},{"crop":"lettuce","wk":"2026-07-26","half":"early","bucket":"other","lbs":7},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"kona","lbs":420},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":677},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"off","lbs":2945},{"crop":"lettuce","wk":"2026-07-26","half":"late","bucket":"other","lbs":20},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"kona","lbs":630},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":521},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"off","lbs":3259},{"crop":"lettuce","wk":"2026-08-02","half":"early","bucket":"other","lbs":7},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"kona","lbs":420},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":603},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"off","lbs":2717},{"crop":"lettuce","wk":"2026-08-02","half":"late","bucket":"other","lbs":22},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"kona","lbs":630},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":739},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"off","lbs":2933},{"crop":"lettuce","wk":"2026-08-09","half":"early","bucket":"other","lbs":7},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"kona","lbs":420},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":1165},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"off","lbs":3114},{"crop":"lettuce","wk":"2026-08-09","half":"late","bucket":"other","lbs":33},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"kona","lbs":630},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":659},{"crop":"lettuce","wk":"2026-08-16","half":"early","bucket":"off","lbs":1438},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"kona","lbs":210},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":534},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"off","lbs":2498},{"crop":"lettuce","wk":"2026-08-16","half":"late","bucket":"other","lbs":26},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"kona","lbs":630},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":647},{"crop":"lettuce","wk":"2026-08-23","half":"early","bucket":"off","lbs":2183},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"kona","lbs":420},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":597},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"off","lbs":2778},{"crop":"lettuce","wk":"2026-08-23","half":"late","bucket":"other","lbs":31},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"kona","lbs":4032},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"pickup","lbs":13566},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"off","lbs":22076},{"crop":"cuke","wk":"2026-07-12","half":"early","bucket":"other","lbs":112},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"kona","lbs":3456},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"pickup","lbs":6854},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"off","lbs":17056},{"crop":"cuke","wk":"2026-07-12","half":"late","bucket":"other","lbs":240},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"kona","lbs":4512},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"pickup","lbs":7775},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"off","lbs":27684},{"crop":"cuke","wk":"2026-07-19","half":"early","bucket":"other","lbs":112},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"kona","lbs":3072},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"pickup","lbs":6240},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"off","lbs":20576},{"crop":"cuke","wk":"2026-07-19","half":"late","bucket":"other","lbs":240},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"kona","lbs":3936},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"pickup","lbs":6347},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"off","lbs":26140},{"crop":"cuke","wk":"2026-07-26","half":"early","bucket":"other","lbs":112},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"kona","lbs":4128},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"pickup","lbs":6338},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"off","lbs":22980},{"crop":"cuke","wk":"2026-07-26","half":"late","bucket":"other","lbs":200},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"kona","lbs":4128},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"pickup","lbs":7054},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"off","lbs":22804},{"crop":"cuke","wk":"2026-08-02","half":"early","bucket":"other","lbs":112},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"kona","lbs":3840},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"pickup","lbs":6664},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"off","lbs":23636},{"crop":"cuke","wk":"2026-08-02","half":"late","bucket":"other","lbs":248},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"kona","lbs":3360},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"pickup","lbs":7187},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"off","lbs":26000},{"crop":"cuke","wk":"2026-08-09","half":"early","bucket":"other","lbs":112},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"kona","lbs":3456},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"pickup","lbs":5763},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"off","lbs":22712},{"crop":"cuke","wk":"2026-08-09","half":"late","bucket":"other","lbs":308},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"kona","lbs":5664},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"pickup","lbs":6974},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"off","lbs":23416},{"crop":"cuke","wk":"2026-08-16","half":"early","bucket":"other","lbs":112},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"kona","lbs":4704},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"pickup","lbs":5904},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"off","lbs":18740},{"crop":"cuke","wk":"2026-08-16","half":"late","bucket":"other","lbs":308},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"kona","lbs":4032},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"pickup","lbs":7011},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"off","lbs":23480},{"crop":"cuke","wk":"2026-08-23","half":"early","bucket":"other","lbs":112},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"kona","lbs":4320},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"pickup","lbs":5865},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"off","lbs":24932},{"crop":"cuke","wk":"2026-08-23","half":"late","bucket":"other","lbs":284}]};
+</script>
 <script>
 (function () {
   "use strict";
 
   var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  var STORE = 'taskvis.flows.v3';
+  var STORE = 'taskvis.view.v1';
 
   var ICON = {
     box:   '<path d="M2 5.2 8 2.4l6 2.8v5.6L8 13.6 2 10.8z"/><path d="M2 5.2 8 8l6-2.8M8 8v5.6"/>',
@@ -265,43 +307,22 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   //
   // Opening hours belong to a PLACE, not to a task. Costco receiving is open 4
   // to 11 whether or not anything is driving towards it.
-  function defaults() {
-    return [{
-      id: 'kona-lettuce',
-      name: 'Lettuce → Costco Kona',
-      note: 'Our own box truck. No carrier at all, so the only thing between packing and the customer is who is awake.',
-      days: ['Sun', 'Mon', 'Wed', 'Thu'],
-      windows: {
-        'Packhouse':   { days: [1,1,1,1,1,1,1], open: 6, close: 19 },
-        'Costco Kona': { days: [0,1,1,1,1,1,1], open: 4, close: 11 }
-      },
-      tasks: [
-        { id: 'pack',  name: 'Packing',          place: 'Packhouse',   icon: 'box',
-          s: 10, e: 18, after: [],
-          note: 'Ends at 6 PM, which is when the clock everything else answers to starts.' },
-        { id: 'hold',  name: 'Waits for the crew', place: 'Packhouse', icon: 'clock',
-          s: 18, e: 30, after: ['pack'],
-          note: 'Nobody is at the packhouse overnight, so it stands here until six.' },
-        { id: 'load',  name: 'Load the truck',   place: 'Packhouse',   icon: 'truck',
-          s: 30, e: 31, after: ['hold'],
-          note: 'A box truck cannot stand loaded overnight, so it is loaded right before it drives.' },
-        { id: 'drive', name: 'Drive to Kona',    place: 'Costco Kona', icon: 'truck',
-          s: 31, e: 33, after: ['load'] },
-        { id: 'recv',  name: 'Costco receiving', place: 'Costco Kona', icon: 'store',
-          s: 33, e: 33.5, after: ['drive'],
-          note: 'Inside the 4–11 window, so it goes straight in.' }
-      ]
-    }];
-  }
-
-  var F = defaults(), S = { id: 'kona-lettuce', day: 'Sun' };
+  // The flows are baked in from journeys.md at build time. Nothing here writes
+  // them; to change a journey you edit the Markdown and run build.py.
+  var F = window.FLOWS || [], DATA = window.DATA || {};
+  var S = { id: F.length ? F[0].id : '', day: F.length ? F[0].days[0] : 'Sun', tab: 'flow' };
   try {
     var sv = JSON.parse(window.localStorage.getItem(STORE) || 'null');
-    if (sv && sv.flows && sv.flows.length) F = sv.flows;
-    if (sv && sv.pick) S = sv.pick;
+    if (sv) {
+      if (F.some(function (f) { return f.id === sv.id; })) S.id = sv.id;
+      if (sv.day) S.day = sv.day;
+      if (sv.tab) S.tab = sv.tab;
+      if (sv.crop) S.crop = sv.crop;
+    }
   } catch (e) { /* nothing stored, or junk in the slot */ }
+  S.crop = S.crop || 'lettuce';
   function save() {
-    try { window.localStorage.setItem(STORE, JSON.stringify({ flows: F, pick: S })); } catch (e) {}
+    try { window.localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {}
   }
   function cur() {
     for (var i = 0; i < F.length; i++) if (F[i].id === S.id) return F[i];
@@ -508,70 +529,10 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       caps + dots + '</div></div>';
   }
 
-  // ── The list ──────────────────────────────────────────────────────────────
-  var COLS = ['', '', 'Task', 'Place', 'Starts', '', 'Stops', '', 'Takes', 'After', '', '', '', ''];
-  function daySel(v, f) {
-    var o = '';
-    for (var d = 0; d < 7; d++) {
-      o += '<option value="' + d + '"' + (d === v ? ' selected' : '') + '>' + dayName(d) + '</option>';
-    }
-    return '<select class="dsel" data-f="' + f + '">' + o + '</select>';
-  }
-  function row(t, i, flow, r) {
-    var p = null;
-    r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
-    var len = num(t.e) - num(t.s);
-    var still = p && p.from === (t.place || 'Somewhere');
-    var pre = (t.after || []).filter(function (id) { return r.byId[id]; });
-    var afterLbl = !pre.length ? 'after —'
-      : pre.length === 1 ? 'after ' + (r.byId[pre[0]].name || '?')
-      : 'after ' + pre.length;
-    var others = flow.tasks.filter(function (o) { return o.id !== t.id; });
-    var fed = feedsOf(flow, t.id);
-    var pop = '<div class="pop" hidden>' + (others.length
-      ? others.map(function (o) {
-          return '<button class="chip' + ((t.after || []).indexOf(o.id) >= 0 ? ' on' : '') +
-            '" data-after="' + esc(o.id) + '">' + esc(o.name) + '</button>';
-        }).join('')
-      : '<span class="feeds">nothing else to depend on yet</span>') +
-      '<div class="feeds">' + (fed.length
-        ? 'Feeds <b>' + fed.map(function (o) { return esc(o.name); }).join('</b>, <b>') + '</b>'
-        : 'Feeds nothing') + '</div></div>';
-
-    return '<div class="row' + (len < 0 ? ' bad' : '') + '" id="task-' + esc(t.id) + '">' +
-      '<div class="cell n">' + (i + 1) + '</div>' +
-      '<div class="cell ico" data-ico="1" title="Change the icon">' + ico(t.icon) + '</div>' +
-      '<div class="cell"><input class="nm" value="' + esc(t.name) + '" data-f="name" placeholder="Name"' +
-      (t.note ? ' title="' + esc(t.note) + '"' : '') + '></div>' +
-      '<div class="cell"><input value="' + esc(t.place) + '" data-f="place" list="places-list" placeholder="Place"></div>' +
-      '<div class="cell">' + daySel(dayOf(num(t.s)), 'sday') + '</div>' +
-      '<div class="cell"><input type="time" step="900" value="' + hhmm(num(t.s)) + '" data-f="stime"></div>' +
-      '<div class="cell">' + daySel(dayOf(num(t.e)), 'eday') + '</div>' +
-      '<div class="cell"><input type="time" step="900" value="' + hhmm(num(t.e)) + '" data-f="etime"></div>' +
-      '<div class="cell dur' + (len < 0 ? ' bad' : still && len > .01 ? ' still' : '') + '">' +
-      (len < 0 ? 'backwards' : dur(len)) + '</div>' +
-      '<div class="cell afterwrap"><button class="after' + (pre.length ? ' on' : '') +
-      '" title="What has to happen first">' + esc(afterLbl) + '</button>' + pop + '</div>' +
-      '<div class="cell"><button class="mini' + (t.note ? ' has' : '') + '" data-note="1" title="' +
-      (t.note ? esc(t.note) : 'Add a note') + '">&#9432;</button></div>' +
-      '<div class="cell"><button class="mini" data-mv="-1" title="Move up"' +
-      (i ? '' : ' disabled') + '>&#8593;</button></div>' +
-      '<div class="cell"><button class="mini" data-mv="1" title="Move down"' +
-      (i === flow.tasks.length - 1 ? ' disabled' : '') + '>&#8595;</button></div>' +
-      '<div class="cell"><button class="mini x" data-del="1" title="Remove">&times;</button></div>' +
-      '<div class="noterow" hidden><input value="' + esc(t.note || '') +
-      '" data-f="note" placeholder="Why this task is here"></div>' +
-      '</div>';
-  }
-  function blank(after, s) {
-    return { id: uid('t'), name: 'New task', place: '', icon: 'clock',
-             s: s, e: s + 1, after: after || [] };
-  }
 
   // ── Gating on the hours ───────────────────────────────────────────────────
-  // The times are typed, not solved, so a window cannot push them about. What
-  // it can do is say when a typed time falls outside the door it belongs to,
-  // and offer to move it to the next moment that door is open.
+  // The times come from the Markdown, so a window cannot push them about. What
+  // it can do is say when a written time falls outside the door it belongs to.
   function nextOpen(w, h) {
     for (var i = 0; i < 28; i++) {
       var d = Math.floor(h / 24) + i, dw = (dowIdx(ANCHOR) + d) % 7;
@@ -584,28 +545,162 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   }
   function outside(flow, place, h) {
     var w = winOf(flow, place);
-    if (!w) return false;
-    return nextOpen(w, h) !== h;
+    return w ? nextOpen(w, h) !== h : false;
   }
   function offences(flow) {
     var out = [];
     flow.tasks.forEach(function (t) {
-      var pl = t.place || 'Somewhere', w = winOf(flow, pl);
-      if (!w) return;
-      if (outside(flow, pl, num(t.s))) out.push({ t: t, f: 's', pl: pl });
-      if (outside(flow, pl, num(t.e))) out.push({ t: t, f: 'e', pl: pl });
+      var pl = t.place || 'Somewhere';
+      if (!winOf(flow, pl)) return;
+      if (outside(flow, pl, num(t.s))) out.push({ t: t, f: 'starts', h: num(t.s), pl: pl });
+      if (outside(flow, pl, num(t.e))) out.push({ t: t, f: 'stops', h: num(t.e), pl: pl });
     });
     return out;
   }
 
+  // ── The task list, which is a reading of the Markdown ─────────────────────
+  var COLS = ['', '', 'Task', 'Place', 'Starts', 'Stops', 'Takes', 'After', 'Note'];
+  function taskTable(flow, r) {
+    var body = flow.tasks.map(function (t, i) {
+      var p = null;
+      r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
+      var len = num(t.e) - num(t.s);
+      var still = p && p.from === (t.place || 'Somewhere');
+      var pre = (t.after || []).filter(function (id) { return r.byId[id]; });
+      var badS = outside(flow, t.place || 'Somewhere', num(t.s));
+      var badE = outside(flow, t.place || 'Somewhere', num(t.e));
+      return '<div class="row' + (len < 0 ? ' bad' : '') + '" id="task-' + esc(t.id) + '">' +
+        '<div class="cell n">' + (i + 1) + '</div>' +
+        '<div class="cell ico">' + ico(t.icon) + '</div>' +
+        '<div class="cell nm">' + esc(t.name) + '</div>' +
+        '<div class="cell plc">' + esc(t.place) + '</div>' +
+        '<div class="cell tm' + (badS ? ' out' : '') + '"' +
+        (badS ? ' title="' + esc(t.place) + ' is shut then."' : '') + '>' + stamp(num(t.s)) + '</div>' +
+        '<div class="cell tm' + (badE ? ' out' : '') + '"' +
+        (badE ? ' title="' + esc(t.place) + ' is shut then."' : '') + '>' + stamp(num(t.e)) + '</div>' +
+        '<div class="cell dur' + (len < 0 ? ' bad' : still && len > .01 ? ' still' : '') + '">' +
+        (len < 0 ? 'backwards' : dur(len)) + '</div>' +
+        '<div class="cell aft">' + (pre.length
+          ? pre.map(function (id) { return esc(r.byId[id].name); }).join(', ') : '—') + '</div>' +
+        '<div class="cell nt">' + esc(t.note || '') + '</div>' +
+        '</div>';
+    }).join('');
+    return '<div class="grid">' +
+      COLS.map(function (c, i) { return '<div class="gh' + (i === 6 ? ' r' : '') + '">' + c + '</div>'; }).join('') +
+      body + '</div>';
+  }
+
+  // ── Orders by destination ─────────────────────────────────────────────────
+  // Three ways an order leaves the farm, off the purchase orders, so it owes
+  // nothing to whether anybody built a pallet for it.
+  var BUCKETS = [['kona', 'Costco Kona'], ['pickup', 'Pick up'], ['off', 'Off-island']];
+  function ordersView() {
+    var c = S.crop, rows = {}, weeks = {};
+    (DATA.sales || []).forEach(function (x) {
+      if (x.crop !== c) return;
+      var k = x.wk + '|' + x.half;
+      (rows[k] || (rows[k] = {}))[x.bucket] = ((rows[k] || {})[x.bucket] || 0) + x.lbs;
+      weeks[x.wk] = 1;
+    });
+    var wks = Object.keys(weeks).sort();
+    var HALF = [['early', 'Sun / Mon'], ['late', 'Wed / Thu']];
+    var best = 0;
+    wks.forEach(function (w) {
+      HALF.forEach(function (h) {
+        var b = rows[w + '|' + h[0]];
+        if (b) best = Math.max(best, (b.kona || 0) + (b.pickup || 0) + (b.off || 0));
+      });
+    });
+    function lb(v) { return v ? '<b>' + Math.round(v).toLocaleString() + '</b><s>lb</s>' : '<u>—</u>'; }
+    var tot = { kona: 0, pickup: 0, off: 0, n: 0 };
+    var body = wks.map(function (w) {
+      return HALF.map(function (h, hi) {
+        var b = rows[w + '|' + h[0]] || null;
+        if (b) { tot.kona += b.kona || 0; tot.pickup += b.pickup || 0; tot.off += b.off || 0; tot.n++; }
+        var sum = b ? (b.kona || 0) + (b.pickup || 0) + (b.off || 0) : 0;
+        var bar = sum && best ? '<span class="obar" style="width:' + (sum / best * 100).toFixed(1) + '%"></span>' : '';
+        return '<tr class="' + (hi ? '' : 'wkstart') + '">' +
+          (hi ? '' : '<th rowspan="2" class="wk">' + shortDate(w) + '</th>') +
+          '<th class="hf">' + h[1] + '</th>' +
+          BUCKETS.map(function (k) { return '<td>' + lb(b ? b[k[0]] : 0) + '</td>'; }).join('') +
+          '<td class="barcell">' + bar + '</td></tr>';
+      }).join('');
+    }).join('');
+    var avg = '<tr class="grp"><th colspan="6">Per window</th></tr><tr><th></th><th class="hf">Average</th>' +
+      BUCKETS.map(function (k) { return '<td>' + lb(tot.n ? tot[k[0]] / tot.n : 0) + '</td>'; }).join('') +
+      '<td class="barcell"></td></tr>';
+    return '<table class="otbl"><thead><tr><th></th><th></th>' +
+      BUCKETS.map(function (k) { return '<th>' + k[1] + '</th>'; }).join('') +
+      '<th></th></tr></thead><tbody>' + body + avg + '</tbody></table>' +
+      '<p class="hint">Pounds invoiced, off the purchase orders, split by how the order leaves the farm: ' +
+      '<b>' + esc(DATA.on_island_customer || 'Kona') + '</b> on our own trucks, <b>pick up</b> at the gate ' +
+      'under FOB Farm, and <b>off-island</b> on a boat. ' +
+      'The freight manifest cannot answer this — it misses more than half of Kona, because it only holds ' +
+      'what somebody built a pallet for, and it has no notion of pick-up at all.</p>';
+  }
+  function shortDate(iso) {
+    var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var d = new Date(iso + 'T00:00:00');
+    return d.getDate() + ' ' + M[d.getMonth()];
+  }
+
+  // ── Opening hours, every place across every journey ───────────────────────
+  function hoursView() {
+    var seen = {};
+    var out = F.map(function (flow) {
+      var pl = places(flow).filter(function (p) { return winOf(flow, p); });
+      if (!pl.length) return '';
+      return '<h4>' + esc(flow.name) + '</h4><table class="otbl hrs"><thead><tr>' +
+        '<th>Place</th><th>Days</th><th>Opens</th><th>Closes</th><th></th></tr></thead><tbody>' +
+        pl.map(function (p) {
+          var w = winOf(flow, p);
+          var key = p + '|' + w.days.join('') + '|' + w.open + '|' + w.close;
+          var dup = seen[key] ? ' <em>same as above</em>' : '';
+          seen[key] = 1;
+          return '<tr><th class="hf">' + esc(p) + '</th>' +
+            '<td class="dcell">' + DOW.map(function (dn, d) {
+              return '<span class="d' + (w.days[d] ? ' on' : '') + '" title="' + dn + '">' + dn[0] + '</span>';
+            }).join('') + '</td>' +
+            '<td class="mono">' + clock(num(w.open)) + '</td>' +
+            '<td class="mono">' + clock(num(w.close)) + '</td>' +
+            '<td class="nt">' + dup + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    }).join('');
+    return out + '<p class="hint">Set in <code>journeys.md</code> under each journey&rsquo;s ' +
+      '<b>Hours</b> table. These are real weekdays — Costco receiving is shut on a Sunday whatever ' +
+      'day we cut on — where the task times are offsets from the cut.</p>';
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
-  function paint(chartOnly) {
+  var TABS = [['flow', 'Flow'], ['orders', 'Orders'], ['hours', 'Hours']];
+  function paint() {
+    seg('tabs', TABS, S.tab, function (v) { S.tab = v; save(); paint(); });
+    TABS.forEach(function (t) {
+      document.getElementById('page-' + t[0]).hidden = t[0] !== S.tab;
+    });
+    if (S.tab === 'flow') paintFlow();
+    if (S.tab === 'orders') paintOrders();
+    if (S.tab === 'hours') document.getElementById('hours').innerHTML = hoursView();
+  }
+
+  function paintFlow() {
+    if (!F.length) {
+      document.getElementById('grid').innerHTML = '<p class="hint">No journeys in journeys.md.</p>';
+      return;
+    }
     var flow = cur();
     if (flow.days.indexOf(S.day) < 0) S.day = flow.days[0];
     ANCHOR = S.day;
 
     var r = read(flow);
     SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
+
+    seg('pick', F.map(function (x) { return [x.id, x.name]; }), S.id,
+      function (v) { S.id = v; save(); paint(); });
+    seg('day', flow.days.map(function (d) { return [d, d]; }), S.day,
+      function (v) { S.day = v; save(); paint(); });
+    document.getElementById('src').innerHTML =
+      'Defined in <code>journeys.md</code> — edit that and run <code>build.py</code>.';
 
     var ax = '';
     for (var i = 0; i < SPAN; i++) {
@@ -617,12 +712,9 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       '<span><i class="sw band"></i>a green box is one day of that place&rsquo;s opening hours</span>' +
       '<span><i class="sw mv"></i>moving</span>' +
       '<span><i class="sw wt"></i>standing still</span>' +
-      '<span><i class="sw tk"></i>where a task starts</span>' +
-      '<span class="note">Drag a bar to move the whole task. Click any bar or dot to find its row.</span>';
-    document.getElementById('places').innerHTML = placeEditor(flow);
+      '<span><i class="sw tk"></i>where a task starts</span>';
 
-    var off = offences(flow);
-    var warn = '';
+    var off = offences(flow), warn = '';
     if (r.broken.length) {
       warn += '<div class="warn">' + r.broken.map(function (t) { return esc(t.name); }).join(', ') +
         ' stop' + (r.broken.length > 1 ? '' : 's') + ' before ' +
@@ -632,200 +724,19 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
       warn += '<div class="warn">' + off.length + ' time' + (off.length > 1 ? 's fall' : ' falls') +
         ' outside the opening hours of the place ' + (off.length > 1 ? 'they belong' : 'it belongs') +
         ' to: ' + off.map(function (o) {
-          return esc(o.t.name) + ' ' + (o.f === 's' ? 'starts' : 'stops') + ' ' +
-                 stamp(num(o.f === 's' ? o.t.s : o.t.e));
-        }).join('; ') + '. <button class="btn" id="snap">Move them to opening time</button></div>';
+          return esc(o.t.name) + ' ' + o.f + ' ' + stamp(o.h) + ', but ' + esc(o.pl) + ' is open ' +
+                 winSpan(winOf(flow, o.pl));
+        }).join('; ') + '.</div>';
     }
     document.getElementById('warn').innerHTML = warn;
-
     document.getElementById('tnote').textContent =
       flow.tasks.length + ' tasks · ' + places(flow).length + ' places · ' + r.edges.length +
       ' links · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
+    document.getElementById('tasks').innerHTML = taskTable(flow, r);
+    document.getElementById('sub').textContent = flow.note ||
+      'Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.';
 
-    if (!chartOnly) {
-      seg('pick', F.map(function (x) { return [x.id, x.name]; }), S.id,
-        function (v) { S.id = v; save(); paint(); });
-      seg('day', flow.days.map(function (d) { return [d, d]; }), S.day,
-        function (v) { S.day = v; save(); paint(); });
-      document.getElementById('tasks').innerHTML =
-        '<datalist id="places-list">' + places(flow).map(function (p) {
-          return '<option value="' + esc(p) + '">';
-        }).join('') + '</datalist>' +
-        '<div class="grid">' +
-        COLS.map(function (c, i) {
-          return '<div class="gh' + (i === 8 ? ' r' : '') + '">' + c + '</div>';
-        }).join('') +
-        flow.tasks.map(function (t, i) { return row(t, i, flow, r); }).join('') +
-        '</div>';
-    } else {
-      flow.tasks.forEach(function (t) {
-        var el = document.querySelector('#task-' + cssId(t.id) + ' .dur');
-        if (!el) return;
-        var len = num(t.e) - num(t.s), p = null;
-        r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
-        el.textContent = len < 0 ? 'backwards' : dur(len);
-        el.className = 'cell dur' + (len < 0 ? ' bad'
-          : p && p.from === (t.place || 'Somewhere') && len > .01 ? ' still' : '');
-      });
-    }
-    markOutside(flow);
-    wire(flow, r);
-  }
-  // The offending inputs wear it, so the fix is where the mistake is.
-  function markOutside(flow) {
-    all('#tasks .row').forEach(function (rowEl) {
-      var id = rowEl.id.replace(/^task-/, ''), t = null;
-      flow.tasks.forEach(function (x) { if (x.id === id) t = x; });
-      if (!t) return;
-      var pl = t.place || 'Somewhere', w = winOf(flow, pl);
-      [['stime', 's'], ['etime', 'e']].forEach(function (pair) {
-        var el = rowEl.querySelector('[data-f="' + pair[0] + '"]');
-        if (!el) return;
-        var bad = w && outside(flow, pl, num(t[pair[1]]));
-        el.style.borderColor = bad ? 'var(--bad)' : '';
-        el.title = bad ? pl + ' is only open ' + winSpan(w) + ' on the days marked below the chart.' : '';
-      });
-    });
-  }
-
-  function placeEditor(flow) {
-    return '<span class="lbl" style="align-self:center">Opening hours</span>' +
-      places(flow).map(function (p) {
-        var w = winOf(flow, p);
-        if (!w) {
-          return '<span class="pl"><b>' + esc(p) + '</b>' +
-            '<button class="btn" data-addwin="' + esc(p) + '">set hours</button></span>';
-        }
-        return '<span class="pl" data-win="' + esc(p) + '"><b>' + esc(p) + '</b>' +
-          '<span class="dcell">' + DOW.map(function (dn, d) {
-            return '<button class="d' + (w.days[d] ? ' on' : '') + '" data-wday="' + d +
-              '" title="' + dn + '">' + dn[0] + '</button>';
-          }).join('') + '</span>' +
-          '<input type="time" step="900" value="' + hhmm(num(w.open)) + '" data-wf="open">' +
-          '<span class="dash">–</span>' +
-          '<input type="time" step="900" value="' + hhmm(num(w.close)) + '" data-wf="close">' +
-          '<button class="mini x" data-delwin="' + esc(p) + '" title="No hours for this place">&times;</button>' +
-          '</span>';
-      }).join('');
-  }
-
-  // ── Wiring ────────────────────────────────────────────────────────────────
-  function wire(flow, r) {
-    all('#tasks .row').forEach(function (rowEl) {
-      var id = rowEl.id.replace(/^task-/, ''), t = null, idx = -1;
-      flow.tasks.forEach(function (x, i) { if (x.id === id) { t = x; idx = i; } });
-      if (!t) return;
-      [].slice.call(rowEl.querySelectorAll('[data-f]')).forEach(function (el) {
-        el.oninput = function () {
-          var f = el.getAttribute('data-f');
-          if (f === 'name' || f === 'place' || f === 'note') { t[f] = el.value; save(); paint(); return; }
-          // Day and time are two halves of one number, so each edit rebuilds it
-          // from whichever half did not change.
-          if (f === 'sday') t.s = (+el.value) * 24 + (num(t.s) % 24);
-          else if (f === 'stime') t.s = dayOf(num(t.s)) * 24 + fromHM(el.value);
-          else if (f === 'eday') t.e = (+el.value) * 24 + (num(t.e) % 24);
-          else if (f === 'etime') t.e = dayOf(num(t.e)) * 24 + fromHM(el.value);
-          save(); paint(true);
-        };
-      });
-      var ic = rowEl.querySelector('.ico');
-      if (ic) ic.onclick = function () {
-        t.icon = ICONS[(ICONS.indexOf(t.icon) + 1) % ICONS.length];
-        save(); paint();
-      };
-      var ab = rowEl.querySelector('.after'), pop = rowEl.querySelector('.pop');
-      if (ab) ab.onclick = function (ev) {
-        ev.stopPropagation();
-        var wasOpen = !pop.hidden;
-        all('.pop').forEach(function (o) { o.hidden = true; });
-        pop.hidden = wasOpen;
-      };
-      if (pop) pop.onclick = function (ev) { ev.stopPropagation(); };
-      [].slice.call(rowEl.querySelectorAll('.chip')).forEach(function (b) {
-        b.onclick = function (ev) {
-          ev.stopPropagation();
-          var dep = b.getAttribute('data-after');
-          t.after = t.after || [];
-          var k = t.after.indexOf(dep);
-          if (k >= 0) t.after.splice(k, 1); else t.after.push(dep);
-          save(); paint();
-          var again = document.querySelector('#task-' + cssId(t.id) + ' .pop');
-          if (again) again.hidden = false;
-        };
-      });
-      var nb = rowEl.querySelector('[data-note]');
-      if (nb) nb.onclick = function () {
-        var nr = rowEl.querySelector('.noterow');
-        nr.hidden = !nr.hidden;
-        if (!nr.hidden) nr.querySelector('input').focus();
-      };
-      [].slice.call(rowEl.querySelectorAll('[data-mv]')).forEach(function (b) {
-        b.onclick = function () {
-          var d = +b.getAttribute('data-mv');
-          if (idx + d < 0 || idx + d >= flow.tasks.length) return;
-          var x = flow.tasks[idx]; flow.tasks[idx] = flow.tasks[idx + d]; flow.tasks[idx + d] = x;
-          save(); paint();
-        };
-      });
-      var del = rowEl.querySelector('[data-del]');
-      if (del) del.onclick = function () {
-        if (flow.tasks.length <= 1) return;
-        flow.tasks.splice(idx, 1);
-        // Close the chain over the hole: whatever depended on this inherits
-        // what it depended on, so removing a step does not orphan the next one.
-        var inherited = (t.after || []).slice();
-        flow.tasks.forEach(function (o) {
-          if ((o.after || []).indexOf(t.id) < 0) return;
-          o.after = o.after.filter(function (x) { return x !== t.id; });
-          inherited.forEach(function (x) {
-            if (x !== o.id && o.after.indexOf(x) < 0) o.after.push(x);
-          });
-        });
-        save(); paint();
-      };
-    });
-
-    // Opening hours, which belong to the place rather than to any task.
-    all('#places [data-win]').forEach(function (el) {
-      var p = el.getAttribute('data-win'), w = flow.windows[p];
-      [].slice.call(el.querySelectorAll('[data-wday]')).forEach(function (b) {
-        b.onclick = function () {
-          var d = +b.getAttribute('data-wday');
-          w.days[d] = w.days[d] ? 0 : 1;
-          save(); paint();
-        };
-      });
-      [].slice.call(el.querySelectorAll('[data-wf]')).forEach(function (inp) {
-        inp.oninput = function () { w[inp.getAttribute('data-wf')] = fromHM(inp.value); save(); paint(); };
-      });
-    });
-    all('#places [data-addwin]').forEach(function (b) {
-      b.onclick = function () {
-        flow.windows = flow.windows || {};
-        flow.windows[b.getAttribute('data-addwin')] = { days: [1,1,1,1,1,1,1], open: 8, close: 17 };
-        save(); paint();
-      };
-    });
-    all('#places [data-delwin]').forEach(function (b) {
-      b.onclick = function () { delete flow.windows[b.getAttribute('data-delwin')]; save(); paint(); };
-    });
-    all('#grid .win').forEach(function (b) {
-      b.onclick = function () {
-        var el = document.querySelector('#places [data-win="' + b.getAttribute('data-place') + '"]') ||
-                 document.querySelector('#places [data-addwin="' + b.getAttribute('data-place') + '"]');
-        if (el) { el.scrollIntoView({ block: 'center' }); var i = el.querySelector('input'); if (i) i.focus(); }
-      };
-    });
-
-    var snap = document.getElementById('snap');
-    if (snap) snap.onclick = function () {
-      offences(flow).forEach(function (o) {
-        var w = winOf(flow, o.pl);
-        o.t[o.f] = nextOpen(w, num(o.t[o.f]));
-      });
-      save(); paint();
-    };
-
+    // A bar or a dot finds its row, which is the only interaction left.
     all('#grid [data-task]').forEach(function (el) {
       el.addEventListener('click', function () {
         var c = document.getElementById('task-' + el.getAttribute('data-task'));
@@ -834,36 +745,30 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
         c.scrollIntoView({ block: 'center' });
         window.setTimeout(function () { c.classList.remove('lit'); }, 2600);
       });
-      if (!el.classList.contains('grab')) return;
-      // Dragging a bar slides the whole task, keeping its length. The times are
-      // typed, so this is a way of typing them.
-      el.addEventListener('mousedown', function (ev) {
-        var t = r.byId[el.getAttribute('data-task')];
-        if (!t) return;
-        var W = el.ownerSVGElement.getBoundingClientRect().width, x0 = ev.clientX;
-        var s0 = num(t.s), e0 = num(t.e);
-        ev.preventDefault();
-        function mv(e) {
-          var d = Math.round(((e.clientX - x0) / W) * SPAN * 24 * 4) / 4;
-          var ns = Math.max(0, s0 + d);
-          if (ns === num(t.s)) return;
-          t.e = ns + (e0 - s0);
-          t.s = ns;
-          paint(true);
-        }
-        function up() {
-          window.removeEventListener('mousemove', mv);
-          window.removeEventListener('mouseup', up);
-          save(); paint();
-        }
-        window.addEventListener('mousemove', mv);
-        window.addEventListener('mouseup', up);
-      });
     });
+  }
+
+  function paintOrders() {
+    var crops = {};
+    (DATA.sales || []).forEach(function (x) { crops[x.crop] = 1; });
+    var opts = Object.keys(crops).sort().map(function (c) {
+      return [c, c === 'cuke' ? 'Cucumbers' : c.charAt(0).toUpperCase() + c.slice(1)];
+    });
+    if (!opts.length) {
+      document.getElementById('orders').innerHTML = '<p class="hint">No order data in data.json.</p>';
+      return;
+    }
+    if (!crops[S.crop]) S.crop = opts[0][0];
+    seg('ocrop', opts, S.crop, function (v) { S.crop = v; save(); paint(); });
+    document.getElementById('onote').textContent =
+      (DATA.window ? DATA.window.first + ' to ' + DATA.window.last : '') +
+      ' · copied from the freight model';
+    document.getElementById('orders').innerHTML = ordersView();
   }
 
   function seg(id, opts, sel, cb) {
     var el = document.getElementById(id);
+    if (!el) return;
     el.innerHTML = opts.map(function (o) {
       return '<a data-v="' + esc(o[0]) + '"' + (String(o[0]) === String(sel) ? ' class="on"' : '') +
         '>' + esc(o[1]) + '</a>';
@@ -873,24 +778,9 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
     });
   }
 
-  document.addEventListener('click', function () {
-    all('.pop').forEach(function (o) { o.hidden = true; });
-  });
-  document.getElementById('add').onclick = function () {
-    var flow = cur(), last = flow.tasks[flow.tasks.length - 1];
-    var t = blank(last ? [last.id] : [], last ? num(last.e) : 8);
-    t.place = last ? last.place : '';
-    flow.tasks.push(t);
-    save(); paint();
-    var c = document.getElementById('task-' + t.id);
-    if (c) { c.scrollIntoView({ block: 'center' }); c.querySelector('.nm').select(); }
-  };
-  document.getElementById('reset').onclick = function () {
-    F = defaults(); S = { id: 'kona-lettuce', day: 'Sun' }; save(); paint();
-  };
-
   paint();
 })();
+
 </script>
 </body>
 </html>

@@ -1,64 +1,69 @@
 # Task Vis
 
-A time–distance chart you can edit. Forked out of the freight model's Flow page
-so one flow can be worked on at a time.
+A time–distance chart, defined in Markdown.
 
-Open `index.html`. There is no build step and nothing to install.
-
-## What it draws
-
-Time runs left to right, place runs top to bottom. So a **sloped bar is the
-thing moving** and a **flat bar is the thing standing still** — which is the
-point, because the waiting is what nobody can see in a list of steps.
-
-A shaded band on a lane is that place's opening hours.
-
-## The data structure
-
-A flow is a set of **tasks**, the links between them, and the opening hours of
-the places they happen in.
-
-```js
-{ id, name, place, icon, note,
-  s,                      // starts: hours from midnight on day 0
-  e,                      // stops:  hours from midnight on day 0
-  after: [taskId, ...] }
+```
+python3 build.py      # journeys.md + data.json -> index.html
+open index.html
 ```
 
-**Every task carries the same fields**, which is why every row in the list is
-the same grid and the columns line up down the page.
+No dependencies, no network. `index.html` is self-contained and opens by
+double-clicking.
 
-**Both times are typed, not solved.** `after` records what has to happen first
-and is what the links are drawn from, but it does not push times about: **the
-next start does not have to be the previous stop.** A gap between them is drawn
-as a gap. An overlap — a task starting before the thing it comes after has
-finished — is drawn as a red backwards link, because that is often the truth and
-used to be inexpressible.
+## Where things live
 
-What a task *feeds* is those same `after` edges read backwards, so it is derived
-and shown in the popover rather than typed; the two cannot drift apart.
+| File | What it is |
+|---|---|
+| `journeys.md` | **The journeys.** The only place a schedule is defined. |
+| `data.json` | Orders by destination, copied out of the freight model. |
+| `build.py` | Parses the Markdown, folds in the data, writes `index.html`. |
+| `viewer/` | The page: shell, stylesheet, app. |
+| `index.html` | Built. Do not edit — `build.py` overwrites it. |
 
-Deleting a task closes the chain over the hole: whatever depended on it inherits
-what it depended on.
+## The chart
 
-## Opening hours belong to a place
+Time runs left to right, place runs top to bottom. A **sloped bar is the thing
+moving**; a **flat bar is the thing standing still**. That is the point, because
+the waiting is what nobody can see in a list of steps. A shaded band is that
+place's opening hours.
 
-Costco receiving is open 4 to 11 whether or not anything is driving towards it,
-so hours are a property of the **place**, edited in the strip under the chart —
-not of any task.
+## Defining a journey
 
-They **gate** the typed times without overriding them. A start or stop that
-falls outside its place's hours is outlined in red, says which window it missed,
-and is listed above the task list with one button to move every offender to the
-next moment that door is open.
+Each `## ` heading is a journey. Two kinds of day appear and they mean
+different things:
 
-## State
+- In **Hours**, days are real weekdays. Costco receiving is shut on a Sunday
+  whatever day we cut on.
+- In **Tasks**, days are offsets from the cut — `D0` is the day the journey
+  starts, `D1` the day after — so the same journey reads against a Sunday cut
+  or a Wednesday one without being rewritten.
 
-Edits are kept in `localStorage` under `taskvis.flows.v3`. **Back to defaults**
-restores the seeded flow.
+A task runs from its start to its stop. **The next start does not have to be
+the previous stop.** Leave a gap and the gap is drawn; start something before
+the thing it follows has finished and the overlap is drawn as a red backwards
+link, because two things happening at once is usually the truth.
+
+`After` is written by name, because a table of ids is unreadable. It draws the
+links and decides where a task begins on the chart; it does not move any times.
+
+The build refuses a file it cannot trust: a bad time, a day that is not a day,
+an icon that is not an icon, or an `After` naming a task that is not there. It
+does **not** refuse a stop before its start — that is a question about the
+schedule, not the syntax, so the viewer flags it in red instead.
+
+## Tabs
+
+- **Flow** — the chart and the task list for one journey.
+- **Orders** — pounds invoiced by how the order leaves the farm: Costco Kona on
+  our own trucks, picked up at the gate under FOB Farm, or off-island on a boat.
+  Copied from the freight model; refresh it there.
+- **Hours** — every place's opening hours, per journey.
+
+Hours **gate** the written times without overriding them: a start or stop
+outside its place's hours is printed in red in the task list and named above it.
 
 ## Not here
 
-Quantities — pounds to Costco Kona, picked up at the gate, and off-island — live
-in the freight model, not in this tool. This one has no data source; it is a
-generic editor.
+This is a viewer. Editing a journey means editing `journeys.md` and running the
+build. Interactive editing was tried and taken back out — the builder was
+becoming the product.

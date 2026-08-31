@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Task Vis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Task Vis</h1>
+      <p class="sub" id="sub">Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.</p>
+    </div>
+    <nav class="seg tabs" id="tabs"></nav>
+  </header>
+
+  <!-- Flow -->
+  <section class="page" id="page-flow">
+    <div class="panel">
+      <div class="panel-hd">
+        <h2>Journey</h2>
+        <span class="seg" id="pick"></span>
+        <span class="lbl">Day 0</span>
+        <span class="seg" id="day"></span>
+        <span class="note" id="src" style="margin-left:auto"></span>
+      </div>
+      <div class="body">
+        <div class="axis" id="axis"></div>
+        <div id="grid"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd"><h2>Tasks</h2><span class="note" id="tnote"></span></div>
+      <div id="warn"></div>
+      <div class="tasks" id="tasks"></div>
+    </div>
+  </section>
+
+  <!-- Orders -->
+  <section class="page" id="page-orders" hidden>
+    <div class="panel">
+      <div class="panel-hd">
+        <h2>Orders by destination</h2>
+        <span class="seg" id="ocrop"></span>
+        <span class="note" id="onote" style="margin-left:auto"></span>
+      </div>
+      <div class="body"><div id="orders"></div></div>
+    </div>
+  </section>
+
+  <!-- Hours -->
+  <section class="page" id="page-hours" hidden>
+    <div class="panel">
+      <div class="panel-hd">
+        <h2>Opening hours</h2>
+        <span class="note">A window belongs to a place, not to a task — Costco receiving is open 4 to 11 whether or not anything is driving towards it.</span>
+      </div>
+      <div class="body"><div id="hours"></div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+window.FLOWS = /*__FLOWS__*/;
+window.DATA = /*__DATA__*/;
+</script>
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>

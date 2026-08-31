@@ -1,0 +1,197 @@
+:root{
+  color-scheme: only light;
+  --ground:#eef1f3; --card:#ffffff; --card-2:#f6f8f9;
+  --ink:#141b1f; --ink-2:#4a5860; --ink-3:#78878f;
+  --line:#d8dfe3; --line-2:#e8edef;
+  --accent:#d4541f; --accent-soft:#fbeee7;
+  --good:#1d7a52; --bad:#b3341c;
+  --band:#e8f2ec; --band-2:#cfe3d8;
+  --shadow:0 1px 2px rgba(20,27,31,.06), 0 8px 24px -12px rgba(20,27,31,.18);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink); font-size:15px; line-height:1.5;
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px; margin:0 auto; padding:32px 24px 80px; display:flex; flex-direction:column; gap:24px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 28px;
+  border-bottom:2px solid var(--ink); padding-bottom:16px}
+h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
+.sub{color:var(--ink-2); font-size:14px; margin:2px 0 0}
+.panel{background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow)}
+.panel-hd{display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:13px 18px;
+  border-bottom:1px solid var(--line-2)}
+.panel-hd h2{margin:0; font-size:12px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-2); font-weight:600}
+.lbl{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.note{font-size:11.5px; color:var(--ink-3)}
+.btn{background:none; border:1px solid var(--line); color:var(--ink-2); font:inherit; font-size:12px;
+  padding:4px 12px; border-radius:6px; cursor:pointer}
+.btn:hover{border-color:var(--accent); color:var(--accent)}
+.btn.solid{background:var(--ink); border-color:var(--ink); color:var(--card); font-weight:600}
+.btn.solid:hover{background:var(--accent); border-color:var(--accent); color:#fff}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.seg a{padding:5px 12px; font-size:12.5px; color:var(--ink-2); cursor:pointer; white-space:nowrap;
+  border-left:1px solid var(--line)}
+.seg a:first-child{border-left:none}
+.seg a.on{background:var(--accent); color:#fff; font-weight:600}
+.seg a:hover:not(.on){background:var(--card-2)}
+
+/* ---------- the chart: time across, place down ---------- */
+.body{padding:14px 18px 14px}
+.axis{display:flex; gap:12px; padding-bottom:2px}
+.gut{flex:0 0 128px; display:flex; flex-direction:column}
+.days{flex:1 1 auto; min-width:0; display:flex}
+.day{flex:1 1 0; text-align:center; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:600; border-left:1px solid var(--line-2); padding-bottom:3px}
+.day:first-child{border-left:none}
+.day.cut{color:var(--accent)}
+.hd{display:flex; align-items:baseline; gap:9px; padding:2px 0 4px}
+.hd b{font-size:14.5px; font-weight:600}
+.hd small{font-size:10.5px; color:var(--ink-3)}
+.res{margin-left:auto; display:flex; align-items:baseline; gap:5px}
+.res b{font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; line-height:1}
+.res small{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.res em{font-style:normal; font-size:10.5px; color:var(--ink-3)}
+.chart{display:flex; gap:12px}
+.lane-lbl{display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
+  font-size:10.5px; font-weight:600; color:var(--ink-2); line-height:1.15; text-align:right}
+.lane-lbl button{margin-top:2px; padding:1px 5px; border:1px solid var(--band-2); border-radius:4px;
+  background:var(--band); color:var(--good); font-family:"IBM Plex Mono",monospace;
+  font-size:9px; font-weight:600; white-space:nowrap; cursor:pointer}
+.lane-lbl button.off{background:var(--card-2); border-color:var(--line); color:var(--ink-3)}
+.lane-lbl button:hover{border-color:var(--accent); color:var(--accent)}
+.plot{position:relative; flex:1 1 auto; min-width:0}
+.svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible}
+.svg line{vector-effect:non-scaling-stroke}
+.lane{stroke:var(--line-2); stroke-width:1}
+.col{stroke:var(--line-2); stroke-width:1}
+.band{fill:var(--band)}
+.cap{position:absolute; font-size:8.5px; font-weight:600; color:var(--good);
+  white-space:nowrap; padding-left:3px; pointer-events:none; opacity:.85}
+.move{stroke:var(--ink); stroke-width:2; stroke-linecap:round}
+.wait{stroke:var(--ink); stroke-width:2; stroke-dasharray:2 3; opacity:.6}
+/* A prereq's stop and the next start need not meet. Where they do not, the gap
+   is drawn for what it is rather than closed up. */
+.link{stroke:var(--ink-3); stroke-width:1.5; stroke-dasharray:1 4; opacity:.75}
+.link.back{stroke:var(--bad); opacity:.9; stroke-dasharray:3 3}
+.tick{fill:var(--card); stroke:var(--ink); stroke-width:1.5}
+.grab{stroke:transparent; stroke-width:13; stroke-linecap:round; cursor:ew-resize}
+.grab:hover{stroke:var(--accent); opacity:.22}
+.dot{position:absolute; width:0; height:0; color:var(--ink); cursor:pointer}
+.dot b{position:absolute; left:-3px; top:-3px; width:6px; height:6px; border-radius:50%;
+  background:currentColor; display:block}
+.dot.end b{left:-4.5px; top:-4.5px; width:9px; height:9px; box-shadow:0 0 0 2px var(--card)}
+.dot span{position:absolute; left:7px; display:flex; align-items:center; gap:3px; white-space:nowrap;
+  font-size:9.5px; font-weight:500; line-height:1.1}
+.dot.s0 span{bottom:2px} .dot.s1 span{top:2px} .dot.s2 span{bottom:13px}
+.dot.flip span{left:auto; right:7px; flex-direction:row-reverse}
+.dot em{font-style:normal; color:var(--ink-3); font-weight:400}
+.dot.end span{font-weight:600}
+.dot:hover b{box-shadow:0 0 0 3px var(--accent-soft)}
+.legend{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; padding-top:14px; margin-top:10px;
+  border-top:1px solid var(--line-2); font-size:11.5px; color:var(--ink-2)}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.sw{display:inline-block; width:11px; height:11px; border-radius:2px}
+.sw.band{background:var(--band); border:1px solid var(--band-2)}
+.sw.mv{width:16px; height:2px; border-radius:0; background:var(--ink-2)}
+.sw.wt{width:16px; height:0; border-radius:0; border-top:2px dashed var(--ink-3)}
+.sw.tk{width:7px; height:7px; border-radius:50%; background:var(--card); border:1.5px solid var(--ink)}
+.i{display:inline-block; vertical-align:-2px; flex:0 0 auto}
+
+/* ---------- the list ---------- */
+/* Every task carries the same fields, so every row is the same grid and the
+   columns line up down the page. That is only possible because a task now says
+   when it starts and when it stops outright, rather than each kind of task
+   needing its own controls. */
+.tasks{padding:0 18px 18px}
+.grid{display:grid; gap:0 8px; align-items:center;
+  grid-template-columns:
+    22px 24px minmax(120px,1fr) minmax(88px,150px)
+    62px 92px 62px 92px 52px auto 22px 22px 22px 22px;}
+.gh{font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:600; padding:10px 0 6px; border-bottom:1px solid var(--line); white-space:nowrap}
+.gh.r{text-align:right}
+.row{display:contents}
+.row>*{min-width:0}
+.cell{padding:4px 0; border-bottom:1px solid var(--line-2); height:100%;
+  display:flex; align-items:center; gap:3px}
+.row.lit .cell{background:var(--accent-soft)}
+.row.bad .cell{background:var(--accent-soft)}
+.n{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--ink-3); font-weight:600;
+  justify-content:flex-end; padding-right:3px}
+.ico{cursor:pointer; color:var(--ink-2); justify-content:center}
+.ico:hover{color:var(--accent)}
+.dur{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3);
+  justify-content:flex-end; white-space:nowrap}
+/* A task that stops where it started is standing still, and that is the one
+   thing on this screen worth spotting from across the room. */
+.dur.still{color:var(--accent); font-weight:600}
+.dur.bad{color:var(--bad); font-weight:600}
+.noterow input:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.warn{margin:12px 18px 0; padding:9px 12px; border:1px solid var(--bad); border-radius:7px;
+  background:var(--accent-soft); color:var(--bad); font-size:12.5px}
+
+/* ---------- opening hours, which belong to a place ---------- */
+/* A window is a fact about a door, not about a task: Costco receiving is open
+   4 to 11 whether or not anything is driving towards it. */
+.dcell{display:inline-flex; gap:1px}
+.d{width:17px; height:20px; border:1px solid var(--line); background:var(--card); color:var(--ink-3);
+  font-family:inherit; font-size:9.5px; font-weight:600; border-radius:3px; cursor:pointer; padding:0}
+.d.on{background:var(--good); border-color:var(--good); color:#fff}
+.d:hover{border-color:var(--accent)}
+@media (max-width:1150px){ .tasks{overflow-x:auto} .grid{min-width:1120px} }
+
+/* ---------- tabs ---------- */
+.tabs{margin-left:auto}
+.page{display:flex; flex-direction:column; gap:24px}
+.page[hidden]{display:none}
+code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--card-2);
+  border:1px solid var(--line-2); border-radius:4px; padding:0 4px}
+
+/* ---------- the task list, now a reading rather than a form ---------- */
+.grid{display:grid; gap:0 10px; align-items:center;
+  grid-template-columns:22px 24px minmax(130px,1.2fr) minmax(90px,.8fr)
+    118px 118px 62px minmax(90px,.9fr) minmax(0,1.6fr);}
+.cell{padding:6px 0; border-bottom:1px solid var(--line-2); height:100%;
+  display:flex; align-items:center; min-width:0}
+.cell.nm{font-weight:600; font-size:13px}
+.cell.plc{font-size:12.5px; color:var(--ink-2)}
+.cell.tm{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-2)}
+.cell.tm.out{color:var(--bad); font-weight:600}
+.cell.aft{font-size:11.5px; color:var(--ink-3)}
+.cell.nt{font-size:11.5px; color:var(--ink-3); line-height:1.35; padding-right:2px}
+.cell.nt em{font-style:normal; color:var(--ink-3)}
+.row.lit .cell{background:var(--accent-soft)}
+.row.bad .cell{background:var(--accent-soft)}
+.tasks{padding:0 18px 18px}
+
+/* ---------- orders and hours ---------- */
+.otbl{width:100%; border-collapse:collapse}
+.otbl th,.otbl td{text-align:right; padding:5px 10px 5px 0; white-space:nowrap; border:none}
+.otbl thead th{font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:600; padding-bottom:6px; border-bottom:2px solid var(--ink)}
+.otbl tbody th{text-align:left; font-size:12px; font-weight:600; color:var(--ink-2)}
+.otbl th.wk{vertical-align:middle; font-family:"IBM Plex Mono",monospace; font-size:11px}
+.otbl th.hf{font-weight:500; color:var(--ink-3); font-size:11.5px}
+.otbl tr.wkstart th,.otbl tr.wkstart td{border-top:1px solid var(--line-2)}
+.otbl tr.grp th{font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  border-top:2px solid var(--ink); padding-top:10px; text-align:left}
+.otbl td b{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+  font-size:14px; font-weight:600; color:var(--ink)}
+.otbl td s{text-decoration:none; margin-left:4px; font-family:"IBM Plex Mono",monospace;
+  font-size:10px; color:var(--ink-3)}
+.otbl td u{text-decoration:none; color:var(--ink-3); font-size:14px}
+.otbl .barcell{width:110px; padding-right:0}
+.obar{display:block; height:9px; margin-left:auto; background:var(--band);
+  border-right:2px solid var(--band-2)}
+.otbl.hrs td.dcell,.otbl.hrs td.mono,.otbl.hrs td.nt{text-align:left}
+.otbl.hrs .mono{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-2)}
+.otbl.hrs .d{display:inline-block; width:17px; height:20px; line-height:19px; text-align:center;
+  border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink-3);
+  font-size:9.5px; font-weight:600; margin-right:1px}
+.otbl.hrs .d.on{background:var(--good); border-color:var(--good); color:#fff}
+.body h4{margin:18px 0 8px; font-size:11px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-2); font-weight:600}
+.body h4:first-child{margin-top:0}
+.hint{margin:14px 0 0; font-size:11.5px; color:var(--ink-3); line-height:1.5}
+.hint b{color:var(--ink-2); font-weight:600}

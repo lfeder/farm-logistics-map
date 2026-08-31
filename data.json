@@ -1,0 +1,773 @@
+{
+ "generated_from": "farm-freight-model data.json (sales_po x sales_po_line x sales_fob)",
+ "window": {
+  "first": "2026-07-17",
+  "last": "2026-08-28"
+ },
+ "on_island_customer": "140 Kona",
+ "sales": [
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 420
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 578
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 1834
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 5
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 420
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 489
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 3411
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 17
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-19",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 630
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-19",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 506
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-19",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 3323
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 630
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 582
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 2975
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 20
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 630
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 618
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 3405
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 7
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 420
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 677
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 2945
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 20
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 630
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 521
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 3259
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 7
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 420
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 603
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 2717
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 22
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 630
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 739
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 2933
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 7
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 420
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 1165
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 3114
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 33
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-16",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 630
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-16",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 659
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-16",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 1438
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 210
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 534
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 2498
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 26
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-23",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 630
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-23",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 647
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-23",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 2183
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 420
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 597
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 2778
+  },
+  {
+   "crop": "lettuce",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 31
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 4032
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 13566
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 22076
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 112
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 3456
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 6854
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 17056
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-12",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 240
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 4512
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 7775
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 27684
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 112
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 3072
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 6240
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 20576
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-19",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 240
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 3936
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 6347
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 26140
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 112
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 4128
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 6338
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 22980
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-07-26",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 200
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 4128
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 7054
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 22804
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 112
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 3840
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 6664
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 23636
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-02",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 248
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 3360
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 7187
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 26000
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 112
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 3456
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 5763
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 22712
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-09",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 308
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 5664
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 6974
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 23416
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 112
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 4704
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 5904
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 18740
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-16",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 308
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "early",
+   "bucket": "kona",
+   "lbs": 4032
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "early",
+   "bucket": "pickup",
+   "lbs": 7011
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "early",
+   "bucket": "off",
+   "lbs": 23480
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "early",
+   "bucket": "other",
+   "lbs": 112
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "kona",
+   "lbs": 4320
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "pickup",
+   "lbs": 5865
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "off",
+   "lbs": 24932
+  },
+  {
+   "crop": "cuke",
+   "wk": "2026-08-23",
+   "half": "late",
+   "bucket": "other",
+   "lbs": 284
+  }
+ ]
+}
