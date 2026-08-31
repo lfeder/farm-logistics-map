@@ -159,7 +159,7 @@
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
 
-    var svg = '', caps = '', busy = {};
+    var svg = '';
     // Every four hours, faint, so a bar can be read off the grid rather than
     // off its label. The day boundaries keep their own heavier line.
     for (var q = 4; q < SPAN * 24; q += 4) {
@@ -169,30 +169,9 @@
     for (var c = 1; c < SPAN; c++) {
       svg += '<line class="col" x1="' + X(c * 24) + '" x2="' + X(c * 24) + '" y1="0" y2="' + H + '"/>';
     }
-    r.pts.forEach(function (p) { (busy[p.place] || (busy[p.place] = [])).push(PCT(p.e)); });
     lanes.forEach(function (l, i) {
       var y = PAD_T + i * LANE_H;
       svg += '<line class="lane" x1="0" x2="1000" y1="' + (y + LANE_H / 2) + '" y2="' + (y + LANE_H / 2) + '"/>';
-      var w = winOf(flow, l);
-      if (!w) return;
-      var open = [];
-      for (var d = 0; d < SPAN; d++) {
-        if (!w.days[(dowIdx(ANCHOR) + d) % 7]) continue;
-        open.push(d);
-        var x0 = X(d * 24 + num(w.open)), x1 = X(d * 24 + num(w.close));
-        svg += '<rect class="band" x="' + x0 + '" width="' + Math.max(0, x1 - x0) +
-          '" y="' + (y + 5) + '" height="' + (LANE_H - 10) + '"><title>' + esc(l) + ' open ' +
-          winSpan(w) + '</title></rect>';
-      }
-      if (!open.length) return;
-      var mine = busy[l] || [], pick = open[0];
-      for (var oi = 0; oi < open.length; oi++) {
-        var px = PCT(open[oi] * 24 + num(w.open)), clear = true;
-        for (var bi = 0; bi < mine.length; bi++) if (Math.abs(mine[bi] - px) < 15) clear = false;
-        if (clear) { pick = open[oi]; break; }
-      }
-      caps += '<div class="cap" style="left:' + PCT(pick * 24 + num(w.open)) + '%;top:' + (y + 3) + 'px">' +
-        esc(l) + ' open</div>';
     });
 
     // Links first, so a bar always sits on top of the thread that reached it.
@@ -253,10 +232,7 @@
     });
 
     var lbl = lanes.map(function (l) {
-      var w = winOf(flow, l);
-      return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) +
-        '<button class="win' + (w ? '' : ' off') + '" data-place="' + esc(l) + '">' +
-        (w ? winSpan(w) : 'no hours') + '</button></div>';
+      return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
     return '<div class="hd"><b>' + esc(flow.name) + '</b><small>' + esc(flow.note || '') + '</small>' +
@@ -265,7 +241,7 @@
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
-      caps + dots + '</div></div>';
+      dots + '</div></div>';
   }
 
 
@@ -431,27 +407,10 @@
         }).join('') + '</tr>';
     }).join('');
 
-    var peak = {};
-    DESTS.forEach(function (d) { GROUPS.forEach(function (g) { peak[d[0] + g[0]] = 0; }); });
-    P.forEach(function (row) {
-      DESTS.forEach(function (d) {
-        GROUPS.forEach(function (g) {
-          peak[d[0] + g[0]] = Math.max(peak[d[0] + g[0]], (row[d[0]] || {})[g[0]] || 0);
-        });
-      });
-    });
     var minRow = '<tr class="minrow"><th></th><th class="hf">Minutes</th>' +
       DESTS.map(function (d) {
         return GROUPS.map(function (g) {
           return '<td class="fig">' + showMins(mins(n ? tot[d[0] + g[0]] / n : 0, R[g[0]])) + '</td>';
-        }).join('');
-      }).join('') + '</tr>' +
-      '<tr class="maxrow"><th></th><th class="hf">Max</th>' +
-      DESTS.map(function (d) {
-        return GROUPS.map(function (g) {
-          var c = peak[d[0] + g[0]];
-          return '<td class="fig" title="' + c.toLocaleString() + ' cases">' +
-            showMins(mins(c, R[g[0]])) + '</td>';
         }).join('');
       }).join('') + '</tr>';
 
@@ -578,7 +537,6 @@
     document.getElementById('axis').innerHTML = '<div class="gut"></div><div class="days">' + ax + '</div>';
     document.getElementById('grid').innerHTML = chart(flow, r);
     document.getElementById('legend').innerHTML =
-      '<span><i class="sw band"></i>a green box is one day of that place&rsquo;s opening hours</span>' +
       '<span><i class="sw mv"></i>moving</span>' +
       '<span><i class="sw wt"></i>standing still</span>' +
       '<span><i class="sw tk"></i>where a leg starts</span>' +

@@ -27,8 +27,8 @@ Three files, split by how often they change.
 
 Time runs left to right, place runs top to bottom. A **sloped bar is the thing
 moving**; a **flat bar is the thing standing still**. That is the point, because
-the waiting is what nobody can see in a list of steps. A shaded band is that
-place's opening hours.
+the waiting is what nobody can see in a list of steps. Faint lines every four
+hours give a leg something to be measured against.
 
 ## legs.csv
 
@@ -67,9 +67,8 @@ that is not a day, an icon that is not an icon, a journey with no entry in
   all of Kona's LW, then as much off-island LW as still fits, then all the LF
   and all the trays. Day 2 is the off-island LW that did not fit. Pounds packed
   are shown for each day. The dashed line on the bar is the 6.5 h day, so a bar
-  running past it is a day that does not fit. The table's first two rows are
-  the minutes each column needs at the average window, and the biggest window
-  each column has had.
+  running past it is a day that does not fit. The table's first row is the
+  minutes each column needs at the average window.
 - **Hours** — everybody's clock, whether or not the journey on screen goes
   through them: the farm, Aloha Air's Kona counter, Young Brothers at Kawaihae,
   Honolulu and Kahului, HFA at both ends, Costco Kona receiving and the

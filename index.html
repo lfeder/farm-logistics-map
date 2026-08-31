@@ -65,20 +65,12 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .chart{display:flex; gap:12px}
 .lane-lbl{display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
   font-size:10.5px; font-weight:600; color:var(--ink-2); line-height:1.15; text-align:right}
-.lane-lbl button{margin-top:2px; padding:1px 5px; border:1px solid var(--band-2); border-radius:4px;
-  background:var(--band); color:var(--good); font-family:"IBM Plex Mono",monospace;
-  font-size:9px; font-weight:600; white-space:nowrap; cursor:pointer}
-.lane-lbl button.off{background:var(--card-2); border-color:var(--line); color:var(--ink-3)}
-.lane-lbl button:hover{border-color:var(--accent); color:var(--accent)}
 .plot{position:relative; flex:1 1 auto; min-width:0}
 .svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible}
 .svg line{vector-effect:non-scaling-stroke}
 .lane{stroke:var(--line-2); stroke-width:1}
 .col{stroke:var(--line-2); stroke-width:1}
 .hr{stroke:var(--line-2); stroke-width:1; opacity:.45}
-.band{fill:var(--band)}
-.cap{position:absolute; font-size:8.5px; font-weight:600; color:var(--good);
-  white-space:nowrap; padding-left:3px; pointer-events:none; opacity:.85}
 .move{stroke:var(--ink); stroke-width:2; stroke-linecap:round}
 .wait{stroke:var(--ink); stroke-width:2; stroke-dasharray:2 3; opacity:.6}
 /* A prereq's stop and the next start need not meet. Where they do not, the gap
@@ -103,8 +95,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   border-top:1px solid var(--line-2); font-size:11.5px; color:var(--ink-2)}
 .legend span{display:inline-flex; align-items:center; gap:5px}
 .sw{display:inline-block; width:11px; height:11px; border-radius:2px}
-.sw.band{background:var(--band); border:1px solid var(--band-2)}
-.sw.mv{width:16px; height:2px; border-radius:0; background:var(--ink-2)}
+.sw.sw.mv{width:16px; height:2px; border-radius:0; background:var(--ink-2)}
 .sw.wt{width:16px; height:0; border-radius:0; border-top:2px dashed var(--ink-3)}
 .sw.tk{width:7px; height:7px; border-radius:50%; background:var(--card); border:1.5px solid var(--ink)}
 .i{display:inline-block; vertical-align:-2px; flex:0 0 auto}
@@ -231,9 +222,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   border:1px solid var(--line); border-radius:5px; background:var(--card); color:var(--ink);
   text-align:right}
 .rate input:focus{outline:none; border-color:var(--accent)}
-/* The average is what the line runs at; the max is what it has to survive. */
-.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600}
-.otbl.orders tr.maxrow td,.otbl.orders tr.maxrow th{color:var(--ink-2); font-weight:600;
+.otbl.orders tr.minrow td,.otbl.orders tr.minrow th{color:var(--accent); font-weight:600;
   border-bottom:1px solid var(--line); padding-bottom:7px}
 
 /* Branches. Two threads leaving the same morning -- the pallet and the clock
@@ -497,7 +486,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
 
-    var svg = '', caps = '', busy = {};
+    var svg = '';
     // Every four hours, faint, so a bar can be read off the grid rather than
     // off its label. The day boundaries keep their own heavier line.
     for (var q = 4; q < SPAN * 24; q += 4) {
@@ -507,30 +496,9 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     for (var c = 1; c < SPAN; c++) {
       svg += '<line class="col" x1="' + X(c * 24) + '" x2="' + X(c * 24) + '" y1="0" y2="' + H + '"/>';
     }
-    r.pts.forEach(function (p) { (busy[p.place] || (busy[p.place] = [])).push(PCT(p.e)); });
     lanes.forEach(function (l, i) {
       var y = PAD_T + i * LANE_H;
       svg += '<line class="lane" x1="0" x2="1000" y1="' + (y + LANE_H / 2) + '" y2="' + (y + LANE_H / 2) + '"/>';
-      var w = winOf(flow, l);
-      if (!w) return;
-      var open = [];
-      for (var d = 0; d < SPAN; d++) {
-        if (!w.days[(dowIdx(ANCHOR) + d) % 7]) continue;
-        open.push(d);
-        var x0 = X(d * 24 + num(w.open)), x1 = X(d * 24 + num(w.close));
-        svg += '<rect class="band" x="' + x0 + '" width="' + Math.max(0, x1 - x0) +
-          '" y="' + (y + 5) + '" height="' + (LANE_H - 10) + '"><title>' + esc(l) + ' open ' +
-          winSpan(w) + '</title></rect>';
-      }
-      if (!open.length) return;
-      var mine = busy[l] || [], pick = open[0];
-      for (var oi = 0; oi < open.length; oi++) {
-        var px = PCT(open[oi] * 24 + num(w.open)), clear = true;
-        for (var bi = 0; bi < mine.length; bi++) if (Math.abs(mine[bi] - px) < 15) clear = false;
-        if (clear) { pick = open[oi]; break; }
-      }
-      caps += '<div class="cap" style="left:' + PCT(pick * 24 + num(w.open)) + '%;top:' + (y + 3) + 'px">' +
-        esc(l) + ' open</div>';
     });
 
     // Links first, so a bar always sits on top of the thread that reached it.
@@ -591,10 +559,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     });
 
     var lbl = lanes.map(function (l) {
-      var w = winOf(flow, l);
-      return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) +
-        '<button class="win' + (w ? '' : ' off') + '" data-place="' + esc(l) + '">' +
-        (w ? winSpan(w) : 'no hours') + '</button></div>';
+      return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
     return '<div class="hd"><b>' + esc(flow.name) + '</b><small>' + esc(flow.note || '') + '</small>' +
@@ -603,7 +568,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
-      caps + dots + '</div></div>';
+      dots + '</div></div>';
   }
 
 
@@ -769,27 +734,10 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
         }).join('') + '</tr>';
     }).join('');
 
-    var peak = {};
-    DESTS.forEach(function (d) { GROUPS.forEach(function (g) { peak[d[0] + g[0]] = 0; }); });
-    P.forEach(function (row) {
-      DESTS.forEach(function (d) {
-        GROUPS.forEach(function (g) {
-          peak[d[0] + g[0]] = Math.max(peak[d[0] + g[0]], (row[d[0]] || {})[g[0]] || 0);
-        });
-      });
-    });
     var minRow = '<tr class="minrow"><th></th><th class="hf">Minutes</th>' +
       DESTS.map(function (d) {
         return GROUPS.map(function (g) {
           return '<td class="fig">' + showMins(mins(n ? tot[d[0] + g[0]] / n : 0, R[g[0]])) + '</td>';
-        }).join('');
-      }).join('') + '</tr>' +
-      '<tr class="maxrow"><th></th><th class="hf">Max</th>' +
-      DESTS.map(function (d) {
-        return GROUPS.map(function (g) {
-          var c = peak[d[0] + g[0]];
-          return '<td class="fig" title="' + c.toLocaleString() + ' cases">' +
-            showMins(mins(c, R[g[0]])) + '</td>';
         }).join('');
       }).join('') + '</tr>';
 
@@ -916,7 +864,6 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     document.getElementById('axis').innerHTML = '<div class="gut"></div><div class="days">' + ax + '</div>';
     document.getElementById('grid').innerHTML = chart(flow, r);
     document.getElementById('legend').innerHTML =
-      '<span><i class="sw band"></i>a green box is one day of that place&rsquo;s opening hours</span>' +
       '<span><i class="sw mv"></i>moving</span>' +
       '<span><i class="sw wt"></i>standing still</span>' +
       '<span><i class="sw tk"></i>where a leg starts</span>' +
