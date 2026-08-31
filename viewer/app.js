@@ -235,7 +235,7 @@
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
-    return '<div class="hd"><b>' + esc(flow.name) + '</b><small>' + esc(flow.note || '') + '</small>' +
+    return '<div class="hd"><b>' + esc(flow.name) + '</b>' +
       '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') + '</small>' +
       '<em>' + r.hrs + ' h end to end, ' + r.still + ' standing still</em></div></div>' +
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
@@ -534,7 +534,16 @@
     for (var i = 0; i < SPAN; i++) {
       ax += '<div class="day' + (i === 0 ? ' cut' : '') + '">' + dayName(i) + '</div>';
     }
-    document.getElementById('axis').innerHTML = '<div class="gut"></div><div class="days">' + ax + '</div>';
+    // The four-hour marks are only useful if you can say what hour they are.
+    var hx = '';
+    for (var q = 0; q < SPAN * 24; q += 4) {
+      var hh = q % 24;
+      hx += '<span class="hlab' + (hh === 0 ? ' mid' : '') + '" style="left:' + PCT(q) + '%">' +
+        (hh === 0 ? '12a' : hh < 12 ? hh + 'a' : hh === 12 ? '12p' : (hh - 12) + 'p') + '</span>';
+    }
+    document.getElementById('axis').innerHTML =
+      '<div class="axrow"><div class="gut"></div><div class="days">' + ax + '</div></div>' +
+      '<div class="axrow"><div class="gut"></div><div class="hours-axis">' + hx + '</div></div>';
     document.getElementById('grid').innerHTML = chart(flow, r);
     document.getElementById('legend').innerHTML =
       '<span><i class="sw mv"></i>moving</span>' +
@@ -564,8 +573,6 @@
       flow.tasks.length + ' legs · ' + (flow.branches || []).length + ' branches · ' +
       places(flow).length + ' places · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
     document.getElementById('tasks').innerHTML = taskTable(flow, r);
-    document.getElementById('sub').textContent = flow.note ||
-      'Time runs across, place runs down — so a sloped bar is movement and a flat one is waiting.';
 
     // A bar or a dot finds its row, which is the only interaction left.
     all('#grid [data-task]').forEach(function (el) {

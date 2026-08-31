@@ -38,7 +38,14 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 
 /* ---------- the chart: time across, place down ---------- */
 .body{padding:14px 18px 14px}
-.axis{display:flex; gap:12px; padding-bottom:2px}
+/* Two rows: the day names, then the hour each four-hour mark stands for, so a
+   bar can be placed in the day without counting gridlines. */
+.axis{padding-bottom:2px}
+.axrow{display:flex; gap:12px}
+.hours-axis{position:relative; flex:1 1 auto; min-width:0; height:14px}
+.hlab{position:absolute; transform:translateX(-50%); font-family:"IBM Plex Mono",monospace;
+  font-size:8.5px; color:var(--ink-3); white-space:nowrap; top:0}
+.hlab.mid{color:var(--ink-2); font-weight:600}
 .gut{flex:0 0 128px; display:flex; flex-direction:column}
 .days{flex:1 1 auto; min-width:0; display:flex}
 .day{flex:1 1 0; text-align:center; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
