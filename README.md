@@ -54,9 +54,11 @@ schedule, not the syntax, so the viewer flags it in red instead.
 ## Tabs
 
 - **Flow** — the chart and the task list for one journey.
-- **Orders** — pounds invoiced by how the order leaves the farm: Costco Kona on
-  our own trucks, picked up at the gate under FOB Farm, or off-island on a boat.
-  Copied from the freight model; refresh it there.
+- **Orders** — cases and pounds invoiced by how the order leaves the farm:
+  Costco Kona on our own trucks, picked up at the gate under FOB Farm, or
+  off-island on a boat. Both units on every line, because the orders arrive in
+  cases and the harvest is weighed. Copied from the freight model; refresh it
+  there.
 - **Hours** — every place's opening hours, per journey.
 
 Hours **gate** the written times without overriding them: a start or stop

@@ -195,3 +195,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .body h4:first-child{margin-top:0}
 .hint{margin:14px 0 0; font-size:11.5px; color:var(--ink-3); line-height:1.5}
 .hint b{color:var(--ink-2); font-weight:600}
+
+/* Cases lead and pounds follow: the orders come in cases and the harvest is
+   weighed, so a line carrying only one of them makes somebody convert. */
+.otbl td s.lb{display:block; margin:1px 0 0; font-size:10px}

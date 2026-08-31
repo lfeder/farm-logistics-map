@@ -327,7 +327,9 @@
     (DATA.sales || []).forEach(function (x) {
       if (x.crop !== c) return;
       var k = x.wk + '|' + x.half;
-      (rows[k] || (rows[k] = {}))[x.bucket] = ((rows[k] || {})[x.bucket] || 0) + x.lbs;
+      var R = rows[k] || (rows[k] = {});
+      R[x.bucket] = (R[x.bucket] || 0) + (x.cases || 0);
+      R[x.bucket + '_lb'] = (R[x.bucket + '_lb'] || 0) + (x.lbs || 0);
       weeks[x.wk] = 1;
     });
     var wks = Object.keys(weeks).sort();
@@ -336,31 +338,48 @@
     wks.forEach(function (w) {
       HALF.forEach(function (h) {
         var b = rows[w + '|' + h[0]];
-        if (b) best = Math.max(best, (b.kona || 0) + (b.pickup || 0) + (b.off || 0));
+        if (b) best = Math.max(best, (b.kona_lb || 0) + (b.pickup_lb || 0) + (b.off_lb || 0));
       });
     });
-    function lb(v) { return v ? '<b>' + Math.round(v).toLocaleString() + '</b><s>lb</s>' : '<u>—</u>'; }
-    var tot = { kona: 0, pickup: 0, off: 0, n: 0 };
+    // Orders arrive in cases and the harvest is weighed, so both units belong on
+    // every line rather than somebody converting in their head.
+    function qty(b, k) {
+      if (!b || !b[k]) return '<u>—</u>';
+      return '<b>' + Math.round(b[k]).toLocaleString() + '</b><s>cs</s>' +
+        '<s class="lb">' + Math.round(b[k + '_lb'] || 0).toLocaleString() + ' lb</s>';
+    }
+    var tot = { kona: 0, pickup: 0, off: 0, kona_lb: 0, pickup_lb: 0, off_lb: 0, n: 0 };
     var body = wks.map(function (w) {
       return HALF.map(function (h, hi) {
         var b = rows[w + '|' + h[0]] || null;
-        if (b) { tot.kona += b.kona || 0; tot.pickup += b.pickup || 0; tot.off += b.off || 0; tot.n++; }
-        var sum = b ? (b.kona || 0) + (b.pickup || 0) + (b.off || 0) : 0;
+        if (b) {
+          BUCKETS.forEach(function (k) {
+            tot[k[0]] += b[k[0]] || 0; tot[k[0] + '_lb'] += b[k[0] + '_lb'] || 0;
+          });
+          tot.n++;
+        }
+        var sum = b ? (b.kona_lb || 0) + (b.pickup_lb || 0) + (b.off_lb || 0) : 0;
         var bar = sum && best ? '<span class="obar" style="width:' + (sum / best * 100).toFixed(1) + '%"></span>' : '';
         return '<tr class="' + (hi ? '' : 'wkstart') + '">' +
           (hi ? '' : '<th rowspan="2" class="wk">' + shortDate(w) + '</th>') +
           '<th class="hf">' + h[1] + '</th>' +
-          BUCKETS.map(function (k) { return '<td>' + lb(b ? b[k[0]] : 0) + '</td>'; }).join('') +
+          BUCKETS.map(function (k) { return '<td>' + qty(b, k[0]) + '</td>'; }).join('') +
           '<td class="barcell">' + bar + '</td></tr>';
       }).join('');
     }).join('');
+    var mean = {};
+    BUCKETS.forEach(function (k) {
+      mean[k[0]] = tot.n ? tot[k[0]] / tot.n : 0;
+      mean[k[0] + '_lb'] = tot.n ? tot[k[0] + '_lb'] / tot.n : 0;
+    });
     var avg = '<tr class="grp"><th colspan="6">Per window</th></tr><tr><th></th><th class="hf">Average</th>' +
-      BUCKETS.map(function (k) { return '<td>' + lb(tot.n ? tot[k[0]] / tot.n : 0) + '</td>'; }).join('') +
+      BUCKETS.map(function (k) { return '<td>' + qty(mean, k[0]) + '</td>'; }).join('') +
       '<td class="barcell"></td></tr>';
     return '<table class="otbl"><thead><tr><th></th><th></th>' +
       BUCKETS.map(function (k) { return '<th>' + k[1] + '</th>'; }).join('') +
       '<th></th></tr></thead><tbody>' + body + avg + '</tbody></table>' +
-      '<p class="hint">Pounds invoiced, off the purchase orders, split by how the order leaves the farm: ' +
+      '<p class="hint">Cases and pounds invoiced, off the purchase orders, split by how the order ' +
+      'leaves the farm: ' +
       '<b>' + esc(DATA.on_island_customer || 'Kona') + '</b> on our own trucks, <b>pick up</b> at the gate ' +
       'under FOB Farm, and <b>off-island</b> on a boat. ' +
       'The freight manifest cannot answer this — it misses more than half of Kona, because it only holds ' +
