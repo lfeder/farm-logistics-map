@@ -1,14 +1,19 @@
-"""Build index.html from journeys.md, data.json and viewer/.
+"""Build index.html from the CSVs, data.json and viewer/.
 
-The journeys are defined in Markdown and nowhere else, so the thing you edit to
-change a schedule is a table a person can read. This turns that file plus the
-order history into one self-contained page that opens by double-clicking.
+A journey is a set of legs and nothing else, so the thing you edit to change a
+schedule is a spreadsheet:
+
+    journeys.csv   one row per journey: its name, its cut days, a note
+    legs.csv       one row per leg: where it is, when it starts, when it stops
+    hours.csv      one row per place: the hours somebody will take it
+    sailings.csv   one row per boat: when it goes and what it connects to
 
     python3 build.py
 
 Touches no network and needs no credentials. data.json is copied out of the
 freight model; refresh it there.
 """
+import csv
 import json
 import os
 import re
@@ -19,48 +24,47 @@ DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 ICONS = {"box", "truck", "plane", "ship", "depot", "store", "clock"}
 
 
-def die(msg):
-    sys.exit("journeys.md: " + msg)
+def die(f, msg):
+    sys.exit("%s: %s" % (f, msg))
 
 
-def rows(block):
-    """The cells of a Markdown table, header and rule dropped."""
-    out = []
-    for line in block:
-        line = line.strip()
-        if not line.startswith("|"):
-            continue
-        cells = [c.strip() for c in line.strip("|").split("|")]
-        if all(set(c) <= set("-: ") for c in cells):     # the rule under the header
-            continue
-        out.append(cells)
-    return out[1:] if out else []
+def read(name, need):
+    path = os.path.join(HERE, name)
+    with open(path, newline="") as fh:
+        rows = [r for r in csv.DictReader(fh)]
+    if not rows:
+        die(name, "no rows")
+    missing = [c for c in need if c not in rows[0]]
+    if missing:
+        die(name, "missing column%s: %s" % ("" if len(missing) == 1 else "s", ", ".join(missing)))
+    return rows
 
 
-def hhmm(s, where):
-    m = re.match(r"^(\d{1,2}):(\d{2})$", s.strip())
+def hhmm(s, f, where):
+    m = re.match(r"^(\d{1,2}):(\d{2})$", (s or "").strip())
     if not m:
-        die("%s: expected a time like 06:00, got %r" % (where, s))
+        die(f, "%s: expected a time like 06:00, got %r" % (where, s))
     h, mn = int(m.group(1)), int(m.group(2))
     if h > 23 or mn > 59:
-        die("%s: %r is not a time" % (where, s))
+        die(f, "%s: %r is not a time" % (where, s))
     return h + mn / 60.0
 
 
-def days_mask(spec, where):
-    """'Mon-Fri', 'Sun-Sat', or 'Mon, Wed, Fri'."""
+def days_mask(spec, f, where):
+    """'Mon-Fri', 'Sun-Sat', or 'Mon; Wed; Fri'."""
     mask = [0] * 7
-    spec = spec.strip()
+    spec = (spec or "").strip()
     if not spec:
-        die("%s: no days given" % where)
-    for part in spec.split(","):
+        die(f, "%s: no days given" % where)
+    for part in re.split(r"[;,]", spec):
         part = part.strip()
+        if not part:
+            continue
         if "-" in part:
             a, b = [x.strip()[:3].title() for x in part.split("-", 1)]
             if a not in DOW or b not in DOW:
-                die("%s: %r is not a day range" % (where, part))
-            i, j = DOW.index(a), DOW.index(b)
-            k = i
+                die(f, "%s: %r is not a day range" % (where, part))
+            i, j, k = DOW.index(a), DOW.index(b), DOW.index(a)
             while True:
                 mask[k] = 1
                 if k == j:
@@ -69,144 +73,140 @@ def days_mask(spec, where):
         else:
             d = part[:3].title()
             if d not in DOW:
-                die("%s: %r is not a day" % (where, part))
+                die(f, "%s: %r is not a day" % (where, part))
             mask[DOW.index(d)] = 1
     return mask
 
 
-def offset_time(s, where):
-    """'D1 06:00' -> 30.0 hours from midnight on day 0."""
-    m = re.match(r"^[Dd](\d+)\s+(\d{1,2}:\d{2})$", s.strip())
+# Su M T W Th F Sa, and the longer forms. A bare S is not accepted: it could be
+# either end of the week and a schedule is not the place to guess.
+DAY_WORDS = {"su": 0, "sun": 0, "sunday": 0,
+             "m": 1, "mo": 1, "mon": 1, "monday": 1,
+             "t": 2, "tu": 2, "tue": 2, "tues": 2, "tuesday": 2,
+             "w": 3, "we": 3, "wed": 3, "wednesday": 3,
+             "th": 4, "thu": 4, "thur": 4, "thurs": 4, "thursday": 4,
+             "f": 5, "fr": 5, "fri": 5, "friday": 5,
+             "sa": 6, "sat": 6, "saturday": 6}
+
+
+def day_time(s, f, where):
+    """'M 06:00' -> (weekday index, hour of day)."""
+    m = re.match(r"^([A-Za-z]+)\s+(\d{1,2}:\d{2})$", (s or "").strip())
     if not m:
-        die("%s: expected a time like 'D1 06:00', got %r" % (where, s))
-    return int(m.group(1)) * 24 + hhmm(m.group(2), where)
+        die(f, "%s: expected a day and a time like 'M 06:00', got %r" % (where, s))
+    w = m.group(1).lower()
+    if w == "s":
+        die(f, "%s: 'S' could be Sunday or Saturday — write Su or Sa" % where)
+    if w not in DAY_WORDS:
+        die(f, "%s: %r is not a day" % (where, m.group(1)))
+    return DAY_WORDS[w], hhmm(m.group(2), f, where)
+
+
+def after(dw, hod, floor):
+    """The first hour at or after `floor` that lands on that weekday at that
+    time, counting from the journey's own first day. A journey that runs Sunday
+    to Friday is five days long, not five days minus a modulo."""
+    base = int(floor // 24) * 24
+    for i in range(0, 60):
+        h = base + i * 24 + hod
+        if h >= floor - 1e-9 and ((ANCHOR_IDX + int(h // 24)) % 7) == dw:
+            return h
+    return floor
 
 
 def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "flow"
 
 
-def top_sections(md):
-    """The '# ' sections, keyed by heading."""
-    out, name, buf = {}, None, []
-    for line in md.split("\n"):
-        # A '## ' journey ends a '# ' section too, or Sailings swallows every
-        # table below it and the reference quietly grows rows nobody wrote.
-        if line.startswith("## "):
-            if name:
-                out[name] = buf
-            name, buf = None, []
-            continue
-        if line.startswith("# "):
-            if name:
-                out[name] = buf
-            name, buf = line[2:].strip().lower(), []
-        elif name:
-            buf.append(line)
-    if name:
-        out[name] = buf
-    return out
+# ── hours, keyed by place ────────────────────────────────────────────────────
+# A window belongs to a place, and the place name in legs.csv is the same name,
+# so there is one namespace and a leg's lane picks up its own hours.
+hours = {}
+hours_order = []
+for r in read("hours.csv", ["place", "days", "open", "close"]):
+    p = (r["place"] or "").strip()
+    if not p:
+        continue
+    if p in hours:
+        die("hours.csv", "%r appears twice" % p)
+    hours[p] = {"place": p, "days": days_mask(r["days"], "hours.csv", p),
+                "open": hhmm(r["open"], "hours.csv", p),
+                "close": hhmm(r["close"], "hours.csv", p),
+                "lead": int(re.sub(r"[^0-9]", "", r.get("after_arrival") or "") or 0),
+                "note": (r.get("note") or "").strip()}
+    hours_order.append(p)
 
+sailings = []
+for r in read("sailings.csv", ["route", "departs", "arrives"]):
+    if not (r["route"] or "").strip():
+        continue
+    sailings.append({"route": r["route"].strip(), "departs": (r["departs"] or "").strip(),
+                     "arrives": (r["arrives"] or "").strip(),
+                     "connects": (r.get("connects") or "").strip(),
+                     "note": (r.get("note") or "").strip()})
 
-def reference(md):
-    """The tables that describe everybody else's clock, whether or not this
-    journey goes through them: opening hours, and the sailing schedule."""
-    sec = top_sections(md)
-    hours = []
-    for r in rows(sec.get("hours", [])):
-        r = r + [""] * (6 - len(r))
-        if not r[0]:
-            continue
-        hours.append({"party": r[0], "days": days_mask(r[1], "Hours / " + r[0]),
-                      "open": hhmm(r[2], "Hours / " + r[0]),
-                      "close": hhmm(r[3], "Hours / " + r[0]),
-                      "lead": int(re.sub(r"[^0-9]", "", r[4]) or 0),
-                      "note": r[5]})
-    sail = []
-    for r in rows(sec.get("sailings", [])):
-        r = r + [""] * (5 - len(r))
-        if not r[0]:
-            continue
-        sail.append({"route": r[0], "departs": r[1], "arrives": r[2],
-                     "connects": r[3], "note": r[4]})
-    return {"hours": hours, "sailings": sail}
+# ── journeys and their legs ──────────────────────────────────────────────────
+flows, by_name = [], {}
+for r in read("journeys.csv", ["journey"]):
+    nm = (r["journey"] or "").strip()
+    if not nm:
+        continue
+    f = {"id": slug(nm), "name": nm, "note": (r.get("note") or "").strip(), "tasks": []}
+    flows.append(f)
+    by_name[nm] = f
 
+for r in read("legs.csv", ["journey", "leg", "place", "starts", "stops"]):
+    jn = (r["journey"] or "").strip()
+    if not jn and not (r["leg"] or "").strip():
+        continue
+    if jn not in by_name:
+        die("legs.csv", "%r is not a journey in journeys.csv" % jn)
+    f = by_name[jn]
+    where = "%s / %s" % (jn, r["leg"])
+    icon = (r.get("icon") or "clock").strip().lower() or "clock"
+    if icon not in ICONS:
+        die("legs.csv", "%s: %r is not an icon (%s)" % (where, icon, ", ".join(sorted(ICONS))))
+    f["tasks"].append({"id": "t%d" % len(f["tasks"]), "name": r["leg"].strip(),
+                       "place": (r["place"] or "Somewhere").strip(),
+                       "_s": day_time(r["starts"], "legs.csv", where),
+                       "_e": day_time(r["stops"], "legs.csv", where),
+                       "icon": icon, "note": (r.get("note") or "").strip(),
+                       "_after": r.get("after") or ""})
 
-def parse(md):
-    """journeys.md -> the list of flows the viewer reads."""
-    chunks = re.split(r"\n(?=## )", md)
-    flows = []
-    for chunk in chunks[1:]:
-        lines = chunk.split("\n")
-        name = lines[0][3:].strip()
-        note_lines, cut_days, section, hours, tasks = [], [], None, [], []
-        buf = []
-        for line in lines[1:]:
-            if line.startswith("### "):
-                if section == "hours":
-                    hours = rows(buf)
-                elif section == "tasks":
-                    tasks = rows(buf)
-                section, buf = line[4:].strip().lower(), []
-                continue
-            if section is None:
-                m = re.match(r"^\s*-\s*Cut days:\s*(.+)$", line, re.I)
-                if m:
-                    cut_days = [d.strip()[:3].title() for d in m.group(1).split(",")]
-                elif line.strip() and not line.startswith("---"):
-                    note_lines.append(line.strip())
-            else:
-                buf.append(line)
-        if section == "hours":
-            hours = rows(buf)
-        elif section == "tasks":
-            tasks = rows(buf)
+for f in flows:
+    if not f["tasks"]:
+        die("legs.csv", "%r has no legs" % f["name"])
+    # The first leg sets the week. Every time after it is the next occurrence of
+    # its weekday, walking forward, so a journey that crosses a Sunday keeps
+    # going instead of wrapping back to the start.
+    ANCHOR_IDX = f["tasks"][0]["_s"][0]
+    f["anchor"] = DOW[ANCHOR_IDX]
+    globals()["ANCHOR_IDX"] = ANCHOR_IDX
+    floor = 0.0
+    for t in f["tasks"]:
+        t["s"] = after(t["_s"][0], t["_s"][1], floor)
+        t["e"] = after(t["_e"][0], t["_e"][1], t["s"])
+        floor = t["s"]
+        del t["_s"], t["_e"]
+    # Prereqs are written by name, because a column of ids is unreadable.
+    ids = {t["name"]: t["id"] for t in f["tasks"]}
+    for t in f["tasks"]:
+        out = []
+        for nm in [x.strip() for x in re.split(r"[;,]", t.pop("_after")) if x.strip()]:
+            if nm not in ids:
+                die("legs.csv", "%s: %r comes after %r, which is not a leg of that journey"
+                    % (f["name"], t["name"], nm))
+            out.append(ids[nm])
+        t["after"] = out
+    # Each place a leg lands in picks up its own hours, if anybody wrote them.
+    f["windows"] = {}
+    for t in f["tasks"]:
+        if t["place"] in hours:
+            w = hours[t["place"]]
+            f["windows"][t["place"]] = {"days": w["days"], "open": w["open"], "close": w["close"]}
 
-        where = "%s / Hours" % name
-        windows = {}
-        for r in hours:
-            if len(r) < 4:
-                die("%s: a row needs Place, Days, Open, Close" % where)
-            windows[r[0]] = {"days": days_mask(r[1], where),
-                             "open": hhmm(r[2], where), "close": hhmm(r[3], where)}
-
-        where = "%s / Tasks" % name
-        out_tasks, by_name = [], {}
-        for r in tasks:
-            r = r + [""] * (7 - len(r))
-            if not r[0]:
-                continue
-            icon = r[5].strip().lower() or "clock"
-            if icon not in ICONS:
-                die("%s: %r is not an icon (%s)" % (where, icon, ", ".join(sorted(ICONS))))
-            t = {"id": "t%d" % len(out_tasks), "name": r[0], "place": r[1] or "Somewhere",
-                 "s": offset_time(r[2], where + " / " + r[0]),
-                 "e": offset_time(r[3], where + " / " + r[0]),
-                 "icon": icon, "note": r[6], "_after": r[4]}
-            by_name[r[0]] = t["id"]
-            out_tasks.append(t)
-        # Prereqs are written by name, because a table of ids is unreadable.
-        for t in out_tasks:
-            ids = []
-            for nm in [x.strip() for x in t.pop("_after").split(",") if x.strip()]:
-                if nm not in by_name:
-                    die("%s: %r comes after %r, which is not a task here"
-                        % (where, t["name"], nm))
-                ids.append(by_name[nm])
-            t["after"] = ids
-        if not out_tasks:
-            die("%s has no tasks" % name)
-        flows.append({"id": slug(name), "name": name, "note": " ".join(note_lines),
-                      "days": cut_days or ["Sun"], "windows": windows, "tasks": out_tasks})
-    if not flows:
-        die("no journeys found — each one is a '## ' heading")
-    return flows
-
-
-md = open(os.path.join(HERE, "journeys.md")).read()
-flows = parse(md)
-ref = reference(md)
 data = json.load(open(os.path.join(HERE, "data.json")))
+ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell
@@ -221,10 +221,11 @@ path = os.path.join(HERE, "index.html")
 with open(path, "w") as fh:
     fh.write(out)
 
-print("%d journeys: %s" % (len(flows), ", ".join(f["name"] for f in flows)))
 for f in flows:
-    print("  %-28s %2d tasks, %d places" % (f["name"], len(f["tasks"]), len(f["windows"])))
-print("reference: %d parties with hours, %d sailings"
-      % (len(ref["hours"]), len(ref["sailings"])))
+    unknown = sorted({t["place"] for t in f["tasks"]} - set(hours))
+    print("%-28s %2d legs from %s, %d places%s"
+          % (f["name"], len(f["tasks"]), f["anchor"], len(f["windows"]),
+             "" if not unknown else "  (no hours for: %s)" % ", ".join(unknown)))
+print("%d places with hours, %d sailings" % (len(hours), len(sailings)))
 print("%d order rows, %s to %s" % (len(data["sales"]), data["window"]["first"], data["window"]["last"]))
 print("wrote %s (%.0f KB)" % (path, len(out) / 1024))

@@ -35,15 +35,14 @@
   //
   // Opening hours belong to a PLACE, not to a task. Costco receiving is open 4
   // to 11 whether or not anything is driving towards it.
-  // The flows are baked in from journeys.md at build time. Nothing here writes
-  // them; to change a journey you edit the Markdown and run build.py.
+  // The flows are baked in from the CSVs at build time. Nothing here writes
+  // them; to change a journey you edit legs.csv and run build.py.
   var F = window.FLOWS || [], DATA = window.DATA || {};
-  var S = { id: F.length ? F[0].id : '', day: F.length ? F[0].days[0] : 'Sun', tab: 'flow' };
+  var S = { id: F.length ? F[0].id : '', tab: 'flow' };
   try {
     var sv = JSON.parse(window.localStorage.getItem(STORE) || 'null');
     if (sv) {
       if (F.some(function (f) { return f.id === sv.id; })) S.id = sv.id;
-      if (sv.day) S.day = sv.day;
       if (sv.tab) S.tab = sv.tab;
       if (sv.crop) S.crop = sv.crop;
     }
@@ -409,10 +408,10 @@
     var out = '';
     if (R.hours.length) {
       out += '<h4>Who will take it, and when</h4>' +
-        '<table class="otbl hrs"><thead><tr><th>Party</th><th>Days</th><th>Opens</th>' +
+        '<table class="otbl hrs"><thead><tr><th>Place</th><th>Days</th><th>Opens</th>' +
         '<th>Closes</th><th>After arrival</th><th>Note</th></tr></thead><tbody>' +
         R.hours.map(function (w) {
-          return '<tr><th class="hf">' + esc(w.party) + '</th>' +
+          return '<tr><th class="hf">' + esc(w.place) + '</th>' +
             '<td class="dcell">' + dayCells(w.days) + '</td>' +
             '<td class="mono">' + clock(num(w.open)) + '</td>' +
             '<td class="mono">' + clock(num(w.close)) + '</td>' +
@@ -448,9 +447,11 @@
             '<td class="mono">' + clock(num(w.close)) + '</td><td></td></tr>';
         }).join('') + '</tbody></table>';
     }
-    return out + '<p class="hint">All of this is set in <code>journeys.md</code> — the two reference ' +
+    return out + '<p class="hint">All of this is set in <code>hours.csv</code> and ' +
+      '<code>sailings.csv</code>. Days here are real weekdays, the same as in ' +
+      '<code>legs.csv</code>.' + '<span hidden>' +
       'tables at the top of the file, and each journey&rsquo;s own <b>Hours</b> table. Days here are ' +
-      'real weekdays, where the task times on the Flow tab are offsets from the cut.</p>';
+      '</span></p>';
   }
   function dayCells(days) {
     return DOW.map(function (dn, d) {
@@ -458,7 +459,7 @@
     }).join('');
   }
   function mark(t) {
-    return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    return esc(t).replace(/NOT CONFIRMED/g, '<b class="unconfirmed">Not confirmed</b>');
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -475,22 +476,19 @@
 
   function paintFlow() {
     if (!F.length) {
-      document.getElementById('grid').innerHTML = '<p class="hint">No journeys in journeys.md.</p>';
+      document.getElementById('grid').innerHTML = '<p class="hint">No journeys in journeys.csv.</p>';
       return;
     }
     var flow = cur();
-    if (flow.days.indexOf(S.day) < 0) S.day = flow.days[0];
-    ANCHOR = S.day;
+    ANCHOR = flow.anchor || 'Sun';
 
     var r = read(flow);
     SPAN = Math.max(2, Math.ceil(r.end / 24) + 1);
 
     seg('pick', F.map(function (x) { return [x.id, x.name]; }), S.id,
       function (v) { S.id = v; save(); paint(); });
-    seg('day', flow.days.map(function (d) { return [d, d]; }), S.day,
-      function (v) { S.day = v; save(); paint(); });
     document.getElementById('src').innerHTML =
-      'Defined in <code>journeys.md</code> — edit that and run <code>build.py</code>.';
+      'Defined in <code>legs.csv</code> — edit that and run <code>build.py</code>.';
 
     var ax = '';
     for (var i = 0; i < SPAN; i++) {

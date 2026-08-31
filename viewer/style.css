@@ -209,3 +209,4 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .otbl td.fig:nth-of-type(even){padding-right:22px}
 .otbl.hrs tr.unk td,.otbl.hrs tr.unk th{opacity:.6}
 .otbl.hrs td.mono u{text-decoration:none; color:var(--ink-3)}
+.unconfirmed{color:var(--bad); font-weight:600}
