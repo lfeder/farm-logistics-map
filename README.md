@@ -1,14 +1,16 @@
 # Task Vis
 
-A time–distance chart, defined in Markdown.
+A time–distance chart, defined in a Google Sheet.
 
 ```
-python3 build.py      # journeys.md + data.json -> index.html
+python3 build.py      # sheet + reference.json + orders.json -> index.html
 open index.html
 ```
 
-No dependencies, no network. `index.html` is self-contained and opens by
-double-clicking.
+**A schedule edit needs no build.** The page reads the sheet on every load, so
+editing the sheet and refreshing the browser is the whole loop. The build is
+for changing the page itself, and for refreshing `legs.csv` — the snapshot the
+page falls back to when the sheet cannot be read.
 
 ## Where things live
 
@@ -16,10 +18,11 @@ Three files, split by how often they change.
 
 | File | What it is |
 |---|---|
-| `legs.csv` | **The schedule.** One row per leg. The only thing you edit to change when something happens. |
+| the Google Sheet | **The schedule.** One row per leg. The only thing you edit to change when something happens. Its URL is `legs_sheet` in `reference.json`. |
+| `legs.csv` | The snapshot of that sheet, rewritten by every build. Committed, so the diff shows what changed and the page still draws with no network. |
 | `reference.json` | Quasi-static, hand-edited: what a journey is, who is open when, which boat goes where. Months between edits. |
 | `orders.json` | Pulled, not typed. Cases and pounds on order by destination, and the pack line's case counts. Copied out of the freight model's `data.json` — refresh it there. |
-| `build.py` | Reads all three, writes `index.html`. |
+| `build.py` | Pulls the sheet, then writes `index.html`. |
 | `viewer/` | The page: shell, stylesheet, app. |
 | `index.html` | Built. Do not edit — `build.py` overwrites it. |
 
@@ -108,9 +111,12 @@ outside its place's hours is printed in red in the task list and named above it.
 
 ## Not here
 
-This is a viewer. Editing a journey means editing `legs.csv` and running the
-build. Interactive editing was tried and taken back out — the builder was
-becoming the product.
+This is a viewer. Editing a journey means editing the sheet. Interactive
+editing was tried and taken back out — the builder was becoming the product.
+
+Turning rows into journeys happens once, in `viewer/app.js`, because the page
+does it at load time. `build.py` does not do it again in Python; two copies of
+those rules would drift.
 
 Honolulu to Nawiliwili is in `sailings.csv` from the Young Brothers cargo sheet:
 departs Monday and Thursday, arrives Tuesday and Friday. The Kauai leg is not

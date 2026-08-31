@@ -4,8 +4,13 @@ Three files, split by how often they change rather than by what they describe:
 
     legs.csv        THE schedule. One row per leg of a journey. Pulled from the
                     Google Sheet named in reference.json when that is reachable,
-                    and committed either way so the build works offline and the
-                    diff shows what changed.
+                    and committed either way so the diff shows what changed and
+                    the page has something to draw with no network.
+
+                    The built page reads the sheet itself on every load, so a
+                    schedule edit needs no build -- a refresh is enough. This
+                    snapshot is the fallback, and running the build is how it
+                    gets caught up.
     reference.json  Quasi-static and hand-edited: what a journey is, who is open
                     when, which boat goes where. Months between edits.
     orders.json     Pulled, not typed. Cases and pounds on order by destination,
@@ -14,7 +19,7 @@ Three files, split by how often they change rather than by what they describe:
 
     python3 build.py
 
-Touches no network and needs no credentials.
+Reads the sheet over the network; needs no credentials.
 """
 import csv
 import io
@@ -159,34 +164,6 @@ def days_mask(spec, f, where):
     return mask
 
 
-# Su M T W Th F Sa, and the longer forms. A bare S is not accepted: it could be
-# either end of the week and a schedule is not the place to guess.
-DAY_WORDS = {"su": 0, "sun": 0, "sunday": 0,
-             "m": 1, "mo": 1, "mon": 1, "monday": 1,
-             "t": 2, "tu": 2, "tue": 2, "tues": 2, "tuesday": 2,
-             "w": 3, "we": 3, "wed": 3, "wednesday": 3,
-             "th": 4, "thu": 4, "thur": 4, "thurs": 4, "thursday": 4,
-             "f": 5, "fr": 5, "fri": 5, "friday": 5,
-             "sa": 6, "sat": 6, "saturday": 6}
-
-
-def day_time(s, f, where):
-    """'Sun, 10:00' or 'M 06:00' -> (weekday index, hour of day)."""
-    m = re.match(r"^([A-Za-z]+)\s*,?\s+(\d{1,2}:\d{2})$", (s or "").strip())
-    if not m:
-        die(f, "%s: expected a day and a time like 'Sun, 10:00', got %r" % (where, s))
-    w = m.group(1).lower()
-    if w == "s":
-        die(f, "%s: 'S' could be Sunday or Saturday — write Su or Sa" % where)
-    if w not in DAY_WORDS:
-        die(f, "%s: %r is not a day" % (where, m.group(1)))
-    return DAY_WORDS[w], hhmm(m.group(2), f, where)
-
-
-def slug(name):
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "flow"
-
-
 # ── hours, keyed by place ────────────────────────────────────────────────────
 # A window belongs to a place, and the place names in legs.csv are the same
 # names, so there is one namespace and a leg's lane picks up its own hours.
@@ -213,80 +190,20 @@ for r in REF.get("sailings", []):
                      "connects": (r.get("connects") or "").strip(),
                      "note": (r.get("note") or "").strip()})
 
-# ── journeys, and one variant per start day ─────────────────────────────────
-# A journey is defined once and run on more than one cutting day, so the rows
-# group by (journey, start day) and each group is its own picture. The branch
-# column is what makes the food-safety clock expressible: branch 1 is the
-# pallet, branch 2 runs beside it, and both leave the same morning.
-#
-# A leg carries where it starts as well as where it ends, so its bar has a real
-# slope instead of one inferred from whatever came before it.
-meta = REF.get("journeys", {})
-
-NEED = ["journey", "start_day", "branch", "leg",
-        "start_location", "start_dt", "end_location", "end_dt"]
-groups, order = {}, []
-for r in read("legs.csv", NEED):
-    jn = (r["journey"] or "").strip()
-    if not jn:
-        continue
-    # The sheet names the journeys; reference.json only ever held optional notes
-    # for them, so a journey that has no note is not an error.
-    key = (jn, (r["start_day"] or "0").strip())
-    if key not in groups:
-        groups[key] = []
-        order.append(key)
-    groups[key].append(r)
-
-flows = []
-for key in order:
-    jn, sd = key
-    rows_ = groups[key]
-    where0 = "%s / start day %s" % (jn, sd)
-    anchor_idx = day_time(rows_[0]["start_dt"], "legs.csv", where0)[0]
-
-    def at(spec, where, _a=None):
-        dw, hod = day_time(spec, "legs.csv", where)
-        return ((dw - anchor_idx) % 7) * 24 + hod
-
-    tasks, branches = [], []
-    for r in rows_:
-        where = "%s / %s" % (where0, r["leg"])
-        icon = (r.get("icon") or "").strip().lower() or "clock"
-        if icon not in ICONS:
-            die("legs.csv", "%s: %r is not an icon (%s)" % (where, icon, ", ".join(sorted(ICONS))))
-        br = (r["branch"] or "1").strip()
-        if br not in branches:
-            branches.append(br)
-        tasks.append({"id": "t%d" % len(tasks), "name": (r["leg"] or "").strip(), "branch": br,
-                      "from": (r["start_location"] or "Somewhere").strip(),
-                      "place": (r["end_location"] or "Somewhere").strip(),
-                      "s": at(r["start_dt"], where), "e": at(r["end_dt"], where),
-                      "icon": icon, "note": (r.get("note") or "").strip()})
-    # Within a branch the rows are already in order, and that is the whole
-    # dependency story -- nothing needs an "after" column to say what the file
-    # already says.
-    last = {}
-    for t in tasks:
-        t["after"] = [last[t["branch"]]] if t["branch"] in last else []
-        last[t["branch"]] = t["id"]
-
-    label = DOW[anchor_idx]
-    wins = {}
-    for t in tasks:
-        for pl in (t["from"], t["place"]):
-            if pl in hours:
-                wins[pl] = {"days": hours[pl]["days"], "open": hours[pl]["open"],
-                            "close": hours[pl]["close"]}
-    flows.append({"id": slug(jn) + "-" + slug(label), "name": jn, "start": label,
-                  "note": meta.get(jn, ""), "branches": branches, "tasks": tasks, "windows": wins})
+# ── what gets embedded ──────────────────────────────────────────────────────
+# The schedule goes in as the CSV text it already is. The viewer turns rows
+# into journeys, from the sheet when it can reach it and from this snapshot
+# when it cannot, so those rules live in exactly one place and this file no
+# longer has an opinion about them.
+legs_text = open(os.path.join(HERE, "legs.csv")).read()
 
 data = json.load(open(os.path.join(HERE, "orders.json")))
 ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell
-       .replace("/*__FLOWS__*/", json.dumps(flows, separators=(",", ":")))
+       .replace("/*__LEGS__*/", json.dumps(legs_text))
+       .replace("/*__SHEET__*/", json.dumps(sheet_url))
        .replace("/*__REF__*/", json.dumps(ref, separators=(",", ":")))
        .replace("/*__DATA__*/", json.dumps(data, separators=(",", ":")))
        .replace("<style>/*__CSS__*/</style>",
@@ -297,12 +214,6 @@ path = os.path.join(HERE, "index.html")
 with open(path, "w") as fh:
     fh.write(out)
 
-for f in flows:
-    unknown = sorted({p for t in f["tasks"] for p in (t["from"], t["place"])} - set(hours))
-    print("%-22s %-4s start  %2d legs, %d branch%s, %d timed%s"
-          % (f["name"], f["start"], len(f["tasks"]), len(f["branches"]),
-             "" if len(f["branches"]) == 1 else "es", len(f["windows"]),
-             "" if not unknown else "  (no hours: %s)" % ", ".join(unknown)))
 print("%d places with hours, %d sailings" % (len(hours), len(sailings)))
 print("%d order rows, %s to %s" % (len(data["sales"]), data["window"]["first"], data["window"]["last"]))
 print("wrote %s (%.0f KB)" % (path, len(out) / 1024))
