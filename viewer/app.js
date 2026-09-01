@@ -238,7 +238,7 @@
             (head.transport || '') + "', fob '" + (head.fob || '') + "'");
         }
         var t = span(g.cell, where);
-        return { name: g.name, from: pl[0], place: pl[1],
+        return { name: g.name, from: pl[0], place: pl[1], sticks: g.st.sticks || '',
                  a: t[0].d * 24 + t[0].h, b: t[1].d * 24 + t[1].h };
       });
       made.forEach(function (g) { while (g.b < g.a) g.b += 24; });
@@ -256,13 +256,25 @@
       var base = +days[0] || 0;
       days.forEach(function (day, n) {
         var shift = (((+day || 0) - base) % 7 + 7) % 7 * 24, push = 0;
-        made.forEach(function (g) {
-          var sa = g.a + shift + push, sb = g.b + shift + push;
+        var moved = made.map(function (g) {
           // The written run is what it says it is; only the moved ones are
           // pushed, or typing a Sunday time would quietly get corrected.
+          var sa = g.a + shift + push;
           for (var k = 0; n && k < 7 && !openOn(g.place, Math.floor(sa / 24)); k++) {
-            sa += 24; sb += 24; push += 24;
+            sa += 24; push += 24;
           }
+          return push;
+        });
+        // Then backwards, for the steps that cannot be left behind. A box
+        // truck has no chilling, so it is loaded immediately before it goes:
+        // when the going moves, the loading moves with it, keeping the gap it
+        // was written with. The container has chilling and can wait, which is
+        // why only one of the two is marked.
+        for (var m = made.length - 2; m >= 0; m--) {
+          if (made[m].sticks === 'next' && moved[m] < moved[m + 1]) moved[m] = moved[m + 1];
+        }
+        made.forEach(function (g, m) {
+          var sa = g.a + shift + moved[m], sb = g.b + shift + moved[m];
           out.push({ crop: head.crop, fob: head.fob, transport: head.transport,
             hold: head.hold || '', start_day: day, branch: '1', leg: g.name,
             from: g.from, place: g.place,

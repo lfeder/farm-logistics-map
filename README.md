@@ -106,6 +106,12 @@ Retrieve                        Thu 08:00-10:00
 Customer      Mon 07:00-08:30   Fri 06:00-10:00
 ```
 
+A step may be marked `sticks: next`, meaning it keeps the gap it was written
+with to the step after it. `Load Truck` is: a box truck has no chilling, so it
+is loaded immediately before it goes, and when the going is pushed the loading
+comes along rather than being left to sit overnight. `Load Container` is not —
+the container chills, and can wait for its driver.
+
 **`Start Day` is a list.** `0, 3` means the journey runs on both cutting days,
 and only the first is written down: the second is the first moved along three
 days, except where a step lands on a day its place is shut — HFA does not
