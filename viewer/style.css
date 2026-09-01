@@ -319,3 +319,10 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
 .grid .grp:first-child{padding-top:2px}
 
+
+/* One row of journeys per crop, each behind its own name. */
+.picks{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.picks .lbl{margin-left:6px}
+.picks .lbl:first-child{margin-left:0}
+
+.warn-in{color:var(--bad)}

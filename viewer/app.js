@@ -186,10 +186,25 @@
       });
     });
 
-    // One journey per column, read top to bottom.
-    var out = [];
+    // One journey per column, read top to bottom. A column that cannot be
+    // built is left out and named, rather than taking the other nine with it:
+    // one bad cell should cost you one journey, not the whole page.
+    var out = [], hurt = [];
     for (j = col + 1; j < wide; j++) {
-      var head = {}, legs = [], started = false;
+      try {
+        out = out.concat(column(rows, lab, col, j, byStep));
+      } catch (err) {
+        hurt.push(String((err && err.message) || err));
+      }
+    }
+    if (!out.length) throw new Error(hurt.length ? hurt[0] : 'no journeys in the grid');
+    out.hurt = hurt;
+    return out;
+  }
+
+  function column(rows, lab, col, j, byStep) {
+    var out = [];
+    var head = {}, legs = [], started = false;
       rows.slice(lab).forEach(function (r) {
         var name = (r[col] || '').trim(), cell = (r[j] || '').trim();
         if (!name) return;
@@ -205,19 +220,22 @@
         // and the canonical one is the one the chart should say.
         if (cell) legs.push({ st: byStep[key], cell: cell, name: String(byStep[key].step) });
       });
-      if (!head.crop && !head.fob) continue;
-      if (!legs.length) continue;
+      if (!head.crop && !head.fob) return out;
+      if (!legs.length) return out;
       var who = [head.crop, head.fob, head.transport].filter(Boolean).join('-');
       var made = legs.map(function (g) {
         var where = who + ' / ' + g.name;
         // Where a step runs between: the same everywhere unless the journey's
         // transport or its customer changes it.
+        // The most specific thing that has an answer wins: an island where the
+        // step differs by island, a vehicle where it differs by vehicle, and
+        // the plain pair where it differs by neither.
         var pl = g.st.places;
-        if (g.st.transport) pl = g.st.transport[head.transport];
-        if (g.st.fob) pl = g.st.fob[head.fob];
+        if (g.st.transport && g.st.transport[head.transport]) pl = g.st.transport[head.transport];
+        if (g.st.fob && g.st.fob[head.fob]) pl = g.st.fob[head.fob];
         if (!pl) {
-          throw new Error(where + ": no places for " +
-            (g.st.transport ? "transport '" + head.transport : "fob '" + head.fob) + "'");
+          throw new Error(where + ": nowhere to run between for mode '" +
+            (head.transport || '') + "', fob '" + (head.fob || '') + "'");
         }
         var t = span(g.cell, where);
         return { name: g.name, from: pl[0], place: pl[1],
@@ -252,8 +270,6 @@
             e: DOW[Math.floor(sb / 24) % 7] + ' ' + hhmm(sb) });
         });
       });
-    }
-    if (!out.length) throw new Error('no journeys in the grid');
     return out;
   }
 
@@ -329,10 +345,12 @@
     return order.map(function (key) {
       var rs = groups[key], jn = name(rs[0]);
       var where0 = jn + ' / start day ' + (rs[0].start_day || '0');
-      // The first leg names the day the journey starts, and every other time
-      // is counted forward from there -- so one definition draws as a Sunday
-      // picture and a Wednesday one without being written down twice.
-      var anchor = dayTime(rs[0].s, where0).d;
+      // The cutting day is the anchor, and every time is counted forward from
+      // it. Taking the first leg's day instead worked only while the first
+      // step happened on the cut: cucumbers are cut on a Sunday and first
+      // written down on the Monday, and the picture called itself Mon/Tue.
+      var sd = parseInt(rs[0].start_day, 10);
+      var anchor = isNaN(sd) ? dayTime(rs[0].s, where0).d : ((sd % 7) + 7) % 7;
       var branches = [], tasks = [];
       rs.forEach(function (r) {
         var where = where0 + ' / ' + r.leg;
@@ -364,9 +382,11 @@
       // Hold column; with none named, the first is the house default.
       var hold = (window.REF || {}).hold;
       var recipes = (hold || {}).recipes || {};
+      // A blank Hold means no hold, not the house default. Cucumbers do not
+      // have a test-and-hold clock at all, and generating one for them would
+      // be inventing a constraint they do not live under.
       var want = rs[0].hold || '';
-      var stages = has(recipes, want) ? recipes[want]
-        : recipes[Object.keys(recipes)[0]];
+      var stages = has(recipes, want) ? recipes[want] : null;
       if (hold && stages && stages.length > 1) {
         var hb = String(hold.branch || '2');
         tasks = tasks.filter(function (t) { return t.branch !== hb; });
@@ -1174,12 +1194,12 @@
   // them as three toggles would offer combinations that do not exist -- 140 by
   // barge, off-island on the long hold -- so they are folded into one.
   function facets(f) {
-    return { when: f.start, crop: f.crop || '', jrn: jrnKey(f) };
+    return { when: f.start, jrn: jrnKey(f) };
   }
   // The key rides in a DOM attribute when it becomes a button, so it has to
   // survive being written out and read back. A NUL does not.
   function jrnKey(f) {
-    return [f.fob || '', f.transport || '', f.hold || ''].join('|');
+    return [f.crop || '', f.fob || '', f.transport || '', f.hold || ''].join('|');
   }
 
   // A journey is named by its customer, plus whatever actually varies between
@@ -1215,7 +1235,7 @@
 
   // Answer as much of the wanted combination as exists, giving up the freight
   // before the destination and the cut before either.
-  var KEYS = ['crop', 'jrn', 'when'];
+  var KEYS = ['jrn', 'when'];
 
   // Each question holds a set of answers rather than one. An empty set asks
   // nothing, so turning every answer off is how you say "the whole week".
@@ -1279,36 +1299,50 @@
     return F.length;
   }
 
+  function toggle(key, v) {
+    var list = (S.sel[key] || []).slice(), at = list.indexOf(v);
+    if (at < 0) list.push(v); else list.splice(at, 1);
+    S.sel[key] = list;
+    save();
+    paint();
+  }
+
   function picker() {
-    function ask(id, key, label, order) {
-      var opts = uniq(F.map(function (f) { return facets(f)[key]; }));
-      if (order) opts = opts.slice().sort(order);
-      // One answer is not a question. That is what keeps the freight toggle
-      // off a destination with only one way to reach it, and the crop toggle
-      // away entirely while we only grow lettuce.
-      seg(id, opts.length > 1 ? opts.map(function (v) {
-        return [v, label ? label(v) : v];
-      }) : [], S.sel[key] || [], function (v) {
-        var list = (S.sel[key] || []).slice(), at = list.indexOf(v);
-        if (at < 0) list.push(v); else list.splice(at, 1);
-        S.sel[key] = list;
-        save();
-        paint();
+    // One answer is not a question -- that is what keeps a cut toggle away
+    // from a crop that is only cut once.
+    var when = uniq(F.map(function (f) { return f.start; }));
+    seg('pick-when', when.length > 1 ? when.map(function (d) { return [d, cutLabel(d)]; }) : [],
+      S.sel.when || [], function (v) { toggle('when', v); });
+
+    // A row of journeys per crop. They are separate questions -- nobody asks
+    // for the lettuce 140 and the cucumber Oahu in one breath -- and grouping
+    // them says which crop a journey belongs to without a word for it.
+    var host = document.getElementById('pick-jrns');
+    if (!host) return;
+    var crops = uniq(F.map(function (f) { return f.crop || ''; }));
+    host.innerHTML = crops.map(function (c, n) {
+      return '<span class="lbl">' + esc(c) + '</span><span class="seg" id="pick-c' + n +
+        '"></span>';
+    }).join('');
+    crops.forEach(function (c, n) {
+      var mine = F.filter(function (f) { return (f.crop || '') === c; });
+      // Journeys to the same customer sit together: 140 twice over is one
+      // choice made twice, and reads that way only side by side.
+      var rank = {};
+      mine.forEach(function (f) {
+        var k = f.fob || '';
+        if (!has(rank, k)) rank[k] = mine.indexOf(f);
       });
-    }
-    ask('pick-when', 'when', cutLabel);
-    ask('pick-crop', 'crop');
-    ask('pick-jrn', 'jrn', function (key) {
-      for (var i = 0; i < F.length; i++) if (jrnKey(F[i]) === key) return jrnLabel(F[i]);
-      return key;
-    }, function (a, b) {
-      // The sheet's column order, except that journeys to the same customer
-      // sit together -- 140 twice over is one choice made twice, and reads
-      // that way only if the two are side by side.
-      var fa = jrnFor(a), fb = jrnFor(b);
-      if (!fa || !fb) return 0;
-      var ga = fobRank(fa), gb = fobRank(fb);
-      return ga !== gb ? ga - gb : idxOf(fa) - idxOf(fb);
+      var opts = uniq(mine.map(jrnKey)).sort(function (a, b) {
+        var fa = jrnFor(a), fb = jrnFor(b);
+        if (!fa || !fb) return 0;
+        var ga = rank[fa.fob || ''], gb = rank[fb.fob || ''];
+        return ga !== gb ? ga - gb : mine.indexOf(fa) - mine.indexOf(fb);
+      });
+      seg('pick-c' + n, opts.map(function (k) {
+        var f = jrnFor(k);
+        return [k, f ? jrnLabel(f) : k];
+      }), S.sel.jrn || [], function (v) { toggle('jrn', v); });
     });
   }
 
@@ -1331,9 +1365,14 @@
   // chart is the answer. The line exists for when it was not, because stale
   // legs drawn silently would be worse than no line at all.
   function srcLine() {
-    if (SRC.live || !SRC.why) return '';
+    // A journey that could not be built is worth a line even when the rest of
+    // the sheet read fine, or it just quietly is not there.
+    var hurt = (SRC.hurt || []).map(function (h) {
+      return '<span class="warn-in">' + esc(h) + '</span>';
+    }).join(' ');
+    if (SRC.live || !SRC.why) return hurt;
     return 'Sheet unreadable (' + esc(SRC.why) + ') — showing the snapshot in ' +
-      '<code>legs.csv</code>.';
+      '<code>legs.csv</code>. ' + hurt;
   }
 
   // ── Boot ──────────────────────────────────────────────────────────────────
@@ -1350,7 +1389,9 @@
       raw.forEach(function (r) {
         r.forEach(function (c) { if (c.trim().toLowerCase() === 'start dt') rowish = true; });
       });
-      built = buildFlows(rowish ? legRows(text) : gridRows(text));
+      var legs = rowish ? legRows(text) : gridRows(text);
+      built = buildFlows(legs);
+      built.hurt = legs.hurt || [];
     } catch (err) {
       why = String((err && err.message) || err);
       // A typo in the sheet must not take the page down with it: fall back to
@@ -1360,7 +1401,7 @@
       live = false;
     }
     F = built;
-    SRC = { live: live, at: new Date(), why: why || '' };
+    SRC = { live: live, at: new Date(), why: why || '', hurt: built.hurt || [] };
     // A stored answer that the sheet no longer offers is dropped rather than
     // silently narrowing the picture to nothing.
     var fresh = !S.sel;

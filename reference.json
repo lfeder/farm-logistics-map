@@ -121,6 +121,22 @@
       "close": "19:00",
       "after_arrival": 0,
       "note": "They collect while we are here."
+    },
+    {
+      "place": "Nawiliwili",
+      "days": "Mon-Fri",
+      "open": "07:00",
+      "close": "16:00",
+      "after_arrival": 0,
+      "note": "Young Brothers Kauai. Same window as KWH."
+    },
+    {
+      "place": "HFA Kauai",
+      "days": "Mon-Fri",
+      "open": "06:00",
+      "close": "15:00",
+      "after_arrival": 0,
+      "note": "Collects, then runs the route."
     }
   ],
   "sailings": [
@@ -214,7 +230,7 @@
     }
   },
   "steps": {
-    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it. Every place named here needs a row in hours. A step may list what it was called before under was, so renaming one does not have to happen in two places at once.",
+    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it -- fob first, then transport, then the plain pair. An override that has no entry for this journey falls through to the next, so a step can be told apart by island where it needs to be and by vehicle everywhere else. Every place named here needs a row in hours. A step may list what it was called before under was, so renaming one does not have to happen in two places at once.",
     "order": [
       {
         "step": "Pack/Store 1",
@@ -238,21 +254,21 @@
         ]
       },
       {
-        "step": "Load",
-        "transport": {
-          "Truck": [
-            "Storage",
-            "Storage"
-          ],
-          "Air": [
-            "Storage",
-            "Storage"
-          ],
-          "Barge": [
-            "Storage",
-            "Container"
-          ]
-        }
+        "step": "Load Truck",
+        "was": [
+          "Load"
+        ],
+        "places": [
+          "Storage",
+          "Storage"
+        ]
+      },
+      {
+        "step": "Load Container",
+        "places": [
+          "Storage",
+          "Container"
+        ]
       },
       {
         "step": "Trucking",
@@ -265,14 +281,15 @@
             "KOA"
           ],
           "Barge": [
-            "Container",
+            "Storage",
             "KWH"
           ]
         }
       },
       {
-        "step": "Inter-Island",
+        "step": "Inter-Island Oahu",
         "was": [
+          "Inter-Island",
           "Transport"
         ],
         "transport": {
@@ -287,6 +304,19 @@
         }
       },
       {
+        "step": "Inter-Island Outer",
+        "fob": {
+          "Maui": [
+            "YBHNL",
+            "Kahului"
+          ],
+          "Kauai": [
+            "YBHNL",
+            "Nawiliwili"
+          ]
+        }
+      },
+      {
         "step": "Retrieve",
         "transport": {
           "Air": [
@@ -296,6 +326,16 @@
           "Barge": [
             "YBHNL",
             "HFA"
+          ]
+        },
+        "fob": {
+          "Maui": [
+            "Kahului",
+            "HFA Kahului"
+          ],
+          "Kauai": [
+            "Nawiliwili",
+            "HFA Kauai"
           ]
         }
       },
@@ -309,6 +349,18 @@
           "Pickup": [
             "Storage",
             "Customer truck"
+          ],
+          "Oahu": [
+            "HFA",
+            "Customer receiving"
+          ],
+          "Maui": [
+            "HFA Kahului",
+            "Customer receiving"
+          ],
+          "Kauai": [
+            "HFA Kauai",
+            "Customer receiving"
           ],
           "Off-island": [
             "HFA",
