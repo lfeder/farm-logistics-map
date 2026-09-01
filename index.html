@@ -215,17 +215,35 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 /* Branches. Two threads leaving the same morning -- the pallet and the clock
    running beside it -- and the whole point is that they are separate until they
    meet, so they do not share a colour. */
-/* One colour per journey. Ten of them, because that is how many the week
-   holds; an eleventh would wrap and share, which is better than running out. */
+/* A hue per journey, a shade per run of it: dark for the earlier cut, light
+   for the later one. Two runs of one journey read as one journey. */
 :root{
-  --j0:#141b1f; --j1:#d4541f; --j2:#1d6fb8; --j3:#1d7a52; --j4:#8b3fb5;
-  --j5:#9a7209; --j6:#b3341c; --j7:#0f8b8d; --j8:#a0489a; --j9:#5a6b7a;
+  --j0a:#b0201f; --j0b:#e07370;
+  --j1a:#16609f; --j1b:#5f9ad0;
+  --j2a:#17714a; --j2b:#57a888;
+  --j3a:#6f36a3; --j3b:#a678cd;
+  --j4a:#c25e10; --j4b:#e59a4a;
 }
-.move.j0,.wait.j0{stroke:var(--j0)} .move.j1,.wait.j1{stroke:var(--j1)}
-.move.j2,.wait.j2{stroke:var(--j2)} .move.j3,.wait.j3{stroke:var(--j3)}
-.move.j4,.wait.j4{stroke:var(--j4)} .move.j5,.wait.j5{stroke:var(--j5)}
-.move.j6,.wait.j6{stroke:var(--j6)} .move.j7,.wait.j7{stroke:var(--j7)}
-.move.j8,.wait.j8{stroke:var(--j8)} .move.j9,.wait.j9{stroke:var(--j9)}
+.move.j0a{stroke:var(--j0a)}
+.move.j0b{stroke:var(--j0b)}
+.move.j1a{stroke:var(--j1a)}
+.move.j1b{stroke:var(--j1b)}
+.move.j2a{stroke:var(--j2a)}
+.move.j2b{stroke:var(--j2b)}
+.move.j3a{stroke:var(--j3a)}
+.move.j3b{stroke:var(--j3b)}
+.move.j4a{stroke:var(--j4a)}
+.move.j4b{stroke:var(--j4b)}
+.wait.j0a{stroke:var(--j0a)}
+.wait.j0b{stroke:var(--j0b)}
+.wait.j1a{stroke:var(--j1a)}
+.wait.j1b{stroke:var(--j1b)}
+.wait.j2a{stroke:var(--j2a)}
+.wait.j2b{stroke:var(--j2b)}
+.wait.j3a{stroke:var(--j3a)}
+.wait.j3b{stroke:var(--j3b)}
+.wait.j4a{stroke:var(--j4a)}
+.wait.j4b{stroke:var(--j4b)}
 .sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}
 
 /* ---------- the two pack days ---------- */
@@ -266,10 +284,16 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pt{fill:var(--card); stroke-width:2; pointer-events:none}
 /* Something big enough to hover, over a dot too small to aim at. */
 .hit{fill:transparent}
-.pt.j0{stroke:var(--j0)} .pt.j1{stroke:var(--j1)} .pt.j2{stroke:var(--j2)}
-.pt.j3{stroke:var(--j3)} .pt.j4{stroke:var(--j4)} .pt.j5{stroke:var(--j5)}
-.pt.j6{stroke:var(--j6)} .pt.j7{stroke:var(--j7)} .pt.j8{stroke:var(--j8)}
-.pt.j9{stroke:var(--j9)}
+.pt.j0a{stroke:var(--j0a)}
+.pt.j0b{stroke:var(--j0b)}
+.pt.j1a{stroke:var(--j1a)}
+.pt.j1b{stroke:var(--j1b)}
+.pt.j2a{stroke:var(--j2a)}
+.pt.j2b{stroke:var(--j2b)}
+.pt.j3a{stroke:var(--j3a)}
+.pt.j3b{stroke:var(--j3b)}
+.pt.j4a{stroke:var(--j4a)}
+.pt.j4b{stroke:var(--j4b)}
 /* A halo rather than a box. A filled box the size of the name paints over
    whatever dots sit behind it, and the dots are the chart. */
 .ln{position:absolute; display:flex; align-items:center; gap:3px;
@@ -278,10 +302,16 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   text-shadow:0 0 3px var(--card), 0 0 3px var(--card), 0 0 3px var(--card),
               0 0 2px var(--card), 0 0 2px var(--card)}
 .ln .nw{white-space:nowrap}
-.ln.j0{color:var(--j0)} .ln.j1{color:var(--j1)} .ln.j2{color:var(--j2)}
-.ln.j3{color:var(--j3)} .ln.j4{color:var(--j4)} .ln.j5{color:var(--j5)}
-.ln.j6{color:var(--j6)} .ln.j7{color:var(--j7)} .ln.j8{color:var(--j8)}
-.ln.j9{color:var(--j9)}
+.ln.j0a{color:var(--j0a)}
+.ln.j0b{color:var(--j0b)}
+.ln.j1a{color:var(--j1a)}
+.ln.j1b{color:var(--j1b)}
+.ln.j2a{color:var(--j2a)}
+.ln.j2b{color:var(--j2b)}
+.ln.j3a{color:var(--j3a)}
+.ln.j3b{color:var(--j3b)}
+.ln.j4a{color:var(--j4a)}
+.ln.j4b{color:var(--j4b)}
 /* A name hangs off its leg's start dot, so it is anchored left and centred
    on whatever row the placement rule gave it. */
 .ln{transform:translate(0,-50%); margin-left:7px}
@@ -754,14 +784,15 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       // Within a branch the rows are already in order, and that is the whole
       // dependency story -- nothing needs an "after" column to say what the
       // sheet already says.
-      var last = {}, was = {};
+      var last = {};
       tasks.forEach(function (t) {
         t.after = has(last, t.branch) ? [last[t.branch]] : [];
-        // A leg descends from the lane its branch was standing on. The first
-        // has nowhere to come down from, so it lies flat on its own.
-        t.from = has(was, t.branch) ? was[t.branch] : t.place;
+        // A step happens ON its own row, for as long as it takes. Drawing it
+        // as a descent from the previous row spent its whole duration moving
+        // between two lanes, so an eight-hour pack looked like a transition
+        // rather than eight hours of packing. The descent is the link.
+        t.from = t.place;
         last[t.branch] = t.id;
-        was[t.branch] = t.place;
       });
       var wins = {};
       tasks.forEach(function (t) {
@@ -867,7 +898,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       (t.after || []).forEach(function (id) {
         if (!byId[id]) return;
         edges.push({ from: id, to: t.id, h0: num(byId[id].e), h1: num(t.s),
-                     p0: byId[id].place || 'Somewhere' });
+                     p0: byId[id].place || 'Somewhere', p1: t.place || 'Somewhere' });
       });
     });
     // Waiting is the gap between one step finishing and the next starting.
@@ -929,13 +960,20 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
 
   function chart(flow, r) {
-    // One colour per journey, so a thread can be followed across a busy week.
-    var hue = {}, hues = 0;
+    // A hue per journey and a shade per run of it. Ten threads cross each
+    // other in a week; five colours made the Sunday barge and the Wednesday
+    // barge the same line. Sharing a hue still says they are the same journey,
+    // and the earlier cut takes the stronger shade.
+    var hue = {}, hues = 0, shade = {}, next = {};
     flow.tasks.forEach(function (t) {
-      var d = t.def || flow.name;
-      if (!has(hue, d)) hue[d] = hues++;
+      var d = t.def || flow.name, run = t.journey || d;
+      if (!has(hue, d)) { hue[d] = hues++; next[d] = 0; }
+      if (!has(shade, run)) shade[run] = next[d]++;
     });
-    function jc(t) { return ' j' + (hue[t.def || flow.name] % 10); }
+    function jc(t) {
+      var d = t.def || flow.name, run = t.journey || d;
+      return ' j' + (hue[d] % 5) + (shade[run] % 2 ? 'b' : 'a');
+    }
 
     var scan = laneScan(flow), lanes = scan.order, yOf = {};
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
@@ -971,13 +1009,16 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     }
 
     // Links first, so a bar always sits on top of the thread that reached it.
-    // A link that runs backwards means a task starts before what it comes after
-    // has finished, which is allowed and is worth seeing.
+    // A link runs from where one step finished to where the next begins, which
+    // is now a descent as well as a wait -- the steps themselves stay on their
+    // own rows. A link that runs backwards means a task starts before what it
+    // comes after has finished, which is allowed and is worth seeing.
     var link = '';
     r.edges.forEach(function (e) {
-      if (Math.abs(e.h1 - e.h0) <= .01) return;
+      var a = yOf[e.p0], b = yOf[e.p1] === undefined ? a : yOf[e.p1];
+      if (Math.abs(e.h1 - e.h0) <= .01 && a === b) return;
       link += '<line class="link' + (e.h1 < e.h0 ? ' back' : '') + '" x1="' + X(e.h0) +
-        '" y1="' + yOf[e.p0] + '" x2="' + X(e.h1) + '" y2="' + yOf[e.p0] + '"/>';
+        '" y1="' + a + '" x2="' + X(e.h1) + '" y2="' + b + '"/>';
     });
 
     var move = '', wait = '';

@@ -33,9 +33,14 @@ happen**. So the chart's rows and the sheet's rows are the same list, every
 journey is measured against the same steps, and two threads can be compared by
 reading across one row: who reaches Customer first.
 
-A **solid bar is a step being done**; a **dotted run is the waiting between
-them**. The waiting is the point, because it is what nobody can see in a list
+A **solid bar is a step being done**, on its own row for as long as it takes;
+a **dotted run is the link to the next one**, which is both the waiting and the
+descent. The waiting is the point, because it is what nobody can see in a list
 of steps.
+
+Colour is a **hue per journey and a shade per run of it** — the earlier cut
+takes the stronger shade. Ten threads cross each other in a week, and sharing a
+hue still says two of them are the same journey.
 
 Where the product physically is rides along on each leg but is not a lane —
 it is what has opening hours, and it is in the task list. Faint lines every four

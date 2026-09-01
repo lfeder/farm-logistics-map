@@ -391,14 +391,15 @@
       // Within a branch the rows are already in order, and that is the whole
       // dependency story -- nothing needs an "after" column to say what the
       // sheet already says.
-      var last = {}, was = {};
+      var last = {};
       tasks.forEach(function (t) {
         t.after = has(last, t.branch) ? [last[t.branch]] : [];
-        // A leg descends from the lane its branch was standing on. The first
-        // has nowhere to come down from, so it lies flat on its own.
-        t.from = has(was, t.branch) ? was[t.branch] : t.place;
+        // A step happens ON its own row, for as long as it takes. Drawing it
+        // as a descent from the previous row spent its whole duration moving
+        // between two lanes, so an eight-hour pack looked like a transition
+        // rather than eight hours of packing. The descent is the link.
+        t.from = t.place;
         last[t.branch] = t.id;
-        was[t.branch] = t.place;
       });
       var wins = {};
       tasks.forEach(function (t) {
@@ -504,7 +505,7 @@
       (t.after || []).forEach(function (id) {
         if (!byId[id]) return;
         edges.push({ from: id, to: t.id, h0: num(byId[id].e), h1: num(t.s),
-                     p0: byId[id].place || 'Somewhere' });
+                     p0: byId[id].place || 'Somewhere', p1: t.place || 'Somewhere' });
       });
     });
     // Waiting is the gap between one step finishing and the next starting.
@@ -566,13 +567,20 @@
   var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
 
   function chart(flow, r) {
-    // One colour per journey, so a thread can be followed across a busy week.
-    var hue = {}, hues = 0;
+    // A hue per journey and a shade per run of it. Ten threads cross each
+    // other in a week; five colours made the Sunday barge and the Wednesday
+    // barge the same line. Sharing a hue still says they are the same journey,
+    // and the earlier cut takes the stronger shade.
+    var hue = {}, hues = 0, shade = {}, next = {};
     flow.tasks.forEach(function (t) {
-      var d = t.def || flow.name;
-      if (!has(hue, d)) hue[d] = hues++;
+      var d = t.def || flow.name, run = t.journey || d;
+      if (!has(hue, d)) { hue[d] = hues++; next[d] = 0; }
+      if (!has(shade, run)) shade[run] = next[d]++;
     });
-    function jc(t) { return ' j' + (hue[t.def || flow.name] % 10); }
+    function jc(t) {
+      var d = t.def || flow.name, run = t.journey || d;
+      return ' j' + (hue[d] % 5) + (shade[run] % 2 ? 'b' : 'a');
+    }
 
     var scan = laneScan(flow), lanes = scan.order, yOf = {};
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
@@ -608,13 +616,16 @@
     }
 
     // Links first, so a bar always sits on top of the thread that reached it.
-    // A link that runs backwards means a task starts before what it comes after
-    // has finished, which is allowed and is worth seeing.
+    // A link runs from where one step finished to where the next begins, which
+    // is now a descent as well as a wait -- the steps themselves stay on their
+    // own rows. A link that runs backwards means a task starts before what it
+    // comes after has finished, which is allowed and is worth seeing.
     var link = '';
     r.edges.forEach(function (e) {
-      if (Math.abs(e.h1 - e.h0) <= .01) return;
+      var a = yOf[e.p0], b = yOf[e.p1] === undefined ? a : yOf[e.p1];
+      if (Math.abs(e.h1 - e.h0) <= .01 && a === b) return;
       link += '<line class="link' + (e.h1 < e.h0 ? ' back' : '') + '" x1="' + X(e.h0) +
-        '" y1="' + yOf[e.p0] + '" x2="' + X(e.h1) + '" y2="' + yOf[e.p0] + '"/>';
+        '" y1="' + a + '" x2="' + X(e.h1) + '" y2="' + b + '"/>';
     });
 
     var move = '', wait = '';
