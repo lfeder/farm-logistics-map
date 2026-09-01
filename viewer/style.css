@@ -255,7 +255,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
    though the name belonged to the far end of it. */
 .pt{fill:var(--card); stroke-width:2; pointer-events:none}
 /* Something big enough to hover, over a dot too small to aim at. */
-.hit{fill:transparent; cursor:help}
+.hit{fill:transparent}
 .pt.j0{stroke:var(--j0)} .pt.j1{stroke:var(--j1)} .pt.j2{stroke:var(--j2)}
 .pt.j3{stroke:var(--j3)} .pt.j4{stroke:var(--j4)} .pt.j5{stroke:var(--j5)}
 .pt.j6{stroke:var(--j6)} .pt.j7{stroke:var(--j7)} .pt.j8{stroke:var(--j8)}
