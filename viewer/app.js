@@ -114,6 +114,96 @@
     return out;
   }
 
+  // ── The grid ──────────────────────────────────────────────────────────────
+  // The other shape the sheet comes in, and the one it is moving to: steps down
+  // the side in the order the chart draws them, journeys across the top, and a
+  // cell saying when that step ran. A blank cell is a step this journey skips,
+  // which is the thing a row-per-leg sheet could never show at a glance.
+  //
+  //   Crop          Lettuce           Lettuce
+  //   FOB           140               Off-island
+  //   Transport     Air               Barge
+  //   Start Day     0                 0
+  //   Pack/Store 1  Sun 10:00-14:00   Sun 14:00-18:00
+  //   BOL           Sun 18:00-18:30   Mon 18:00-18:30
+  //
+  // Where each step runs between is not in the sheet at all -- it is the same
+  // on every journey, so it lives in reference.json under steps.
+  var GRID_KEYS = { 'crop': 'crop', 'fob': 'fob', 'transport': 'transport',
+                    'start day': 'start_day', 'start_day': 'start_day' };
+
+  // 'Sun 10:00-14:00' or 'Tue 18:00 - Wed 12:00': the day carries over to the
+  // stop unless the stop names one of its own, because most steps finish on
+  // the day they start and saying so twice is noise.
+  function span(cell, where) {
+    var t = String(cell).replace(/[\s\u00a0\u202f]+/g, ' ').trim();
+    var m = /^([A-Za-z]+ ?,? ?\d{1,2}:\d{2})\s*[-\u2013]\s*(.+)$/.exec(t);
+    if (!m) throw new Error(where + ": expected 'Sun 10:00-14:00', got '" + t + "'");
+    var a = dayTime(m[1], where), tail = m[2].trim();
+    var b = /^\d{1,2}:\d{2}$/.test(tail)
+      ? dayTime(DOW[a.d] + ' ' + tail, where)
+      : dayTime(tail, where);
+    return [a, b];
+  }
+
+  function gridRows(text) {
+    var rows = csvRows(text), lab = -1, col = 0, i, j;
+    // Find the row that names the crop, and the column its labels sit in.
+    for (i = 0; i < rows.length && lab < 0; i++) {
+      for (j = 0; j < rows[i].length; j++) {
+        if (rows[i][j].trim().toLowerCase() === 'crop') { lab = i; col = j; break; }
+      }
+    }
+    if (lab < 0) throw new Error('no row labelled Crop');
+    var wide = 0;
+    rows.forEach(function (r) { if (r.length > wide) wide = r.length; });
+
+    var steps = (((window.REF || {}).steps || {}).order) || [];
+    if (!steps.length) throw new Error('reference.json names no steps');
+    var byStep = {};
+    steps.forEach(function (st) { byStep[String(st.step).toLowerCase()] = st; });
+
+    // One journey per column, read top to bottom.
+    var out = [];
+    for (j = col + 1; j < wide; j++) {
+      var head = {}, legs = [], started = false;
+      rows.slice(lab).forEach(function (r) {
+        var name = (r[col] || '').trim(), cell = (r[j] || '').trim();
+        if (!name) return;
+        var key = name.toLowerCase();
+        // Transport is both a thing a journey IS and a step it takes, so the
+        // identity block is the one above the first step. After that, a label
+        // is a step whatever else it also names.
+        if (!started && has(GRID_KEYS, key)) { head[GRID_KEYS[key]] = cell; return; }
+        if (!has(byStep, key)) return;
+        started = true;
+        if (cell) legs.push({ st: byStep[key], cell: cell, name: name });
+      });
+      if (!head.crop && !head.fob) continue;
+      if (!legs.length) continue;
+      var who = [head.crop, head.fob, head.transport].filter(Boolean).join('-');
+      legs.forEach(function (g) {
+        var where = who + ' / ' + g.name;
+        // Where a step runs between: the same everywhere unless the journey's
+        // transport or its customer changes it.
+        var pl = g.st.places;
+        if (g.st.transport) pl = g.st.transport[head.transport];
+        if (g.st.fob) pl = g.st.fob[head.fob];
+        if (!pl) {
+          throw new Error(where + ": no places for " +
+            (g.st.transport ? "transport '" + head.transport : "fob '" + head.fob) + "'");
+        }
+        var t = span(g.cell, where);
+        out.push({ crop: head.crop, fob: head.fob, transport: head.transport,
+          start_day: head.start_day || '0', branch: '1', leg: g.name,
+          from: pl[0], place: pl[1],
+          s: DOW[t[0].d] + ' ' + hhmm(t[0].h), e: DOW[t[1].d] + ' ' + hhmm(t[1].h) });
+      });
+    }
+    if (!out.length) throw new Error('no journeys in the grid');
+    return out;
+  }
+
   // Su M T W Th F Sa, and the longer forms. A bare S is not accepted: it could
   // be either end of the week and a schedule is not the place to guess.
   var DAY_WORDS = { su: 0, sun: 0, sunday: 0,
@@ -1096,7 +1186,14 @@
   function useText(text, live, why) {
     var built;
     try {
-      built = buildFlows(legRows(text));
+      // Two shapes, one reader: a row per leg, or the grid of steps by
+      // journey. Only the row shape carries a Start dt column, because only it
+      // needs one -- the grid puts both times in a cell.
+      var raw = csvRows(text), rowish = false;
+      raw.forEach(function (r) {
+        r.forEach(function (c) { if (c.trim().toLowerCase() === 'start dt') rowish = true; });
+      });
+      built = buildFlows(rowish ? legRows(text) : gridRows(text));
     } catch (err) {
       why = String((err && err.message) || err);
       // A typo in the sheet must not take the page down with it: fall back to

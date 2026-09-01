@@ -38,18 +38,6 @@ def die(f, msg):
     sys.exit("%s: %s" % (f, msg))
 
 
-def read(name, need):
-    path = os.path.join(HERE, name)
-    with open(path, newline="") as fh:
-        rows = [r for r in csv.DictReader(fh)]
-    if not rows:
-        die(name, "no rows")
-    missing = [c for c in need if c not in rows[0]]
-    if missing:
-        die(name, "missing column%s: %s" % ("" if len(missing) == 1 else "s", ", ".join(missing)))
-    return rows
-
-
 REF = json.load(open(os.path.join(HERE, "reference.json")))
 
 # ── the sheet ────────────────────────────────────────────────────────────────
@@ -57,82 +45,30 @@ REF = json.load(open(os.path.join(HERE, "reference.json")))
 # every build so the two cannot drift, fall back to the snapshot when the
 # network is not there, and always write what was pulled so the change shows up
 # in the diff rather than only on the screen.
-# What a journey IS is three columns -- crop, where it is going, how it gets
-# there -- and when it runs is a fourth. Together they name the picture; the
-# rest of the row is one leg of it.
-SHEET_COLS = {"crop": "crop", "fob": "fob", "transport": "transport",
-              "start day": "start_day", "branch": "branch",
-              "leg": "leg", "step": "leg",
-              "start location": "start_location", "start dt": "start_dt",
-              "end location": "end_location", "end dt": "end_dt",
-              "icon": "icon", "note": "note"}
-COLS = ["crop", "fob", "transport", "start_day", "branch", "leg",
-        "start_location", "start_dt", "end_location", "end_dt", "icon", "note"]
+#
+# What is pulled is saved verbatim. The viewer knows both shapes the sheet
+# comes in -- a row per leg, or the grid of steps by journey -- and reshaping
+# it here would be a third opinion about that, in a second language.
 
 
 def pull_sheet(url):
     with urllib.request.urlopen(url, timeout=20) as fh:
         body = fh.read().decode("utf-8")
     rows = [r for r in csv.reader(io.StringIO(body))]
-    # The sheet has its own margins: blank leading columns and blank rows above
-    # the header. Find the header by looking for the row that names a journey.
-    def names(r):
-        return {(c or "").strip().lower() for c in r}
-    head_i = next((i for i, r in enumerate(rows)
-                   if "start dt" in names(r) and names(r) & {"leg", "step"}), None)
-    if head_i is None:
-        raise ValueError("no header row naming Leg or Step, and Start dt")
-    head = [(c or "").strip().lower() for c in rows[head_i]]
-    keep = [(i, SHEET_COLS[h]) for i, h in enumerate(head) if h in SHEET_COLS]
-    got = [k[1] for k in keep]
-    missing = [v for v in ("leg", "start_dt", "end_dt") if v not in got]
-    if missing:
-        raise ValueError("sheet is missing: " + ", ".join(missing))
-    if not [v for v in ("crop", "fob", "transport") if v in got]:
-        raise ValueError("sheet names no journey: needs Crop, FOB or Transport")
-    out = []
-    for r in rows[head_i + 1:]:
-        rec = {name: (r[i].strip() if i < len(r) and r[i] else "") for i, name in keep}
-        if rec.get("leg"):
-            out.append(rec)
-    return out
-
-
-# A leg's icon is read off its name rather than typed, so the sheet stays four
-# columns of schedule and a new leg picks up a sensible glyph on its own.
-# Order matters: the first pattern that matches wins, so the specific ones come
-# before the general. "Costco delivery clearance" is a clearance, not a delivery.
-ICON_RULES = [
-    (r"clearance|eligib|submission|paperwork", "depot"),
-    (r"pack", "box"),
-    (r"fl(y|ight)|aloha|air\b", "plane"),
-    (r"sail|barge|boat", "ship"),
-    (r"truck|deliver|pickup|haul|drive|load", "truck"),
-    (r"receiv|store", "store"),
-]
-
-
-def icon_for(name):
-    low = (name or "").lower()
-    for pat, ic in ICON_RULES:
-        if re.search(pat, low):
-            return ic
-    return "clock"
+    names = {(c or "").strip().lower() for r in rows for c in r}
+    if not (names & {"leg", "step"} or "crop" in names):
+        raise ValueError("names no Leg, Step or Crop -- is this the right tab?")
+    n = sum(1 for r in rows if any((c or "").strip() for c in r))
+    return body, n
 
 
 sheet_url = (REF.get("legs_sheet") or "").strip()
 if sheet_url:
     try:
-        pulled = pull_sheet(sheet_url)
-        cols = COLS
-        for r in pulled:
-            r["icon"] = r.get("icon") or icon_for(r.get("leg"))
+        body, n = pull_sheet(sheet_url)
         with open(os.path.join(HERE, "legs.csv"), "w", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
-            w.writeheader()
-            for r in pulled:
-                w.writerow({c: r.get(c, "") for c in cols})
-        print("pulled %d legs from the sheet" % len(pulled))
+            fh.write(body)
+        print("pulled %d rows from the sheet" % n)
     except Exception as e:
         print("sheet unreachable (%s) — using the committed legs.csv" % e)
 
@@ -210,7 +146,7 @@ legs_text = open(os.path.join(HERE, "legs.csv")).read()
 
 data = json.load(open(os.path.join(HERE, "orders.json")))
 ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings,
-       "hold": REF.get("hold", {})}
+       "hold": REF.get("hold", {}), "steps": REF.get("steps", {})}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell

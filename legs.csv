@@ -1,51 +1,51 @@
-crop,fob,transport,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note
-Lettuce,140,Air,0,1,Packing,PH,"Sun, 10:00",Storage,"Sun, 14:00",box,
-Lettuce,140,Air,0,1,BOL,Storage,"Sun, 18:00",Storage,"Sun, 18:30",clock,
-Lettuce,140,Air,0,1,Load box-> 140,Storage,"Mon, 07:00",140,"Mon, 08:30",truck,
-Lettuce,140,Air,3,1,Packing,PH,"Wed, 10:00",Storage,"Wed, 14:00",box,
-Lettuce,140,Air,3,1,BOL,Storage,"Wed, 18:00",Storage,"Wed, 18:30",clock,
-Lettuce,140,Air,3,1,Load box-> 140,Storage,"Thu, 07:00",140,"Thu, 08:30",truck,
-Lettuce,HF,Air,0,1,Packing,PH,"Sun, 14:00",Storage,"Sun, 18:00",box,
-Lettuce,HF,Air,0,1,BOL,Storage,"Sun, 18:00",Storage,"Sun, 18:30",clock,
-Lettuce,HF,Air,0,1,Pickup,Storage,"Mon, 13:00",Storage,"Mon, 13:30",truck,
-Lettuce,HF,Air,3,1,Packing,PH,"Wed, 14:00",Storage,"Wed, 18:00",box,
-Lettuce,HF,Air,3,1,BOL,Storage,"Wed, 18:00",Storage,"Wed, 18:30",clock,
-Lettuce,HF,Air,3,1,Pickup,Storage,"Thu, 13:00",Storage,"Thu, 13:30",truck,
-Lettuce,Oahu,Air,0,1,Packing,PH,"Sun, 14:00",Storage,"Sun, 18:00",box,
-Lettuce,Oahu,Air,0,1,Packing,PH,"Mon, 10:00",Storage,"Mon, 18:00",box,
-Lettuce,Oahu,Air,0,1,BOL,Storage,"Mon, 18:00",Storage,"Mon, 18:30",clock,
-Lettuce,Oahu,Air,0,1,Load box -> KOA,Storage,"Tue, 07:00",KOA,"Tue, 11:00",truck,
-Lettuce,Oahu,Air,0,1,KOA-HNL,KOA,"Tue, 11:00",HNL,"Tue, 15:00",clock,
-Lettuce,Oahu,Air,0,1,HFA pickup,HNL,"Tue, 16:00",HFA,"Tue, 17:00",truck,
-Lettuce,Oahu,Air,0,1,Customer deliveries,HFA,"Wed, 05:00",Customer receiving,"Wed, 10:00",truck,
-Lettuce,Oahu,Air,3,1,Packing,PH,"Wed, 14:00",Storage,"Wed, 18:00",box,
-Lettuce,Oahu,Air,3,1,Packing,PH,"Thu, 10:00",Storage,"Thu, 18:00",box,
-Lettuce,Oahu,Air,3,1,BOL,Storage,"Thu, 18:00",Storage,"Thu, 18:30",clock,
-Lettuce,Oahu,Air,3,1,Load box -> KOA,Storage,"Fri, 07:00",KOA,"Fri, 11:00",truck,
-Lettuce,Oahu,Air,3,1,KOA-HNL,KOA,"Fri, 11:00",HNL,"Fri, 15:00",clock,
-Lettuce,Oahu,Air,3,1,HFA pickup,HNL,"Fri, 16:00",HFA,"Fri, 17:00",truck,
-Lettuce,Oahu,Air,3,1,Customer deliveries,HFA,"Sat, 05:00",Customer receiving,"Sat, 10:00",truck,
-Lettuce,Oahu,Barge,0,1,Packing,PH,"Sun, 14:00",Storage,"Sun, 18:00",box,
-Lettuce,Oahu,Barge,0,1,Packing,PH,"Mon, 10:00",Storage,"Mon, 18:00",box,
-Lettuce,Oahu,Barge,0,1,BOL,Storage,"Mon, 18:00",Storage,"Mon, 18:30",clock,
-Lettuce,Oahu,Barge,0,1,Load container,Storage,"Mon, 18:30",Container,"Mon, 19:00",truck,
-Lettuce,Oahu,Barge,0,1,Container->KWH,Container,"Tue, 07:00",Kawaihae,"Tue, 08:00",clock,
-Lettuce,Oahu,Barge,0,1,Load box->KWH,Storage,"Tue, 07:00",Kawaihae,"Tue, 08:00",truck,
-Lettuce,Oahu,Barge,0,1,KWH-HNL,Kawaihae,"Tue, 18:00",YBHNL,"Wed, 12:00",clock,
-Lettuce,Oahu,Barge,0,1,HFA pickup,YBHNL,"Thu, 08:00",HFA,"Thu, 10:00",truck,
-Lettuce,Oahu,Barge,0,1,Customer deliveries,HFA,"Fri, 06:00",Customer receiving,"Fri, 10:00",truck,
-Lettuce,Oahu,Barge,3,1,Packing,PH,"Wed, 14:00",Storage,"Wed, 18:00",box,
-Lettuce,Oahu,Barge,3,1,Packing,PH,"Thu, 10:00",Storage,"Thu, 18:00",box,
-Lettuce,Oahu,Barge,3,1,BOL,Storage,"Thu, 18:00",Storage,"Thu, 18:30",clock,
-Lettuce,Oahu,Barge,3,1,Load container,Storage,"Thu, 18:30",Container,"Thu, 19:00",truck,
-Lettuce,Oahu,Barge,3,1,Container->KWH,Container,"Fri, 07:00",Kawaihae,"Fri, 08:00",clock,
-Lettuce,Oahu,Barge,3,1,Load box->KWH,Storage,"Fri, 07:00",Kawaihae,"Fri, 08:00",truck,
-Lettuce,Oahu,Barge,3,1,KWH-HNL,Kawaihae,"Fri, 18:00",YBHNL,"Sat, 12:00",clock,
-Lettuce,Oahu,Barge,3,1,HFA pickup,YBHNL,"Mon, 08:00",HFA,"Mon, 10:00",truck,
-Lettuce,Oahu,Barge,3,1,Customer deliveries,HFA,"Tue, 06:00",Customer receiving,"Tue, 10:00",truck,
-Lettuce,140,Barge,0,1,Packing,PH,"Sun, 10:00",Storage,"Sun, 14:00",box,
-Lettuce,140,Barge,0,1,BOL,Storage,"Sun, 18:00",Storage,"Sun, 18:30",clock,
-Lettuce,140,Barge,0,1,Load box-> 140,Storage,"Thu, 07:00",140,"Thu, 08:30",truck,
-Lettuce,140,Barge,3,1,Packing,PH,"Wed, 10:00",Storage,"Wed, 14:00",box,
-Lettuce,140,Barge,3,1,BOL,Storage,"Wed, 18:00",Storage,"Wed, 18:30",clock,
-Lettuce,140,Barge,3,1,Load box-> 140,Storage,"Mon, 07:00",140,"Mon, 08:30",truck,
+Crop,FOB,Transport,Start Day,Branch,Leg,Start location,Start dt,end location,end dt
+Lettuce,140,Air,0,1,Packing,PH,"Sun, 10:00 ",Storage,"Sun, 14:00 "
+Lettuce,140,Air,0,1,BOL,Storage,"Sun, 18:00 ",Storage,"Sun, 18:30 "
+Lettuce,140,Air,0,1,Load box-> 140,Storage,"Mon, 07:00 ",140,"Mon, 08:30 "
+Lettuce,140,Air,3,1,Packing,PH,"Wed, 10:00 ",Storage,"Wed, 14:00 "
+Lettuce,140,Air,3,1,BOL,Storage,"Wed, 18:00 ",Storage,"Wed, 18:30 "
+Lettuce,140,Air,3,1,Load box-> 140,Storage,"Thu, 07:00 ",140,"Thu, 08:30 "
+Lettuce,HF,Air,0,1,Packing,PH,"Sun, 14:00 ",Storage,"Sun, 18:00 "
+Lettuce,HF,Air,0,1,BOL,Storage,"Sun, 18:00 ",Storage,"Sun, 18:30 "
+Lettuce,HF,Air,0,1,Pickup,Storage,"Mon, 13:00 ",Storage,"Mon, 13:30 "
+Lettuce,HF,Air,3,1,Packing,PH,"Wed, 14:00 ",Storage,"Wed, 18:00 "
+Lettuce,HF,Air,3,1,BOL,Storage,"Wed, 18:00 ",Storage,"Wed, 18:30 "
+Lettuce,HF,Air,3,1,Pickup,Storage,"Thu, 13:00 ",Storage,"Thu, 13:30 "
+Lettuce,Oahu,Air,0,1,Packing,PH,"Sun, 14:00 ",Storage,"Sun, 18:00 "
+Lettuce,Oahu,Air,0,1,Packing,PH,"Mon, 10:00 ",Storage,"Mon, 18:00 "
+Lettuce,Oahu,Air,0,1,BOL,Storage,"Mon, 18:00 ",Storage,"Mon, 18:30 "
+Lettuce,Oahu,Air,0,1,Load box -> KOA,Storage,"Tue, 07:00 ",KOA,"Tue, 11:00 "
+Lettuce,Oahu,Air,0,1,KOA-HNL,KOA,"Tue, 11:00 ",HNL,"Tue, 15:00 "
+Lettuce,Oahu,Air,0,1,HFA pickup,HNL,"Tue, 16:00 ",HFA,"Tue, 17:00 "
+Lettuce,Oahu,Air,0,1,Customer deliveries,HFA,"Wed, 05:00 ",Customer receiving,"Wed, 10:00 "
+Lettuce,Oahu,Air,3,1,Packing,PH,"Wed, 14:00 ",Storage,"Wed, 18:00 "
+Lettuce,Oahu,Air,3,1,Packing,PH,"Thu, 10:00 ",Storage,"Thu, 18:00 "
+Lettuce,Oahu,Air,3,1,BOL,Storage,"Thu, 18:00 ",Storage,"Thu, 18:30 "
+Lettuce,Oahu,Air,3,1,Load box -> KOA,Storage,"Fri, 07:00 ",KOA,"Fri, 11:00 "
+Lettuce,Oahu,Air,3,1,KOA-HNL,KOA,"Fri, 11:00 ",HNL,"Fri, 15:00 "
+Lettuce,Oahu,Air,3,1,HFA pickup,HNL,"Fri, 16:00 ",HFA,"Fri, 17:00 "
+Lettuce,Oahu,Air,3,1,Customer deliveries,HFA,"Sat, 05:00 ",Customer receiving,"Sat, 10:00 "
+Lettuce,Oahu,Barge,0,1,Packing,PH,"Sun, 14:00 ",Storage,"Sun, 18:00 "
+Lettuce,Oahu,Barge,0,1,Packing,PH,"Mon, 10:00 ",Storage,"Mon, 18:00 "
+Lettuce,Oahu,Barge,0,1,BOL,Storage,"Mon, 18:00 ",Storage,"Mon, 18:30 "
+Lettuce,Oahu,Barge,0,1,Load container,Storage,"Mon, 18:30 ",Container,"Mon, 19:00 "
+Lettuce,Oahu,Barge,0,1,Container->KWH,Container,"Tue, 07:00 ",Kawaihae,"Tue, 08:00 "
+Lettuce,Oahu,Barge,0,1,Load box->KWH,Storage,"Tue, 07:00 ",Kawaihae,"Tue, 08:00 "
+Lettuce,Oahu,Barge,0,1,KWH-HNL,Kawaihae,"Tue, 18:00 ",YBHNL,"Wed, 12:00 "
+Lettuce,Oahu,Barge,0,1,HFA pickup,YBHNL,"Thu, 08:00 ",HFA,"Thu, 10:00 "
+Lettuce,Oahu,Barge,0,1,Customer deliveries,HFA,"Fri, 06:00 ",Customer receiving,"Fri, 10:00 "
+Lettuce,Oahu,Barge,3,1,Packing,PH,"Wed, 14:00 ",Storage,"Wed, 18:00 "
+Lettuce,Oahu,Barge,3,1,Packing,PH,"Thu, 10:00 ",Storage,"Thu, 18:00 "
+Lettuce,Oahu,Barge,3,1,BOL,Storage,"Thu, 18:00 ",Storage,"Thu, 18:30 "
+Lettuce,Oahu,Barge,3,1,Load container,Storage,"Thu, 18:30 ",Container,"Thu, 19:00 "
+Lettuce,Oahu,Barge,3,1,Container->KWH,Container,"Fri, 07:00 ",Kawaihae,"Fri, 08:00 "
+Lettuce,Oahu,Barge,3,1,Load box->KWH,Storage,"Fri, 07:00 ",Kawaihae,"Fri, 08:00 "
+Lettuce,Oahu,Barge,3,1,KWH-HNL,Kawaihae,"Fri, 18:00 ",YBHNL,"Sat, 12:00 "
+Lettuce,Oahu,Barge,3,1,HFA pickup,YBHNL,"Mon, 08:00 ",HFA,"Mon, 10:00 "
+Lettuce,Oahu,Barge,3,1,Customer deliveries,HFA,"Tue, 06:00 ",Customer receiving,"Tue, 10:00 "
+Lettuce,140,Barge,0,1,Packing,PH,"Sun, 10:00 ",Storage,"Sun, 14:00 "
+Lettuce,140,Barge,0,1,BOL,Storage,"Sun, 18:00 ",Storage,"Sun, 18:30 "
+Lettuce,140,Barge,0,1,Load box-> 140,Storage,"Thu, 07:00 ",140,"Thu, 08:30 "
+Lettuce,140,Barge,3,1,Packing,PH,"Wed, 10:00 ",Storage,"Wed, 14:00 "
+Lettuce,140,Barge,3,1,BOL,Storage,"Wed, 18:00 ",Storage,"Wed, 18:30 "
+Lettuce,140,Barge,3,1,Load box-> 140,Storage,"Mon, 07:00 ",140,"Mon, 08:30 "

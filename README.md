@@ -66,12 +66,48 @@ filling the picture. What is worth saying is which thread this is, and that is
 said once, in the thread's own colour, where the thread starts: `140 · Air`,
 `Oahu · Barge`. The leg names are in the task list underneath.
 
-## legs.csv
+## The sheet
+
+The sheet comes in either of two shapes and the viewer reads both. The one it
+is moving to is **the grid**: steps down the side in the order the chart draws
+them, journeys across the top, and a cell saying when that step ran.
 
 ```
-crop,fob,transport,start_day,branch,leg,start_location,start_dt,end_location,end_dt,icon,note
-Lettuce,140,Air,0,1,Packing,PH,"Sun, 10:00",Storage,"Sun, 14:00",box,
-Lettuce,140,Air,0,2,Hypercell,Lab,"Sun, 14:00",Lab,"Sun, 21:00",clock,
+Crop          Lettuce           Lettuce
+FOB           140               Off-island
+Transport     Air               Barge
+Start Day     0                 0
+Pack/Store 1  Sun 10:00-14:00   Sun 14:00-18:00
+Pack/Store 2                    Mon 10:00-18:00
+BOL           Sun 18:00-18:30   Mon 18:00-18:30
+Load                            Mon 18:30-19:00
+Drayage                         Tue 07:00-08:00
+Transport                       Tue 18:00-Wed 12:00
+Retrieve                        Thu 08:00-10:00
+Customer      Mon 07:00-08:30   Fri 06:00-10:00
+```
+
+**A blank cell is a step this journey skips** — the thing a row per leg could
+never show at a glance. A column read top to bottom is one thread. Adding a
+journey is a column.
+
+The day carries over to the stop unless the stop names its own, because most
+steps finish on the day they start: `Sun 10:00-14:00`, but `Tue 18:00-Wed 12:00`.
+
+**Where a step runs between is not in the sheet.** It is the same on every
+journey, so it lives in `reference.json` under `steps` — and where it does
+depend on the journey, `transport` or `fob` overrides it. Every place named
+there needs a row in `hours`, which is what makes that table the register of
+places rather than a list of opening times.
+
+`Transport` is both a thing a journey *is* and a step it *takes*. The identity
+block is the one above the first step row; after that a label is a step.
+
+The older shape, a row per leg, still reads:
+
+```
+crop,fob,transport,start_day,branch,step,start_location,start_dt,end_location,end_dt
+Lettuce,140,Air,0,1,Packing,PH,"Sun, 10:00",Storage,"Sun, 14:00"
 ```
 
 A leg carries **where it starts as well as where it ends**, so its bar has a

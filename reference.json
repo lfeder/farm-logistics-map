@@ -1,6 +1,6 @@
 {
   "_": "Hand-edited. Everything here changes rarely: what a journey is, who is open when, and which boat goes where. The legs themselves live in legs.csv.",
-  "legs_sheet": "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv",
+  "legs_sheet": "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv&gid=578288022",
   "hours": [
     {
       "place": "PH",
@@ -11,7 +11,7 @@
       "note": "Hawaii Farming packhouse. Nobody is here to load a truck outside these hours."
     },
     {
-      "place": "Cold Storage",
+      "place": "Storage",
       "days": "Sun-Sat",
       "open": "00:00",
       "close": "23:59",
@@ -27,7 +27,7 @@
       "note": ""
     },
     {
-      "place": "Costco receiving dock",
+      "place": "140",
       "days": "Mon-Sat",
       "open": "04:00",
       "close": "11:00",
@@ -43,7 +43,7 @@
       "note": "The incubation runs whether or not anyone is watching it."
     },
     {
-      "place": "Kona airport",
+      "place": "KOA",
       "days": "Sun-Fri",
       "open": "06:00",
       "close": "17:00",
@@ -51,7 +51,7 @@
       "note": "Aloha Air Cargo counter. Six days \u2014 dark Saturday."
     },
     {
-      "place": "Kawaihae",
+      "place": "KWH",
       "days": "Mon-Fri",
       "open": "07:00",
       "close": "16:00",
@@ -59,7 +59,7 @@
       "note": "Young Brothers. Cargo acceptance ahead of the sailing."
     },
     {
-      "place": "Honolulu",
+      "place": "HNL",
       "days": "Mon-Sat",
       "open": "07:00",
       "close": "15:00",
@@ -75,7 +75,7 @@
       "note": "Young Brothers. Available the next business day after arrival."
     },
     {
-      "place": "HFA Honolulu",
+      "place": "HFA",
       "days": "Mon-Fri",
       "open": "06:00",
       "close": "15:00",
@@ -91,12 +91,36 @@
       "note": "Collects, then runs the route."
     },
     {
-      "place": "Off-island customer",
+      "place": "Customer receiving",
       "days": "Mon-Sat",
       "open": "05:00",
       "close": "12:00",
       "after_arrival": 0,
       "note": "The back door at the other end."
+    },
+    {
+      "place": "Container",
+      "days": "Sun-Sat",
+      "open": "00:00",
+      "close": "23:59",
+      "after_arrival": 0,
+      "note": "our yard; hours not confirmed"
+    },
+    {
+      "place": "YBHNL",
+      "days": "Mon-Sat",
+      "open": "00:00",
+      "close": "23:59",
+      "after_arrival": 0,
+      "note": "Young Brothers Honolulu; hours not confirmed"
+    },
+    {
+      "place": "Customer truck",
+      "days": "Sun-Sat",
+      "open": "00:00",
+      "close": "23:59",
+      "after_arrival": 0,
+      "note": "the customer's own truck; hours not confirmed"
     }
   ],
   "sailings": [
@@ -165,6 +189,95 @@
       {
         "place": "Cleared for Delivery",
         "hours": 3
+      }
+    ]
+  },
+  "steps": {
+    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it. Every place named here needs a row in hours.",
+    "order": [
+      {
+        "step": "Pack/Store 1",
+        "places": [
+          "PH",
+          "Storage"
+        ]
+      },
+      {
+        "step": "Pack/Store 2",
+        "places": [
+          "PH",
+          "Storage"
+        ]
+      },
+      {
+        "step": "BOL",
+        "places": [
+          "Storage",
+          "Storage"
+        ]
+      },
+      {
+        "step": "Load",
+        "places": [
+          "Storage",
+          "Container"
+        ]
+      },
+      {
+        "step": "Drayage",
+        "transport": {
+          "Air": [
+            "Storage",
+            "KOA"
+          ],
+          "Barge": [
+            "Container",
+            "KWH"
+          ]
+        }
+      },
+      {
+        "step": "Transport",
+        "transport": {
+          "Air": [
+            "KOA",
+            "HNL"
+          ],
+          "Barge": [
+            "KWH",
+            "YBHNL"
+          ]
+        }
+      },
+      {
+        "step": "Retrieve",
+        "transport": {
+          "Air": [
+            "HNL",
+            "HFA"
+          ],
+          "Barge": [
+            "YBHNL",
+            "HFA"
+          ]
+        }
+      },
+      {
+        "step": "Customer",
+        "fob": {
+          "140": [
+            "Storage",
+            "140"
+          ],
+          "Pickup": [
+            "Storage",
+            "Customer truck"
+          ],
+          "Off-island": [
+            "HFA",
+            "Customer receiving"
+          ]
+        }
       }
     ]
   }
