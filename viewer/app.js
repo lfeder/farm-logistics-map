@@ -463,67 +463,45 @@
     });
     svg += link + wait + move + grabs;
 
-    // A leg carries three labels: the hour at each end, against its own dot, and
-    // the name on the bar between them. Hanging the name off one end made a
-    // flat bar read as though the name belonged to the far end of it.
-    var dots = '', taken = [], said = {};
+    // ── Naming the threads ────────────────────────────────────────────────
+    // Not one name per leg. A leg's name was the same word on every journey --
+    // Packing, BOL, Drayage -- so on a busy week it said nothing while filling
+    // the chart. What is worth saying is which thread this is, and that is
+    // worth saying once, where the thread starts.
+    var dots = '', taken = [];
+    // One per RUN, not per journey: the same journey goes twice a week and
+    // each of those threads starts somewhere and deserves saying.
+    var firsts = {};
     r.pts.forEach(function (p) {
+      var d = p.t.journey || p.t.def || flow.name;
+      if (!has(firsts, d) || p.s < firsts[d].s) firsts[d] = { p: p, def: p.t.def || flow.name };
+    });
+    Object.keys(firsts).forEach(function (d) {
+      var p = firsts[d].p;
       var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
       var y2 = yOf[p.place];
       var db = jc(p.t);
-      var nm = p.t.name || 'Task';
-      // One leg's stop is usually the next one's start, in the same place at
-      // the same minute, and printing the hour twice on top of itself is how
-      // that reads. Each moment gets one label.
+      var nm = threadName(firsts[d].def);
 
-      // ── Where a leg's name goes ──────────────────────────────────────
-      // The shape of the leg decides it, not the crowding:
+      // Where the name goes, by the shape of the leg it hangs off:
       //
-      //   sloped -- it changes place  the name sits to the RIGHT of the
-      //                               start dot, on the start dot's own row
-      //   flat   -- it stays put      the name sits just ABOVE the start dot
+      //   sloped -- it changes place  to the RIGHT of the start dot, on the
+      //                               start dot's own row
+      //   flat   -- it stays put      just ABOVE the start dot
       //
-      // Either way it hangs off the start, so a name always reads as the
-      // beginning of its activity rather than the end. If that spot is taken
-      // the name steps up; it never slides along the bar, so it cannot drift
-      // away from the leg it belongs to.
-      // A name wraps at every word, so it is as wide as its longest word and
-      // as tall as it has words. Time is the scarce axis here and place is
-      // not, which is the whole reason to spend height to buy width.
-      // A leg named after the place it arrives at is already labelled, by the
-      // lane it lands on. Saying it twice is how the hold's staircase ended up
-      // with a word beside every step.
-      if (nm === (p.place || '')) return;
-
-      // Several journeys share the same first legs -- one packing run feeds
-      // both the air and the barge picture -- so the same name at the same
-      // place and hour is one event, said once.
-      var once = nm + '|' + p.from + '|' + p.place + '|' + p.s + '|' + p.e;
-      if (said[once]) return;
-      said[once] = 1;
-
-      var ROW = 12;
-      // Where the browser is allowed to break: at a space, and after a slash
-      // or a hyphen -- which stay on the line they end. Guessing this wrong
-      // makes a name shorter and taller than the model thinks, and then two
-      // names a step apart still touch.
-      var words = nm.replace(/([\/-])/g, '$1\u0000').split(/[\s\u0000]+/)
-        .filter(function (w) { return w; });
-      var wLen = 0;
-      words.forEach(function (w) { if (w.length > wLen) wLen = w.length; });
-      var wpc = (12 + wLen * 5.6) / PLOT_PX * 100;
-      // Plus the padding the box actually carries, so a step really does clear
-      // the name it stepped over.
-      var hh = Math.max(1, words.length) * ROW + 2;
+      // Either way it hangs off the start, so the name reads as the beginning
+      // of the thread. If that spot is taken it steps up; it never slides
+      // along the bar, so it cannot drift away from what it names.
+      //
+      // Names used to wrap at every word to buy width back on a chart with one
+      // on every leg. There are ten now, clustered at the two cut days, so
+      // width is cheap again and a name stays on its line.
+      var wpc = (12 + nm.length * 5.6) / PLOT_PX * 100;
+      // One line, plus the padding the box actually carries, so a step really
+      // does clear the name it stepped over.
+      var hh = 14;
       var lo = PCT(p.s) + .6, hi = lo + wpc;
-      // Sloped, the name sits centred on the start dot's row. Flat, it sits
-      // clear above the dot -- which for a stack means its bottom edge does,
-      // not its middle. A name that has to move moves by its whole height,
-      // because moving by less would only overlap itself.
       var base = y1 === y2 ? -(hh / 2 + 2) : 0;
-      // Keep stepping until there is room. Two journeys can put a dozen legs
-      // on one lane in one hour, and a name that gives up lands on top of
-      // another. Up is tried before down, since that is where a name reads.
       var STEPS = [0, -1, -2, -3, -4, -5, 1, 2, 3, 4];
       var ly = null;
       for (var k = 0; k < STEPS.length; k++) {
@@ -541,8 +519,7 @@
       if (ly === null) ly = y1 + base;
       taken.push({ t: ly - hh / 2, b: ly + hh / 2, lo: lo, hi: hi });
       dots += '<div class="ln' + db + '" style="left:' + PCT(p.s) + '%;top:' + ly + 'px"' +
-        ' data-task="' + esc(p.id) + '" title="' + esc(nm) + ' — ' + stamp(p.s) + ' to ' +
-        stamp(p.e) + ', ' + dur(p.e - p.s) + (p.t.note ? '. ' + esc(p.t.note) : '') + '">' +
+        ' data-task="' + esc(p.id) + '" title="' + esc(d) + ', from ' + stamp(p.s) + '">' +
         '<span class="nw">' + esc(nm) + '</span></div>';
     });
 
@@ -1044,6 +1021,19 @@
 
   // Name the picture by what every journey in it has in common, which is the
   // only thing that is true of all of them.
+  // A thread's name is where it is going and what carries it, which is what
+  // the toggles ask about. The crop is left out: it is the same on every
+  // thread in one picture, and it is already in the title.
+  function threadName(def) {
+    for (var i = 0; i < F.length; i++) {
+      if (F[i].name === def) {
+        var x = facets(F[i]);
+        return [x.to, x.by].filter(function (v) { return v; }).join(' \u00b7 ') || def;
+      }
+    }
+    return def;
+  }
+
   function sharedName(list) {
     var parts = [];
     KEYS.forEach(function (k) {

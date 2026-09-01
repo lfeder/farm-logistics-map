@@ -270,9 +270,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .ln{position:absolute; display:flex; align-items:center; gap:3px;
   font-size:10px; font-weight:600; line-height:1.2; cursor:pointer;
   background:var(--card); padding:1px 4px; border-radius:3px}
-/* Wrapped at every word: as wide as the longest word, as tall as it has
-   words. Time is the crowded axis, place is not. */
-.ln .nw{width:min-content}
+.ln .nw{white-space:nowrap}
 .ln.j0{color:var(--j0)} .ln.j1{color:var(--j1)} .ln.j2{color:var(--j2)}
 .ln.j3{color:var(--j3)} .ln.j4{color:var(--j4)} .ln.j5{color:var(--j5)}
 .ln.j6{color:var(--j6)} .ln.j7{color:var(--j7)} .ln.j8{color:var(--j8)}
