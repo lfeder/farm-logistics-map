@@ -565,7 +565,7 @@
   var X = function (h) { return (h / (SPAN * 24)) * 1000; };
   var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
 
-  function chart(flow, r, title) {
+  function chart(flow, r) {
     // One colour per journey, so a thread can be followed across a busy week.
     var hue = {}, hues = 0;
     flow.tasks.forEach(function (t) {
@@ -717,8 +717,7 @@
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
-    return '<div class="hd"><b>' + esc(title || flow.name) + '</b></div>' +
-      '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
+    return '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
       dots + '</div></div>';
@@ -1041,7 +1040,7 @@
       document.getElementById('tasks').innerHTML = '';
       return;
     }
-    var flow = merge(list), title = sharedName(list);
+    var flow = merge(list);
     // One journey is drawn from its own cut; several share the week, because
     // that is the only axis they have in common.
     ANCHOR = flow.many ? 'Sun' : (flow.start || 'Sun');
@@ -1072,7 +1071,7 @@
     document.getElementById('axis').innerHTML =
       '<div class="axrow"><div class="gut"></div><div class="days">' + ax + '</div></div>' +
       '<div class="axrow"><div class="gut"></div><div class="hours-axis">' + hx + '</div></div>';
-    document.getElementById('grid').innerHTML = chart(flow, r, title);
+    document.getElementById('grid').innerHTML = chart(flow, r);
 
     var off = offences(flow), warn = '';
     if (r.broken.length) {
@@ -1226,12 +1225,10 @@
       (f.branches || []).forEach(function (b) { if (branches.indexOf(b) < 0) branches.push(b); });
       for (var p in f.windows) if (has(f.windows, p)) windows[p] = f.windows[p];
     });
-    return { id: 'many', name: sharedName(list), start: 'Sun', many: list.length,
+    return { id: 'many', name: 'many', start: 'Sun', many: list.length,
       branches: branches, tasks: tasks, windows: windows };
   }
 
-  // Name the picture by what every journey in it has in common, which is the
-  // only thing that is true of all of them.
   // The name on the chart is the name on the button, so a thread and the thing
   // that selected it read as the same thing.
   function threadName(def) {
@@ -1239,16 +1236,6 @@
     return def;
   }
 
-  function sharedName(list) {
-    var parts = [];
-    var crop = uniq(list.map(function (f) { return f.crop || ''; }));
-    if (crop.length === 1 && crop[0]) parts.push(crop[0]);
-    var jrn = uniq(list.map(function (f) { return jrnLabel(f); }));
-    if (jrn.length === 1) parts.push(jrn[0]);
-    var when = uniq(list.map(function (f) { return f.start; }));
-    if (when.length === 1) parts.push(cutLabel(when[0]));
-    return parts.length ? parts.join(' \u00b7 ') : 'The week';
-  }
 
   function jrnFor(key) {
     for (var i = 0; i < F.length; i++) if (jrnKey(F[i]) === key) return F[i];

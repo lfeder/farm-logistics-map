@@ -62,9 +62,6 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
   color:var(--ink-3); font-weight:600; border-left:1px solid var(--line-2); padding-bottom:3px}
 .day:first-child{border-left:none}
 .day.cut{color:var(--accent)}
-.hd{display:flex; align-items:baseline; gap:9px; padding:2px 0 4px}
-.hd b{font-size:14.5px; font-weight:600}
-.hd small{font-size:10.5px; color:var(--ink-3)}
 .chart{display:flex; gap:12px}
 .lane-lbl{display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
   font-size:10.5px; font-weight:600; color:var(--ink-2); line-height:1.15; text-align:right}
@@ -928,7 +925,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   var X = function (h) { return (h / (SPAN * 24)) * 1000; };
   var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
 
-  function chart(flow, r, title) {
+  function chart(flow, r) {
     // One colour per journey, so a thread can be followed across a busy week.
     var hue = {}, hues = 0;
     flow.tasks.forEach(function (t) {
@@ -1080,8 +1077,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
-    return '<div class="hd"><b>' + esc(title || flow.name) + '</b></div>' +
-      '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
+    return '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
       dots + '</div></div>';
@@ -1404,7 +1400,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       document.getElementById('tasks').innerHTML = '';
       return;
     }
-    var flow = merge(list), title = sharedName(list);
+    var flow = merge(list);
     // One journey is drawn from its own cut; several share the week, because
     // that is the only axis they have in common.
     ANCHOR = flow.many ? 'Sun' : (flow.start || 'Sun');
@@ -1435,7 +1431,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     document.getElementById('axis').innerHTML =
       '<div class="axrow"><div class="gut"></div><div class="days">' + ax + '</div></div>' +
       '<div class="axrow"><div class="gut"></div><div class="hours-axis">' + hx + '</div></div>';
-    document.getElementById('grid').innerHTML = chart(flow, r, title);
+    document.getElementById('grid').innerHTML = chart(flow, r);
 
     var off = offences(flow), warn = '';
     if (r.broken.length) {
@@ -1589,12 +1585,10 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       (f.branches || []).forEach(function (b) { if (branches.indexOf(b) < 0) branches.push(b); });
       for (var p in f.windows) if (has(f.windows, p)) windows[p] = f.windows[p];
     });
-    return { id: 'many', name: sharedName(list), start: 'Sun', many: list.length,
+    return { id: 'many', name: 'many', start: 'Sun', many: list.length,
       branches: branches, tasks: tasks, windows: windows };
   }
 
-  // Name the picture by what every journey in it has in common, which is the
-  // only thing that is true of all of them.
   // The name on the chart is the name on the button, so a thread and the thing
   // that selected it read as the same thing.
   function threadName(def) {
@@ -1602,16 +1596,6 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     return def;
   }
 
-  function sharedName(list) {
-    var parts = [];
-    var crop = uniq(list.map(function (f) { return f.crop || ''; }));
-    if (crop.length === 1 && crop[0]) parts.push(crop[0]);
-    var jrn = uniq(list.map(function (f) { return jrnLabel(f); }));
-    if (jrn.length === 1) parts.push(jrn[0]);
-    var when = uniq(list.map(function (f) { return f.start; }));
-    if (when.length === 1) parts.push(cutLabel(when[0]));
-    return parts.length ? parts.join(' \u00b7 ') : 'The week';
-  }
 
   function jrnFor(key) {
     for (var i = 0; i < F.length; i++) if (jrnKey(F[i]) === key) return F[i];
