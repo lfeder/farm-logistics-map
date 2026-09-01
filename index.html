@@ -439,7 +439,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   var COL = {
     'crop': 'crop', 'fob': 'fob', 'transport': 'transport',
     'start day': 'start_day', 'start_day': 'start_day',
-    'branch': 'branch', 'leg': 'leg',
+    'branch': 'branch', 'leg': 'leg', 'step': 'leg',
     'start location': 'from', 'start_location': 'from',
     'start dt': 's', 'start_dt': 's',
     'end location': 'place', 'end_location': 'place',
@@ -456,9 +456,9 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     for (i = 0; i < rows.length && head < 0; i++) {
       var seen = {};
       rows[i].forEach(function (c) { seen[c.trim().toLowerCase()] = 1; });
-      if (seen.leg && seen['start dt']) head = i;
+      if ((seen.leg || seen.step) && seen['start dt']) head = i;
     }
-    if (head < 0) throw new Error('no header row naming both Leg and Start dt');
+    if (head < 0) throw new Error('no header row naming Leg or Step, and Start dt');
     var keep = [];
     rows[head].forEach(function (h, k) {
       var name = h.trim().toLowerCase();

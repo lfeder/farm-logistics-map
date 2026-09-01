@@ -62,7 +62,8 @@ REF = json.load(open(os.path.join(HERE, "reference.json")))
 # rest of the row is one leg of it.
 SHEET_COLS = {"crop": "crop", "fob": "fob", "transport": "transport",
               "start day": "start_day", "branch": "branch",
-              "leg": "leg", "start location": "start_location", "start dt": "start_dt",
+              "leg": "leg", "step": "leg",
+              "start location": "start_location", "start dt": "start_dt",
               "end location": "end_location", "end dt": "end_dt",
               "icon": "icon", "note": "note"}
 COLS = ["crop", "fob", "transport", "start_day", "branch", "leg",
@@ -78,9 +79,9 @@ def pull_sheet(url):
     def names(r):
         return {(c or "").strip().lower() for c in r}
     head_i = next((i for i, r in enumerate(rows)
-                   if {"leg", "start dt"} <= names(r)), None)
+                   if "start dt" in names(r) and names(r) & {"leg", "step"}), None)
     if head_i is None:
-        raise ValueError("no header row naming both Leg and Start dt")
+        raise ValueError("no header row naming Leg or Step, and Start dt")
     head = [(c or "").strip().lower() for c in rows[head_i]]
     keep = [(i, SHEET_COLS[h]) for i, h in enumerate(head) if h in SHEET_COLS]
     got = [k[1] for k in keep]
