@@ -162,6 +162,11 @@
     return !d ? true : !!d[((day % 7) + 7) % 7];
   }
 
+  // The order the sheet lists its steps in. The chart's rows are the sheet's
+  // rows, so the sheet is what orders them; reference.json only says where a
+  // step goes when the sheet does not mention it.
+  var SHEET_ORDER = [];
+
   function gridRows(text) {
     var rows = csvRows(text), lab = -1, col = 0, i, j;
     // Find the row that names the crop, and the column its labels sit in.
@@ -189,6 +194,14 @@
     // One journey per column, read top to bottom. A column that cannot be
     // built is left out and named, rather than taking the other nine with it:
     // one bad cell should cost you one journey, not the whole page.
+    SHEET_ORDER = [];
+    rows.slice(lab).forEach(function (r) {
+      var k = (r[col] || '').trim().toLowerCase();
+      if (has(byStep, k) && SHEET_ORDER.indexOf(byStep[k].step) < 0) {
+        SHEET_ORDER.push(byStep[k].step);
+      }
+    });
+
     var out = [], hurt = [];
     for (j = col + 1; j < wide; j++) {
       try {
@@ -433,6 +446,20 @@
       // Within a branch the rows are already in order, and that is the whole
       // dependency story -- nothing needs an "after" column to say what the
       // sheet already says.
+      // Times are written as weekdays, so they only say where in a week a step
+      // falls. A journey that runs longer than a week then folds back on
+      // itself -- Kauai cut on a Wednesday delivers the following Wednesday,
+      // and landed on its own cutting day. A step never starts before the one
+      // before it did, so the week is added back until it does not.
+      var floor = {};
+      tasks.forEach(function (t) {
+        var b = t.branch;
+        if (has(floor, b)) {
+          while (t.s < floor[b]) { t.s += 168; t.e += 168; }
+        }
+        floor[b] = t.s;
+      });
+
       var last = {};
       tasks.forEach(function (t) {
         t.after = has(last, t.branch) ? [last[t.branch]] : [];
@@ -591,8 +618,10 @@
     // Reaching them is not the same thing: the 140 journey reaches Customer
     // third, but Customer is still the last step there is.
     var rank = {}, r = 0;
+    SHEET_ORDER.forEach(function (name) { rank[String(name).toLowerCase()] = r++; });
     ((((window.REF || {}).steps || {}).order) || []).forEach(function (st) {
-      rank[String(st.step).toLowerCase()] = r++;
+      var k = String(st.step).toLowerCase();
+      if (!has(rank, k)) rank[k] = r++;
     });
     function rk(p) {
       var k = String(p).toLowerCase();

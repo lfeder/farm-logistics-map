@@ -230,7 +230,7 @@
     }
   },
   "steps": {
-    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it -- fob first, then transport, then the plain pair. An override that has no entry for this journey falls through to the next, so a step can be told apart by island where it needs to be and by vehicle everywhere else. Every place named here needs a row in hours. A step may list what it was called before under was, so renaming one does not have to happen in two places at once. A step marked sticks:next keeps the gap it was written with to the step after it, so that when a later step is pushed it comes along rather than being left to sit.",
+    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it -- fob first, then transport, then the plain pair. An override that has no entry for this journey falls through to the next, so a step can be told apart by island where it needs to be and by vehicle everywhere else. Every place named here needs a row in hours. A step may list what it was called before under was, so renaming one does not have to happen in two places at once. A step marked sticks:next keeps the gap it was written with to the step after it, so that when a later step is pushed it comes along rather than being left to sit. The order here is the fallback; where the sheet names a step, the sheet's row order wins, so the chart's rows are the sheet's rows.",
     "order": [
       {
         "step": "Pack/Store 1",
@@ -254,6 +254,13 @@
         ]
       },
       {
+        "step": "Load Container",
+        "places": [
+          "Storage",
+          "Container"
+        ]
+      },
+      {
         "step": "Load Truck",
         "sticks": "next",
         "was": [
@@ -262,13 +269,6 @@
         "places": [
           "Storage",
           "Storage"
-        ]
-      },
-      {
-        "step": "Load Container",
-        "places": [
-          "Storage",
-          "Container"
         ]
       },
       {

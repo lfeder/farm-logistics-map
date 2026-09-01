@@ -126,6 +126,10 @@ journey is a column.
 The day carries over to the stop unless the stop names its own, because most
 steps finish on the day they start: `Sun 10:00-14:00`, but `Tue 18:00-Wed 12:00`.
 
+**The sheet's row order is the chart's row order.** `reference.json` only says
+where a step goes when the sheet does not mention it, so reordering rows in the
+sheet reorders the lanes and there are not two lists to keep in step.
+
 **Every step is a row, always** — whether or not the journeys on screen use
 one. The rows then stay put as journeys are switched on and off, and an empty
 row says what an empty cell says: this one skips it.
