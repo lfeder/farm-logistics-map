@@ -71,8 +71,13 @@ being positioned by hand.
 **Legs are not named on the chart.** A leg's name is the same word on every
 journey — Packing, BOL, Drayage — so on a busy week it said nothing while
 filling the picture. What is worth saying is which thread this is, and that is
-said once, in the thread's own colour, where the thread starts: `140 · Air`,
-`Oahu · Barge`. The leg names are in the task list underneath.
+said once, in the thread's own colour: `140 (6h)`, `Off-island (Barge)`. The
+leg names are in the task list underneath.
+
+Room for a name is found **along** the thread, not above and below it. Five
+journeys leave the same morning, so stacking their names at the start piles
+them into a column; walking each one forward to its next step instead spreads
+them across the page, and a name still sits on the thread it names.
 
 ## The sheet
 

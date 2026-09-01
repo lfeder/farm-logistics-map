@@ -599,9 +599,13 @@
       var y = PAD_T + i * LANE_H;
       svg += '<line class="lane" x1="0" x2="1000" y1="' + (y + LANE_H / 2) + '" y2="' + (y + LANE_H / 2) + '"/>';
     });
-    splits.forEach(function (y) {
-      svg += '<line class="split" x1="0" x2="1000" y1="' + y + '" y2="' + y + '"/>';
-    });
+    // Everything below the first split is the clock rather than the pallet.
+    // A tint says that better than a rule does: it names the region instead of
+    // just marking where one ends.
+    if (splits.length) {
+      svg = '<rect class="aside" x="0" y="' + splits[0] + '" width="1000" height="' +
+        (H - splits[0]) + '"/>' + svg;
+    }
 
     // Links first, so a bar always sits on top of the thread that reached it.
     // A link that runs backwards means a task starts before what it comes after
@@ -638,59 +642,65 @@
     // Not one name per leg. A leg's name was the same word on every journey --
     // Packing, BOL, Drayage -- so on a busy week it said nothing while filling
     // the chart. What is worth saying is which thread this is, and that is
-    // worth saying once, where the thread starts.
+    // worth saying once, where there is room for it.
+    //
+    // Room is found ALONG the thread, not above and below it. Five journeys
+    // leave the same morning, so stacking their names at the start piles them
+    // into a column; walking each one forward to its next step instead spreads
+    // them across the page, and a name still sits on the thread it names.
     var dots = '', taken = [];
-    // One per RUN, not per journey: the same journey goes twice a week and
-    // each of those threads starts somewhere and deserves saying.
-    var firsts = {};
+    var threads = {}, order = [];
     r.pts.forEach(function (p) {
       var d = p.t.journey || p.t.def || flow.name;
-      if (!has(firsts, d) || p.s < firsts[d].s) firsts[d] = { p: p, def: p.t.def || flow.name };
+      if (!has(threads, d)) { threads[d] = { def: p.t.def || flow.name, pts: [] }; order.push(d); }
+      threads[d].pts.push(p);
     });
-    Object.keys(firsts).forEach(function (d) {
-      var p = firsts[d].p;
+
+    var ROW = 14, GAP = 7;   // a name's height, and the air between two of them
+
+    function box(p, nm, step) {
       var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
       var y2 = yOf[p.place];
-      var db = jc(p.t);
-      var nm = threadName(firsts[d].def);
-
-      // Where the name goes, by the shape of the leg it hangs off:
-      //
-      //   sloped -- it changes place  to the RIGHT of the start dot, on the
-      //                               start dot's own row
-      //   flat   -- it stays put      just ABOVE the start dot
-      //
-      // Either way it hangs off the start, so the name reads as the beginning
-      // of the thread. If that spot is taken it steps up; it never slides
-      // along the bar, so it cannot drift away from what it names.
-      //
-      // Names used to wrap at every word to buy width back on a chart with one
-      // on every leg. There are ten now, clustered at the two cut days, so
-      // width is cheap again and a name stays on its line.
       var wpc = (12 + nm.length * 5.6) / PLOT_PX * 100;
-      // One line, plus the padding the box actually carries, so a step really
-      // does clear the name it stepped over.
-      var hh = 14, GAP = 7;   // a name's height, and the air between two of them
-      var lo = PCT(p.s) + .6, hi = lo + wpc;
-      var base = y1 === y2 ? -(hh / 2 + 2) : 0;
-      var STEPS = [0, -1, -2, -3, -4, -5, 1, 2, 3, 4];
-      var ly = null;
-      for (var k = 0; k < STEPS.length; k++) {
-        var cand = y1 + base + STEPS[k] * (hh + GAP), free = true;
-        // A name may not leave the plot. Stepping off the top used to put it
-        // over the day and hour labels, where it read as part of the axis.
-        if (cand - hh / 2 < 0 || cand + hh / 2 > H) continue;
-        for (var q2 = 0; q2 < taken.length; q2++) {
-          var o = taken[q2];
-          if (cand - hh / 2 < o.b && o.t < cand + hh / 2 &&
-              lo < o.hi + .4 && o.lo < hi + .4) { free = false; break; }
-        }
-        if (free) { ly = cand; break; }
+      // Sloped, the name sits on the row the step comes down from. Flat, it
+      // sits clear above the dot. Either way it hangs off the start, so it
+      // reads as the beginning of the thread.
+      var base = y1 === y2 ? -(ROW / 2 + 2) : 0;
+      var ly = y1 + base + (step || 0) * (ROW + GAP);
+      return { lo: PCT(p.s) + .6, hi: PCT(p.s) + .6 + wpc, ly: ly,
+               t: ly - ROW / 2, b: ly + ROW / 2, x: PCT(p.s), p: p };
+    }
+    function free(k) {
+      // A name may not leave the plot. Stepping off the top used to put it
+      // over the day and hour labels, where it read as part of the axis.
+      if (k.t < 0 || k.b > H) return false;
+      for (var i = 0; i < taken.length; i++) {
+        var o = taken[i];
+        if (k.t < o.b && o.t < k.b && k.lo < o.hi + .4 && o.lo < k.hi + .4) return false;
       }
-      if (ly === null) ly = y1 + base;
-      taken.push({ t: ly - hh / 2, b: ly + hh / 2, lo: lo, hi: hi });
-      dots += '<div class="ln' + db + '" style="left:' + PCT(p.s) + '%;top:' + ly + 'px"' +
-        ' data-task="' + esc(p.id) + '" title="' + esc(d) + ', from ' + stamp(p.s) + '">' +
+      return true;
+    }
+
+    order.forEach(function (d) {
+      var th = threads[d], nm = threadName(th.def);
+      var list = th.pts.slice().sort(function (x, y) { return x.s - y.s; });
+      var best = null, i;
+      // Walk the thread from its start and take the first step with room.
+      for (i = 0; i < list.length && !best; i++) {
+        var k = box(list[i], nm, 0);
+        if (free(k)) best = k;
+      }
+      // Only if the whole thread is crowded does a name step off its row, and
+      // then at the start, where the thread begins.
+      var STEPS = [-1, 1, -2, 2, -3, 3];
+      for (i = 0; i < STEPS.length && !best; i++) {
+        var k2 = box(list[0], nm, STEPS[i]);
+        if (free(k2)) best = k2;
+      }
+      if (!best) best = box(list[0], nm, 0);
+      taken.push(best);
+      dots += '<div class="ln' + jc(best.p.t) + '" style="left:' + best.x +
+        '%;top:' + best.ly + 'px" title="' + esc(d) + '">' +
         '<span class="nw">' + esc(nm) + '</span></div>';
     });
 

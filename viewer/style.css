@@ -72,8 +72,9 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .wait{stroke:var(--ink); stroke-width:2; stroke-dasharray:2 3; opacity:.6}
 /* A prereq's stop and the next start need not meet. Where they do not, the gap
    is drawn for what it is rather than closed up. */
-/* Between the pallet's lanes and the clock's. */
-.split{stroke:var(--ink-2); stroke-width:2; vector-effect:non-scaling-stroke}
+/* The clock's lanes, tinted so the region has a name rather than just an
+   edge. Behind everything, so a bar still reads on top of it. */
+.aside{fill:#f2f5f6}
 .link{stroke:var(--ink-3); stroke-width:1.5; stroke-dasharray:1 4; opacity:.75}
 .link.back{stroke:var(--bad); opacity:.9; stroke-dasharray:3 3}
 .legend{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; padding-top:14px; margin-top:10px;
