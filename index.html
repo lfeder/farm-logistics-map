@@ -270,9 +270,13 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .pt.j3{stroke:var(--j3)} .pt.j4{stroke:var(--j4)} .pt.j5{stroke:var(--j5)}
 .pt.j6{stroke:var(--j6)} .pt.j7{stroke:var(--j7)} .pt.j8{stroke:var(--j8)}
 .pt.j9{stroke:var(--j9)}
+/* A halo rather than a box. A filled box the size of the name paints over
+   whatever dots sit behind it, and the dots are the chart. */
 .ln{position:absolute; display:flex; align-items:center; gap:3px;
-  font-size:10px; font-weight:600; line-height:1.2; cursor:pointer;
-  background:var(--card); padding:1px 4px; border-radius:3px}
+  font-size:10px; font-weight:600; line-height:1.2; pointer-events:none;
+  padding:1px 4px;
+  text-shadow:0 0 3px var(--card), 0 0 3px var(--card), 0 0 3px var(--card),
+              0 0 2px var(--card), 0 0 2px var(--card)}
 .ln .nw{white-space:nowrap}
 .ln.j0{color:var(--j0)} .ln.j1{color:var(--j1)} .ln.j2{color:var(--j2)}
 .ln.j3{color:var(--j3)} .ln.j4{color:var(--j4)} .ln.j5{color:var(--j5)}
@@ -281,7 +285,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 /* A name hangs off its leg's start dot, so it is anchored left and centred
    on whatever row the placement rule gave it. */
 .ln{transform:translate(0,-50%); margin-left:7px}
-.ln:hover{outline:2px solid var(--accent-soft)}
 
 /* A journey's name, said once above its own run of rows. */
 .grid .grp{grid-column:1/-1; padding:12px 0 3px; font-size:11px; font-weight:700;
