@@ -497,7 +497,10 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
   //
   // Where each step runs between is not in the sheet at all -- it is the same
   // on every journey, so it lives in reference.json under steps.
-  var GRID_KEYS = { 'crop': 'crop', 'fob': 'fob', 'transport': 'transport',
+  // 'Mode' and 'Transport' both name the same thing about a journey. The
+  // second is also the name of a step, which is why the first exists.
+  var GRID_KEYS = { 'crop': 'crop', 'fob': 'fob',
+                    'transport': 'transport', 'mode': 'transport',
                     'start day': 'start_day', 'start_day': 'start_day' };
 
   // 'Sun 10:00-14:00' or 'Tue 18:00 - Wed 12:00': the day carries over to the
