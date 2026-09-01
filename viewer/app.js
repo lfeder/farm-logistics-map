@@ -292,8 +292,13 @@
         var br = (r.branch || '1').trim() || '1';
         if (branches.indexOf(br) < 0) branches.push(br);
         var ic = (r.icon || '').toLowerCase();
+        // The lane is the step, not the place. The sheet's rows and the
+        // chart's rows are then the same list, and every journey is measured
+        // against the same seven -- which is what makes two threads
+        // comparable at a glance. Where it physically is rides along on `at`,
+        // because that is what has opening hours.
         tasks.push({ id: 't' + tasks.length, name: r.leg, branch: br,
-          from: r.from || 'Somewhere', place: r.place || 'Somewhere',
+          place: r.leg, at: r.place || 'Somewhere', atFrom: r.from || 'Somewhere',
           s: at(r.s), e: at(r.e),
           icon: ICONS.indexOf(ic) < 0 ? iconFor(r.leg) : ic,
           note: r.note || '' });
@@ -325,23 +330,17 @@
         });
         if (seed) {
           if (branches.indexOf(hb) < 0) branches.push(hb);
-          // Each stage is a lane and each leg is the wait to reach the next
-          // one, so the chain draws as a staircase and its name is the stage
-          // it arrives at. The first stage is where the clock starts.
-          // A stage's hours is how long THAT stage takes, so the leg out of
-          // it carries its own duration and the last stage takes none.
+          // One leg per stage, on its own lane, for the length of that stage --
+          // the same shape as a step in the sheet. The last stage is where it
+          // ends and takes no time, but it still gets a leg, because a lane
+          // with nothing on it is a lane that does not appear.
           var run = seed.e;
           stages.forEach(function (st, n) {
-            var next = stages[n + 1];
-            if (!next) return;
-            var len = +st.hours || 0, pl = next.place || 'Hold';
-            var was = st.place || 'Hold';
+            var len = +st.hours || 0, pl = st.place || 'Hold';
             var ic = String(st.icon || '').toLowerCase();
-            // Named for the stage it LEAVES, because that is the activity the
-            // leg is: six hours out of Incubate is the incubating.
-            tasks.push({ id: 'h' + n, name: was, branch: hb,
-              from: was, place: pl, s: run, e: run + len,
-              icon: ICONS.indexOf(ic) < 0 ? iconFor(was) : ic,
+            tasks.push({ id: 'h' + n, name: pl, branch: hb,
+              place: pl, at: pl, atFrom: pl, s: run, e: run + len,
+              icon: ICONS.indexOf(ic) < 0 ? iconFor(pl) : ic,
               note: st.note || '' });
             run += len;
           });
@@ -351,14 +350,18 @@
       // Within a branch the rows are already in order, and that is the whole
       // dependency story -- nothing needs an "after" column to say what the
       // sheet already says.
-      var last = {};
+      var last = {}, was = {};
       tasks.forEach(function (t) {
         t.after = has(last, t.branch) ? [last[t.branch]] : [];
+        // A leg descends from the lane its branch was standing on. The first
+        // has nowhere to come down from, so it lies flat on its own.
+        t.from = has(was, t.branch) ? was[t.branch] : t.place;
         last[t.branch] = t.id;
+        was[t.branch] = t.place;
       });
       var wins = {};
       tasks.forEach(function (t) {
-        [t.from, t.place].forEach(function (pl) {
+        [t.atFrom, t.at].forEach(function (pl) {
           if (has(hours, pl)) {
             wins[pl] = { days: hours[pl].days, open: hours[pl].open, close: hours[pl].close };
           }
@@ -453,7 +456,7 @@
       // The leg carries its own origin, so a bar has a real slope rather than
       // one inferred from whatever happened to come before it.
       p.from = p.t.from || p.place;
-      if (p.from === p.place) still += Math.max(0, p.e - p.s); else moving += Math.max(0, p.e - p.s);
+      moving += Math.max(0, p.e - p.s);
     });
     var edges = [];
     flow.tasks.forEach(function (t) {
@@ -463,6 +466,10 @@
                      p0: byId[id].place || 'Somewhere' });
       });
     });
+    // Waiting is the gap between one step finishing and the next starting.
+    // Summing the flat bars used to say it, back when a flat bar meant sitting
+    // in one place; a lane per step means every bar is a step being done.
+    edges.forEach(function (e) { still += Math.max(0, e.h1 - e.h0); });
     var broken = flow.tasks.filter(function (t) { return num(t.e) < num(t.s); });
     return { byId: byId, pts: pts, edges: edges, broken: broken,
              start: start, end: end, idle: Math.round(idle),
@@ -485,9 +492,21 @@
     // Branch 1 is the pallet and branch 2 is the clock running beside it, so
     // the places only the clock touches go underneath -- the product's own
     // path then reads as one block rather than being interrupted by the lab.
+    // The lanes are the steps, and the steps have an order of their own --
+    // the one reference.json lists them in, which is the order they happen.
+    // Reaching them is not the same thing: the 140 journey reaches Customer
+    // third, but Customer is still the last step there is.
+    var rank = {}, r = 0;
+    ((((window.REF || {}).steps || {}).order) || []).forEach(function (st) {
+      rank[String(st.step).toLowerCase()] = r++;
+    });
+    function rk(p) {
+      var k = String(p).toLowerCase();
+      return has(rank, k) ? rank[k] : 1e6 + seen[p].i;
+    }
     out.sort(function (a, b) {
       if (seen[a].b !== seen[b].b) return seen[a].b < seen[b].b ? -1 : 1;
-      return seen[a].i - seen[b].i;
+      return rk(a) - rk(b);
     });
     return { order: out, of: seen };
   }
@@ -553,11 +572,15 @@
         '" y1="' + yOf[e.p0] + '" x2="' + X(e.h1) + '" y2="' + yOf[e.p0] + '"/>';
     });
 
-    var move = '', wait = '', grabs = '';
+    var move = '', wait = '';
     r.pts.forEach(function (p) {
       var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
       var seg = 'x1="' + X(p.s) + '" y1="' + y1 + '" x2="' + X(p.e) + '" y2="' + yOf[p.place] + '"';
-      var still = p.from === p.place;
+      // Every leg is a step being done, so every leg is drawn solid. What is
+      // dotted is the link between them, which is the waiting. A lane per step
+      // means the old test -- did it change place? -- now only ever catches
+      // the first leg of a branch, and packing is not idleness.
+      var still = false;
       // Branches are separate threads until they meet, so they do not share a
       // colour.
       var b = jc(p.t);
@@ -567,11 +590,8 @@
       }
       svg += '<circle class="pt' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="3"/>' +
         '<circle class="pt' + b + '" cx="' + X(p.e) + '" cy="' + yOf[p.place] + '" r="3"/>';
-      grabs += '<line class="grab" ' + seg + ' data-task="' + esc(p.id) + '"><title>' +
-        esc(p.t.name) + ' — ' + stamp(p.s) + ' to ' + stamp(p.e) + ', ' + dur(p.e - p.s) +
-        '. Drag to move the whole task.</title></line>';
     });
-    svg += link + wait + move + grabs;
+    svg += link + wait + move;
 
     // ── Naming the threads ────────────────────────────────────────────────
     // Not one name per leg. A leg's name was the same word on every journey --
@@ -641,7 +661,7 @@
     // single duration between them, so there is nothing to put here.
     var res = flow.many ? '' :
       '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') +
-      '</small><em>' + r.hrs + ' h end to end, ' + r.still + ' standing still</em></div>';
+      '</small><em>' + r.hrs + ' h end to end, ' + r.still + ' waiting</em></div>';
     return '<div class="hd"><b>' + esc(title || flow.name) + '</b>' + res + '</div>' +
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
@@ -670,7 +690,7 @@
   function offences(flow) {
     var out = [];
     flow.tasks.forEach(function (t) {
-      var pl = t.place || 'Somewhere';
+      var pl = t.at || t.place || 'Somewhere';
       if (!winOf(flow, pl)) return;
       if (outside(flow, pl, num(t.s))) out.push({ t: t, f: 'starts', h: num(t.s), pl: pl });
       if (outside(flow, pl, num(t.e))) out.push({ t: t, f: 'stops', h: num(t.e), pl: pl });
@@ -693,19 +713,20 @@
       var p = null;
       r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
       var len = num(t.e) - num(t.s);
-      var still = p && p.from === (t.place || 'Somewhere');
+      var still = false;   // see the chart: a leg is a step, not a place change
       var pre = (t.after || []).filter(function (id) { return r.byId[id]; });
-      var badS = outside(flow, t.place || 'Somewhere', num(t.s));
-      var badE = outside(flow, t.place || 'Somewhere', num(t.e));
+      var where = t.at || t.place || 'Somewhere';
+      var badS = outside(flow, where, num(t.s));
+      var badE = outside(flow, where, num(t.e));
       return mark + '<div class="row' + (len < 0 ? ' bad' : '') + '" id="task-' + esc(t.id) + '">' +
         '<div class="cell n">' + (i + 1) + '</div>' +
         '<div class="cell ico">' + ico(t.icon) + '</div>' +
         '<div class="cell nm">' + esc(t.name) + '</div>' +
-        '<div class="cell plc">' + esc(t.place) + '</div>' +
+        '<div class="cell plc">' + esc(t.at || t.place) + '</div>' +
         '<div class="cell tm' + (badS ? ' out' : '') + '"' +
-        (badS ? ' title="' + esc(t.place) + ' is shut then."' : '') + '>' + stamp(num(t.s)) + '</div>' +
+        (badS ? ' title="' + esc(where) + ' is shut then."' : '') + '>' + stamp(num(t.s)) + '</div>' +
         '<div class="cell tm' + (badE ? ' out' : '') + '"' +
-        (badE ? ' title="' + esc(t.place) + ' is shut then."' : '') + '>' + stamp(num(t.e)) + '</div>' +
+        (badE ? ' title="' + esc(where) + ' is shut then."' : '') + '>' + stamp(num(t.e)) + '</div>' +
         '<div class="cell dur' + (len < 0 ? ' bad' : still && len > .01 ? ' still' : '') + '">' +
         (len < 0 ? 'backwards' : dur(len)) + '</div>' +
         '<div class="cell aft">' + (pre.length
@@ -905,7 +926,9 @@
     // What this journey actually uses, which is a subset and worth seeing
     // apart -- and only means anything while one journey is on screen.
     var flow = cur();
-    var pl = flow ? places(flow).filter(function (p) { return winOf(flow, p); }) : [];
+    var pl = flow ? uniq(flow.tasks.reduce(function (a, t) {
+      return a.concat([t.atFrom, t.at]);
+    }, [])).filter(function (p) { return winOf(flow, p); }) : [];
     if (pl.length) {
       out += '<h4>Used by ' + esc(flow.name) + '</h4>' +
         '<table class="otbl hrs"><thead><tr><th>Place</th><th>Days</th><th>Opens</th>' +
@@ -954,7 +977,7 @@
     var list = shown();
     picker();
     document.getElementById('key').innerHTML =
-      '<i class="sw mv"></i>moving<i class="sw wt"></i>standing still';
+      '<i class="sw mv"></i>a step<i class="sw wt"></i>waiting';
     document.getElementById('src').innerHTML = srcLine();
     if (!list.length) {
       document.getElementById('grid').innerHTML =
@@ -1013,7 +1036,7 @@
     document.getElementById('warn').innerHTML = warn;
     document.getElementById('tnote').textContent =
       flow.tasks.length + ' legs · ' + (flow.branches || []).length + ' branches · ' +
-      places(flow).length + ' places · ' + r.hrs + ' h end to end, ' + r.still + ' standing still';
+      places(flow).length + ' places · ' + r.hrs + ' h end to end, ' + r.still + ' waiting';
     document.getElementById('tasks').innerHTML = taskTable(flow, r);
 
     // A bar or a dot finds its row, which is the only interaction left.

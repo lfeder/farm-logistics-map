@@ -28,9 +28,17 @@ Three files, split by how often they change.
 
 ## The chart
 
-Time runs left to right, place runs top to bottom. A **sloped bar is the thing
-moving**; a **flat bar is the thing standing still**. That is the point, because
-the waiting is what nobody can see in a list of steps. Faint lines every four
+Time runs left to right, **the steps run top to bottom, in the order they
+happen**. So the chart's rows and the sheet's rows are the same list, every
+journey is measured against the same steps, and two threads can be compared by
+reading across one row: who reaches Customer first.
+
+A **solid bar is a step being done**; a **dotted run is the waiting between
+them**. The waiting is the point, because it is what nobody can see in a list
+of steps.
+
+Where the product physically is rides along on each leg but is not a lane —
+it is what has opening hours, and it is in the task list. Faint lines every four
 hours give a leg something to be measured against.
 
 ## How the chart places labels

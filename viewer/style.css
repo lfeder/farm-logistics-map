@@ -76,8 +76,6 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .split{stroke:var(--ink-2); stroke-width:2; vector-effect:non-scaling-stroke}
 .link{stroke:var(--ink-3); stroke-width:1.5; stroke-dasharray:1 4; opacity:.75}
 .link.back{stroke:var(--bad); opacity:.9; stroke-dasharray:3 3}
-.grab{stroke:transparent; stroke-width:13; stroke-linecap:round; cursor:ew-resize}
-.grab:hover{stroke:var(--accent); opacity:.22}
 .legend{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; padding-top:14px; margin-top:10px;
   border-top:1px solid var(--line-2); font-size:11.5px; color:var(--ink-2)}
 .legend span{display:inline-flex; align-items:center; gap:5px}
@@ -149,7 +147,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .cell.aft{font-size:11.5px; color:var(--ink-3)}
 .cell.nt{font-size:11.5px; color:var(--ink-3); line-height:1.35; padding-right:2px}
 .cell.nt em{font-style:normal; color:var(--ink-3)}
-.row.lit .cell{background:var(--accent-soft)}
 .row.bad .cell{background:var(--accent-soft)}
 .tasks{padding:0 18px 18px}
 
