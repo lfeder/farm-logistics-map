@@ -68,6 +68,7 @@
   // read the same and neither has to be rewritten to match the other.
   var COL = {
     'crop': 'crop', 'fob': 'fob', 'transport': 'transport',
+    'mode': 'transport', 'hold': 'hold',
     'start day': 'start_day', 'start_day': 'start_day',
     'branch': 'branch', 'leg': 'leg', 'step': 'leg',
     'start location': 'from', 'start_location': 'from',
@@ -133,6 +134,7 @@
   // second is also the name of a step, which is why the first exists.
   var GRID_KEYS = { 'crop': 'crop', 'fob': 'fob',
                     'transport': 'transport', 'mode': 'transport',
+                    'hold': 'hold',
                     'start day': 'start_day', 'start_day': 'start_day' };
 
   // 'Sun 10:00-14:00' or 'Tue 18:00 - Wed 12:00': the day carries over to the
@@ -198,6 +200,7 @@
         }
         var t = span(g.cell, where);
         out.push({ crop: head.crop, fob: head.fob, transport: head.transport,
+          hold: head.hold || '',
           start_day: head.start_day || '0', branch: '1', leg: g.name,
           from: pl[0], place: pl[1],
           s: DOW[t[0].d] + ' ' + hhmm(t[0].h), e: DOW[t[1].d] + ' ' + hhmm(t[1].h) });
@@ -268,7 +271,7 @@
       return [r.crop, r.fob, r.transport].filter(function (v) { return v; }).join('-') || 'Journey';
     }
     rows.forEach(function (r) {
-      var key = name(r) + '\u0000' + (r.start_day || '0');
+      var key = name(r) + '\u0000' + (r.hold || '') + '\u0000' + (r.start_day || '0');
       if (!has(groups, key)) { groups[key] = []; order.push(key); }
       groups[key].push(r);
     });
@@ -301,8 +304,14 @@
       // moment packing ends. Branch 2 rows in the sheet are dropped rather
       // than merged: two definitions of one clock would drift apart, and the
       // sheet's were already inconsistent about when the clock starts.
+      // Which chain of waits this journey runs. A journey names one with its
+      // Hold column; with none named, the first is the house default.
       var hold = (window.REF || {}).hold;
-      if (hold && hold.stages && hold.stages.length > 1) {
+      var recipes = (hold || {}).recipes || {};
+      var want = rs[0].hold || '';
+      var stages = has(recipes, want) ? recipes[want]
+        : recipes[Object.keys(recipes)[0]];
+      if (hold && stages && stages.length > 1) {
         var hb = String(hold.branch || '2');
         tasks = tasks.filter(function (t) { return t.branch !== hb; });
         // The leg the clock hangs off: the last one by that name, since a
@@ -319,17 +328,22 @@
           // Each stage is a lane and each leg is the wait to reach the next
           // one, so the chain draws as a staircase and its name is the stage
           // it arrives at. The first stage is where the clock starts.
-          var run = seed.e, was = hold.stages[0].place || 'Hold';
-          hold.stages.slice(1).forEach(function (st, n) {
-            var pl = st.place || 'Hold';
+          // A stage's hours is how long THAT stage takes, so the leg out of
+          // it carries its own duration and the last stage takes none.
+          var run = seed.e;
+          stages.forEach(function (st, n) {
+            var next = stages[n + 1];
+            if (!next) return;
+            var len = +st.hours || 0, pl = next.place || 'Hold';
+            var was = st.place || 'Hold';
             var ic = String(st.icon || '').toLowerCase();
-            var len = +st.hours || 0;
-            tasks.push({ id: 'h' + n, name: pl, branch: hb,
+            // Named for the stage it LEAVES, because that is the activity the
+            // leg is: six hours out of Incubate is the incubating.
+            tasks.push({ id: 'h' + n, name: was, branch: hb,
               from: was, place: pl, s: run, e: run + len,
-              icon: ICONS.indexOf(ic) < 0 ? iconFor(pl) : ic,
+              icon: ICONS.indexOf(ic) < 0 ? iconFor(was) : ic,
               note: st.note || '' });
             run += len;
-            was = pl;
           });
         }
       }
@@ -356,12 +370,15 @@
       tasks.forEach(function (t) { t.def = jn; });
       return { id: slug(jn) + '-' + slug(DOW[anchor]), name: jn, start: DOW[anchor],
         crop: rs[0].crop || '', fob: rs[0].fob || '', transport: rs[0].transport || '',
+        hold: rs[0].hold || '',
         branches: branches, tasks: tasks, windows: wins };
     });
   }
 
   var F = [], DATA = window.DATA || {};
-  var S = { sel: {}, tab: 'flow' };
+  // sel stays null until something fills it, so a first visit can be told
+  // apart from a visit where every toggle was cleared.
+  var S = { sel: null, tab: 'flow' };
   // Where the drawn schedule came from, so the line above the chart can say.
   var SRC = { live: false, at: null, why: '' };
   try {
@@ -488,7 +505,7 @@
   var X = function (h) { return (h / (SPAN * 24)) * 1000; };
   var PCT = function (h) { return (h / (SPAN * 24)) * 100; };
 
-  function chart(flow, r) {
+  function chart(flow, r, title) {
     // One colour per journey, so a thread can be followed across a busy week.
     var hue = {}, hues = 0;
     flow.tasks.forEach(function (t) {
@@ -625,7 +642,7 @@
     var res = flow.many ? '' :
       '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') +
       '</small><em>' + r.hrs + ' h end to end, ' + r.still + ' standing still</em></div>';
-    return '<div class="hd"><b>' + esc(flow.name) + '</b>' + res + '</div>' +
+    return '<div class="hd"><b>' + esc(title || flow.name) + '</b>' + res + '</div>' +
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
@@ -946,7 +963,7 @@
       document.getElementById('tasks').innerHTML = '';
       return;
     }
-    var flow = merge(list);
+    var flow = merge(list), title = sharedName(list);
     // One journey is drawn from its own cut; several share the week, because
     // that is the only axis they have in common.
     ANCHOR = flow.many ? 'Sun' : (flow.start || 'Sun');
@@ -977,7 +994,7 @@
     document.getElementById('axis').innerHTML =
       '<div class="axrow"><div class="gut"></div><div class="days">' + ax + '</div></div>' +
       '<div class="axrow"><div class="gut"></div><div class="hours-axis">' + hx + '</div></div>';
-    document.getElementById('grid').innerHTML = chart(flow, r);
+    document.getElementById('grid').innerHTML = chart(flow, r, title);
 
     var off = offences(flow), warn = '';
     if (r.broken.length) {
@@ -1043,10 +1060,33 @@
   // The same eight are three questions: which cut, where it is going, and what
   // carries it. A question with only one answer is not a question and is not
   // drawn, which is what keeps the freight toggle off the on-island journeys.
-  // The sheet says what a journey is in its own columns, so nothing here has
-  // to take a name apart to find out.
+  // Where it goes, how it gets there and which hold it runs are three columns
+  // in the sheet, but they are one question to ask: which journey. Offering
+  // them as three toggles would offer combinations that do not exist -- 140 by
+  // barge, off-island on the long hold -- so they are folded into one.
   function facets(f) {
-    return { when: f.start, crop: f.crop || '', to: f.fob || '', by: f.transport || '' };
+    return { when: f.start, crop: f.crop || '', jrn: jrnKey(f) };
+  }
+  // The key rides in a DOM attribute when it becomes a button, so it has to
+  // survive being written out and read back. A NUL does not.
+  function jrnKey(f) {
+    return [f.fob || '', f.transport || '', f.hold || ''].join('|');
+  }
+
+  // A journey is named by its customer, plus whatever actually varies between
+  // the journeys that share that customer. 140 always goes on our truck and
+  // differs only by hold; off-island always holds fast and differs only by
+  // mode; pickup differs from nothing and needs no bracket at all.
+  function jrnLabel(f) {
+    var kin = F.filter(function (g) {
+      return (g.crop || '') === (f.crop || '') && (g.fob || '') === (f.fob || '');
+    });
+    var bits = [];
+    ['transport', 'hold'].forEach(function (k) {
+      if (!f[k]) return;
+      if (uniq(kin.map(function (g) { return g[k] || ''; })).length > 1) bits.push(f[k]);
+    });
+    return (f.fob || 'Journey') + (bits.length ? ' (' + bits.join(', ') + ')' : '');
   }
 
   // We cut on the anchor day and the day after, and both feed the same
@@ -1066,7 +1106,7 @@
 
   // Answer as much of the wanted combination as exists, giving up the freight
   // before the destination and the cut before either.
-  var KEYS = ['crop', 'to', 'by', 'when'];
+  var KEYS = ['crop', 'jrn', 'when'];
 
   // Each question holds a set of answers rather than one. An empty set asks
   // nothing, so turning every answer off is how you say "the whole week".
@@ -1114,31 +1154,38 @@
 
   // Name the picture by what every journey in it has in common, which is the
   // only thing that is true of all of them.
-  // A thread's name is where it is going and what carries it, which is what
-  // the toggles ask about. The crop is left out: it is the same on every
-  // thread in one picture, and it is already in the title.
+  // The name on the chart is the name on the button, so a thread and the thing
+  // that selected it read as the same thing.
   function threadName(def) {
-    for (var i = 0; i < F.length; i++) {
-      if (F[i].name === def) {
-        var x = facets(F[i]);
-        return [x.to, x.by].filter(function (v) { return v; }).join(' \u00b7 ') || def;
-      }
-    }
+    for (var i = 0; i < F.length; i++) if (F[i].name === def) return jrnLabel(F[i]);
     return def;
   }
 
   function sharedName(list) {
     var parts = [];
-    KEYS.forEach(function (k) {
-      var v = uniq(list.map(function (f) { return facets(f)[k]; }));
-      if (v.length === 1 && v[0]) parts.push(k === 'when' ? cutLabel(v[0]) : v[0]);
-    });
+    var crop = uniq(list.map(function (f) { return f.crop || ''; }));
+    if (crop.length === 1 && crop[0]) parts.push(crop[0]);
+    var jrn = uniq(list.map(function (f) { return jrnLabel(f); }));
+    if (jrn.length === 1) parts.push(jrn[0]);
+    var when = uniq(list.map(function (f) { return f.start; }));
+    if (when.length === 1) parts.push(cutLabel(when[0]));
     return parts.length ? parts.join(' \u00b7 ') : 'The week';
   }
 
+  function jrnFor(key) {
+    for (var i = 0; i < F.length; i++) if (jrnKey(F[i]) === key) return F[i];
+    return null;
+  }
+  function idxOf(f) { return F.indexOf(f); }
+  function fobRank(f) {
+    for (var i = 0; i < F.length; i++) if ((F[i].fob || '') === (f.fob || '')) return i;
+    return F.length;
+  }
+
   function picker() {
-    function ask(id, key, label) {
+    function ask(id, key, label, order) {
       var opts = uniq(F.map(function (f) { return facets(f)[key]; }));
+      if (order) opts = opts.slice().sort(order);
       // One answer is not a question. That is what keeps the freight toggle
       // off a destination with only one way to reach it, and the crop toggle
       // away entirely while we only grow lettuce.
@@ -1154,8 +1201,18 @@
     }
     ask('pick-when', 'when', cutLabel);
     ask('pick-crop', 'crop');
-    ask('pick-to', 'to');
-    ask('pick-by', 'by');
+    ask('pick-jrn', 'jrn', function (key) {
+      for (var i = 0; i < F.length; i++) if (jrnKey(F[i]) === key) return jrnLabel(F[i]);
+      return key;
+    }, function (a, b) {
+      // The sheet's column order, except that journeys to the same customer
+      // sit together -- 140 twice over is one choice made twice, and reads
+      // that way only if the two are side by side.
+      var fa = jrnFor(a), fb = jrnFor(b);
+      if (!fa || !fb) return 0;
+      var ga = fobRank(fa), gb = fobRank(fb);
+      return ga !== gb ? ga - gb : idxOf(fa) - idxOf(fb);
+    });
   }
 
   function seg(id, opts, sel, cb) {
@@ -1209,16 +1266,18 @@
     SRC = { live: live, at: new Date(), why: why || '' };
     // A stored answer that the sheet no longer offers is dropped rather than
     // silently narrowing the picture to nothing.
+    var fresh = !S.sel;
     S.sel = S.sel || {};
     var have = {};
     KEYS.forEach(function (k) { have[k] = uniq(F.map(function (f) { return facets(f)[k]; })); });
-    var any = false;
     KEYS.forEach(function (k) {
       S.sel[k] = (S.sel[k] || []).filter(function (v) { return have[k].indexOf(v) >= 0; });
-      if (S.sel[k].length) any = true;
     });
-    // Open on one journey rather than on everything at once.
-    if (!any && F.length) {
+    // Open on one journey rather than on everything at once -- but only on a
+    // session that had nothing stored. An answer the sheet stopped offering
+    // gets dropped; that is the reader clearing a toggle, not a fresh start,
+    // and reseeding over it would put back a choice they had let go.
+    if (fresh && F.length) {
       var first = facets(F[0]);
       KEYS.forEach(function (k) { S.sel[k] = first[k] ? [first[k]] : []; });
     }

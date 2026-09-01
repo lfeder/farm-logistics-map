@@ -1,4 +1,4 @@
-# Task Vis
+# Logistics Map
 
 A time–distance chart, defined in a Google Sheet.
 

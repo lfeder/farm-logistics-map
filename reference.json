@@ -168,29 +168,50 @@
     }
   ],
   "hold": {
-    "_": "Test and hold. The same chain on every journey, so it is written here once and grown onto each one. The clock starts when packing ends. Each stage is a lane, and hours is how long it takes to reach that stage from the one before it. Branch 2 rows in the sheet are ignored: two definitions of one clock would drift apart.",
+    "_": "Test and hold. Each stage is a lane and its hours is how long that stage takes, so the chain draws as a staircase whose steps are the waits; the last stage is where it ends and takes no time. The clock starts when packing ends. A journey picks a recipe by name with its Hold column -- the names are what they are, 6h and 48h, so the sheet and the toggle say the same thing. Branch 2 rows in the sheet are ignored either way.",
     "branch": "2",
     "starts_after": [
+      "Pack/Store 2",
+      "Pack/Store 1",
       "Packing",
       "BOL"
     ],
-    "stages": [
-      {
-        "place": "Incubate"
-      },
-      {
-        "place": "Reader",
-        "hours": 6
-      },
-      {
-        "place": "Azzule Submit",
-        "hours": 1.5
-      },
-      {
-        "place": "Cleared for Delivery",
-        "hours": 3
-      }
-    ]
+    "recipes": {
+      "6h": [
+        {
+          "place": "Incubate",
+          "hours": 6
+        },
+        {
+          "place": "Reader",
+          "hours": 1.5
+        },
+        {
+          "place": "Azzule Submit",
+          "hours": 3
+        },
+        {
+          "place": "Cleared for Delivery"
+        }
+      ],
+      "48h": [
+        {
+          "place": "Incubate",
+          "hours": 48
+        },
+        {
+          "place": "Reader",
+          "hours": 1.5
+        },
+        {
+          "place": "Azzule Submit",
+          "hours": 3
+        },
+        {
+          "place": "Cleared for Delivery"
+        }
+      ]
+    }
   },
   "steps": {
     "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it. Every place named here needs a row in hours.",
