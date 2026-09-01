@@ -361,7 +361,8 @@
   }
   // Every location a leg touches, in the order the journey reaches them, so the
   // vertical axis reads top to bottom the way the product travels.
-  function places(flow) {
+  function places(flow) { return laneScan(flow).order; }
+  function laneScan(flow) {
     var seen = {}, out = [];
     flow.tasks.forEach(function (t) {
       var b = t.branch || '1';
@@ -374,10 +375,11 @@
     // Branch 1 is the pallet and branch 2 is the clock running beside it, so
     // the places only the clock touches go underneath -- the product's own
     // path then reads as one block rather than being interrupted by the lab.
-    return out.sort(function (a, b) {
+    out.sort(function (a, b) {
       if (seen[a].b !== seen[b].b) return seen[a].b < seen[b].b ? -1 : 1;
       return seen[a].i - seen[b].i;
     });
+    return { order: out, of: seen };
   }
   function feedsOf(flow, id) {
     return flow.tasks.filter(function (t) { return (t.after || []).indexOf(id) >= 0; });
@@ -402,9 +404,15 @@
     });
     function jc(t) { return ' j' + (hue[t.def || flow.name] % 10); }
 
-    var lanes = places(flow), yOf = {};
+    var scan = laneScan(flow), lanes = scan.order, yOf = {};
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
+    // Where the pallet's world ends and the clock's begins. The lanes are
+    // already grouped by branch, so the line goes wherever that group changes.
+    var splits = [];
+    for (var n = 1; n < lanes.length; n++) {
+      if (scan.of[lanes[n]].b !== scan.of[lanes[n - 1]].b) splits.push(PAD_T + n * LANE_H);
+    }
 
     var svg = '';
     // Every two hours, faint. With no times written in the grid this is how a
@@ -420,6 +428,9 @@
     lanes.forEach(function (l, i) {
       var y = PAD_T + i * LANE_H;
       svg += '<line class="lane" x1="0" x2="1000" y1="' + (y + LANE_H / 2) + '" y2="' + (y + LANE_H / 2) + '"/>';
+    });
+    splits.forEach(function (y) {
+      svg += '<line class="split" x1="0" x2="1000" y1="' + y + '" y2="' + y + '"/>';
     });
 
     // Links first, so a bar always sits on top of the thread that reached it.
