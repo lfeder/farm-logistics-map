@@ -624,8 +624,11 @@
     r.edges.forEach(function (e) {
       var a = yOf[e.p0], b = yOf[e.p1] === undefined ? a : yOf[e.p1];
       if (Math.abs(e.h1 - e.h0) <= .01 && a === b) return;
-      link += '<line class="link' + (e.h1 < e.h0 ? ' back' : '') + '" x1="' + X(e.h0) +
-        '" y1="' + a + '" x2="' + X(e.h1) + '" y2="' + b + '"/>';
+      // In the thread's own colour: it is part of the thread, and the descent
+      // between two steps is where a busy week is hardest to follow.
+      var t = r.byId[e.to] || r.byId[e.from];
+      link += '<line class="link' + (t ? jc(t) : '') + (e.h1 < e.h0 ? ' back' : '') +
+        '" x1="' + X(e.h0) + '" y1="' + a + '" x2="' + X(e.h1) + '" y2="' + b + '"/>';
     });
 
     var move = '', wait = '';
