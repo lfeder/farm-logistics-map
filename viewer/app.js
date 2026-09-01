@@ -633,8 +633,17 @@
         if (still) wait += '<line class="wait' + b + '" ' + seg + '/>';
         else move += '<line class="move' + b + '" ' + seg + '/>';
       }
-      svg += '<circle class="pt' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="3"/>' +
-        '<circle class="pt' + b + '" cx="' + X(p.e) + '" cy="' + yOf[p.place] + '" r="3"/>';
+      // A dot is three pixels across, which is not something to aim at, so each
+      // carries an invisible one behind it to be hovered. What it says is the
+      // whole of what that dot is: which thread, which step, and the moment.
+      var who = threadName(p.t.def || flow.name);
+      function dot(x, y, when, h) {
+        return '<circle class="pt' + b + '" cx="' + x + '" cy="' + y + '" r="3"/>' +
+          '<circle class="hit" cx="' + x + '" cy="' + y + '" r="9"><title>' +
+          esc(who) + ' \u00b7 ' + esc(p.t.name) + ' ' + when + ' ' + stamp(h) +
+          '</title></circle>';
+      }
+      svg += dot(X(p.s), y1, 'starts', p.s) + dot(X(p.e), yOf[p.place], 'stops', p.e);
     });
     svg += link + wait + move;
 
@@ -708,12 +717,7 @@
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
-    // How long it takes is a fact about one journey. Several of them have no
-    // single duration between them, so there is nothing to put here.
-    var res = flow.many ? '' :
-      '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') +
-      '</small><em>' + r.hrs + ' h end to end, ' + r.still + ' waiting</em></div>';
-    return '<div class="hd"><b>' + esc(title || flow.name) + '</b>' + res + '</div>' +
+    return '<div class="hd"><b>' + esc(title || flow.name) + '</b></div>' +
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +

@@ -65,10 +65,6 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .hd{display:flex; align-items:baseline; gap:9px; padding:2px 0 4px}
 .hd b{font-size:14.5px; font-weight:600}
 .hd small{font-size:10.5px; color:var(--ink-3)}
-.res{margin-left:auto; display:flex; align-items:baseline; gap:5px}
-.res b{font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; line-height:1}
-.res small{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
-.res em{font-style:normal; font-size:10.5px; color:var(--ink-3)}
 .chart{display:flex; gap:12px}
 .lane-lbl{display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
   font-size:10.5px; font-weight:600; color:var(--ink-2); line-height:1.15; text-align:right}
@@ -270,7 +266,9 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 /* Three labels a leg: the hour at each end against its own dot, and the name on
    the bar between them. Hanging the name off one end made a flat bar read as
    though the name belonged to the far end of it. */
-.pt{fill:var(--card); stroke-width:2}
+.pt{fill:var(--card); stroke-width:2; pointer-events:none}
+/* Something big enough to hover, over a dot too small to aim at. */
+.hit{fill:transparent; cursor:help}
 .pt.j0{stroke:var(--j0)} .pt.j1{stroke:var(--j1)} .pt.j2{stroke:var(--j2)}
 .pt.j3{stroke:var(--j3)} .pt.j4{stroke:var(--j4)} .pt.j5{stroke:var(--j5)}
 .pt.j6{stroke:var(--j6)} .pt.j7{stroke:var(--j7)} .pt.j8{stroke:var(--j8)}
@@ -998,8 +996,17 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
         if (still) wait += '<line class="wait' + b + '" ' + seg + '/>';
         else move += '<line class="move' + b + '" ' + seg + '/>';
       }
-      svg += '<circle class="pt' + b + '" cx="' + X(p.s) + '" cy="' + y1 + '" r="3"/>' +
-        '<circle class="pt' + b + '" cx="' + X(p.e) + '" cy="' + yOf[p.place] + '" r="3"/>';
+      // A dot is three pixels across, which is not something to aim at, so each
+      // carries an invisible one behind it to be hovered. What it says is the
+      // whole of what that dot is: which thread, which step, and the moment.
+      var who = threadName(p.t.def || flow.name);
+      function dot(x, y, when, h) {
+        return '<circle class="pt' + b + '" cx="' + x + '" cy="' + y + '" r="3"/>' +
+          '<circle class="hit" cx="' + x + '" cy="' + y + '" r="9"><title>' +
+          esc(who) + ' \u00b7 ' + esc(p.t.name) + ' ' + when + ' ' + stamp(h) +
+          '</title></circle>';
+      }
+      svg += dot(X(p.s), y1, 'starts', p.s) + dot(X(p.e), yOf[p.place], 'stops', p.e);
     });
     svg += link + wait + move;
 
@@ -1073,12 +1080,7 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
     }).join('');
 
-    // How long it takes is a fact about one journey. Several of them have no
-    // single duration between them, so there is nothing to put here.
-    var res = flow.many ? '' :
-      '<div class="res"><b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') +
-      '</small><em>' + r.hrs + ' h end to end, ' + r.still + ' waiting</em></div>';
-    return '<div class="hd"><b>' + esc(title || flow.name) + '</b>' + res + '</div>' +
+    return '<div class="hd"><b>' + esc(title || flow.name) + '</b></div>' +
       '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +

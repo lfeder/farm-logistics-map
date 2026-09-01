@@ -55,10 +55,6 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .hd{display:flex; align-items:baseline; gap:9px; padding:2px 0 4px}
 .hd b{font-size:14.5px; font-weight:600}
 .hd small{font-size:10.5px; color:var(--ink-3)}
-.res{margin-left:auto; display:flex; align-items:baseline; gap:5px}
-.res b{font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; line-height:1}
-.res small{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
-.res em{font-style:normal; font-size:10.5px; color:var(--ink-3)}
 .chart{display:flex; gap:12px}
 .lane-lbl{display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
   font-size:10.5px; font-weight:600; color:var(--ink-2); line-height:1.15; text-align:right}
@@ -260,7 +256,9 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 /* Three labels a leg: the hour at each end against its own dot, and the name on
    the bar between them. Hanging the name off one end made a flat bar read as
    though the name belonged to the far end of it. */
-.pt{fill:var(--card); stroke-width:2}
+.pt{fill:var(--card); stroke-width:2; pointer-events:none}
+/* Something big enough to hover, over a dot too small to aim at. */
+.hit{fill:transparent; cursor:help}
 .pt.j0{stroke:var(--j0)} .pt.j1{stroke:var(--j1)} .pt.j2{stroke:var(--j2)}
 .pt.j3{stroke:var(--j3)} .pt.j4{stroke:var(--j4)} .pt.j5{stroke:var(--j5)}
 .pt.j6{stroke:var(--j6)} .pt.j7{stroke:var(--j7)} .pt.j8{stroke:var(--j8)}
