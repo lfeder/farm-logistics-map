@@ -86,10 +86,6 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .legend{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; padding-top:14px; margin-top:10px;
   border-top:1px solid var(--line-2); font-size:11.5px; color:var(--ink-2)}
 .legend span{display:inline-flex; align-items:center; gap:5px}
-.sw{display:inline-block; width:11px; height:11px; border-radius:2px}
-.sw.sw.mv{width:16px; height:2px; border-radius:0; background:var(--ink-2)}
-.sw.wt{width:16px; height:0; border-radius:0; border-top:2px dashed var(--ink-3)}
-.i{display:inline-block; vertical-align:-2px; flex:0 0 auto}
 
 /* ---------- the list ---------- */
 /* Every task carries the same fields, so every row is the same grid and the
@@ -247,7 +243,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 .wait.j3b{stroke:var(--j3b)}
 .wait.j4a{stroke:var(--j4a)}
 .wait.j4b{stroke:var(--j4b)}
-.sw.b0{background:var(--ink)} .sw.b1{background:var(--accent)}
 
 /* ---------- the two pack days ---------- */
 /* Hours across, in the order they are packed. The 6.5 h day still decides how
@@ -334,13 +329,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
   letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
 .grid .grp:first-child{padding-top:2px}
 
-/* The key rides on the toggle line rather than taking a strip of its own
-   under the plot, where it had nothing to do but collide with a name. */
-.panel-hd .lgd{margin-left:auto; display:flex; align-items:center; gap:5px;
-  font-size:11px; color:var(--ink-3); white-space:nowrap}
-.panel-hd .lgd .sw{margin-left:9px}
-.panel-hd .lgd .sw:first-child{margin-left:0}
-.panel-hd #src{margin-left:16px}
 
 </style>
 </head>
@@ -361,7 +349,6 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
         <span class="seg" id="pick-when"></span>
         <span class="seg" id="pick-crop"></span>
         <span class="seg" id="pick-jrn"></span>
-        <span class="lgd" id="key"></span>
         <span class="note" id="src"></span>
       </div>
       <div class="body">
@@ -1470,8 +1457,6 @@ window.REF = {"hours":[{"place":"PH","days":[1,1,1,1,1,1,1],"open":6.0,"close":1
     }
     var list = shown();
     picker();
-    document.getElementById('key').innerHTML =
-      '<i class="sw mv"></i>a step<i class="sw wt"></i>waiting';
     document.getElementById('src').innerHTML = srcLine();
     if (!list.length) {
       document.getElementById('grid').innerHTML =

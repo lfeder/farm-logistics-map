@@ -1064,8 +1064,6 @@
     }
     var list = shown();
     picker();
-    document.getElementById('key').innerHTML =
-      '<i class="sw mv"></i>a step<i class="sw wt"></i>waiting';
     document.getElementById('src').innerHTML = srcLine();
     if (!list.length) {
       document.getElementById('grid').innerHTML =

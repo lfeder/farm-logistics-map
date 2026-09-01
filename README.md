@@ -34,8 +34,9 @@ journey is measured against the same steps, and two threads can be compared by
 reading across one row: who reaches Customer first.
 
 A **solid bar is a step being done**, on its own row for as long as it takes;
-a **dotted run is the link to the next one**, which is both the waiting and the
-descent. The waiting is the point, because it is what nobody can see in a list
+a **dashed run is the link to the next one**, which is both the waiting and the
+descent. There is no key: a bar sits on a row that names it, and the only other
+thing on the chart is the line between two of them. The waiting is the point, because it is what nobody can see in a list
 of steps.
 
 Colour is a **hue per journey and a shade per run of it** — the earlier cut
