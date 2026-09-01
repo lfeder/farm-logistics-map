@@ -151,6 +151,17 @@
     return [a, b];
   }
 
+  // A place with no hours has no door to be shut.
+  var OPEN = null;
+  function openOn(place, day) {
+    if (!OPEN) {
+      OPEN = {};
+      ((window.REF || {}).hours || []).forEach(function (h) { OPEN[h.place] = h.days; });
+    }
+    var d = OPEN[place];
+    return !d ? true : !!d[((day % 7) + 7) % 7];
+  }
+
   function gridRows(text) {
     var rows = csvRows(text), lab = -1, col = 0, i, j;
     // Find the row that names the crop, and the column its labels sit in.
@@ -187,7 +198,7 @@
       if (!head.crop && !head.fob) continue;
       if (!legs.length) continue;
       var who = [head.crop, head.fob, head.transport].filter(Boolean).join('-');
-      legs.forEach(function (g) {
+      var made = legs.map(function (g) {
         var where = who + ' / ' + g.name;
         // Where a step runs between: the same everywhere unless the journey's
         // transport or its customer changes it.
@@ -199,11 +210,37 @@
             (g.st.transport ? "transport '" + head.transport : "fob '" + head.fob) + "'");
         }
         var t = span(g.cell, where);
-        out.push({ crop: head.crop, fob: head.fob, transport: head.transport,
-          hold: head.hold || '',
-          start_day: head.start_day || '0', branch: '1', leg: g.name,
-          from: pl[0], place: pl[1],
-          s: DOW[t[0].d] + ' ' + hhmm(t[0].h), e: DOW[t[1].d] + ' ' + hhmm(t[1].h) });
+        return { name: g.name, from: pl[0], place: pl[1],
+                 a: t[0].d * 24 + t[0].h, b: t[1].d * 24 + t[1].h };
+      });
+      made.forEach(function (g) { while (g.b < g.a) g.b += 24; });
+
+      // A journey written once and run on more than one cutting day. The
+      // second run is the first one moved along, except where it lands on a
+      // shut door -- HFA does not collect at the weekend, 140 does not receive
+      // on a Sunday -- and then it waits for the next open day and everything
+      // behind it waits with it. That is the whole difference between the two
+      // runs, so only one of them is worth typing.
+      var days = String(head.start_day || '0').split(/[,;]+/)
+        .map(function (x) { return x.trim(); })
+        .filter(function (x) { return x !== ''; });
+      if (!days.length) days = ['0'];
+      var base = +days[0] || 0;
+      days.forEach(function (day, n) {
+        var shift = (((+day || 0) - base) % 7 + 7) % 7 * 24, push = 0;
+        made.forEach(function (g) {
+          var sa = g.a + shift + push, sb = g.b + shift + push;
+          // The written run is what it says it is; only the moved ones are
+          // pushed, or typing a Sunday time would quietly get corrected.
+          for (var k = 0; n && k < 7 && !openOn(g.place, Math.floor(sa / 24)); k++) {
+            sa += 24; sb += 24; push += 24;
+          }
+          out.push({ crop: head.crop, fob: head.fob, transport: head.transport,
+            hold: head.hold || '', start_day: day, branch: '1', leg: g.name,
+            from: g.from, place: g.place,
+            s: DOW[Math.floor(sa / 24) % 7] + ' ' + hhmm(sa),
+            e: DOW[Math.floor(sb / 24) % 7] + ' ' + hhmm(sb) });
+        });
       });
     }
     if (!out.length) throw new Error('no journeys in the grid');
@@ -267,11 +304,15 @@
     var groups = {}, order = [];
     // Crop, where it is going and how it gets there name the journey; the
     // start day says which run of it this is. Four columns, one picture.
+    // The hold belongs in the name: two journeys to the same customer on the
+    // same truck are different journeys if one waits six hours and the other
+    // waits forty-eight, and they need their own colour and their own label.
     function name(r) {
-      return [r.crop, r.fob, r.transport].filter(function (v) { return v; }).join('-') || 'Journey';
+      return [r.crop, r.fob, r.transport, r.hold]
+        .filter(function (v) { return v; }).join('-') || 'Journey';
     }
     rows.forEach(function (r) {
-      var key = name(r) + '\u0000' + (r.hold || '') + '\u0000' + (r.start_day || '0');
+      var key = name(r) + '\u0000' + (r.start_day || '0');
       if (!has(groups, key)) { groups[key] = []; order.push(key); }
       groups[key].push(r);
     });
@@ -629,13 +670,13 @@
       var wpc = (12 + nm.length * 5.6) / PLOT_PX * 100;
       // One line, plus the padding the box actually carries, so a step really
       // does clear the name it stepped over.
-      var hh = 14;
+      var hh = 14, GAP = 7;   // a name's height, and the air between two of them
       var lo = PCT(p.s) + .6, hi = lo + wpc;
       var base = y1 === y2 ? -(hh / 2 + 2) : 0;
       var STEPS = [0, -1, -2, -3, -4, -5, 1, 2, 3, 4];
       var ly = null;
       for (var k = 0; k < STEPS.length; k++) {
-        var cand = y1 + base + STEPS[k] * hh, free = true;
+        var cand = y1 + base + STEPS[k] * (hh + GAP), free = true;
         // A name may not leave the plot. Stepping off the top used to put it
         // over the day and hour labels, where it read as part of the axis.
         if (cand - hh / 2 < 0 || cand + hh / 2 > H) continue;

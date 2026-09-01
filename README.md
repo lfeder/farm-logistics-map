@@ -95,6 +95,13 @@ Retrieve                        Thu 08:00-10:00
 Customer      Mon 07:00-08:30   Fri 06:00-10:00
 ```
 
+**`Start Day` is a list.** `0, 3` means the journey runs on both cutting days,
+and only the first is written down: the second is the first moved along three
+days, except where a step lands on a day its place is shut — HFA does not
+collect at the weekend, 140 does not receive on a Sunday — and then it waits
+for the next open day and everything behind it waits with it. That is the
+entire difference between the two runs, which is why only one is typed.
+
 **A blank cell is a step this journey skips** — the thing a row per leg could
 never show at a glance. A column read top to bottom is one thread. Adding a
 journey is a column.
