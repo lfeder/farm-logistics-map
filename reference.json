@@ -101,26 +101,26 @@
     {
       "place": "Container",
       "days": "Sun-Sat",
-      "open": "00:00",
-      "close": "23:59",
+      "open": "06:00",
+      "close": "19:00",
       "after_arrival": 0,
-      "note": "our yard; hours not confirmed"
+      "note": "Our yard. We are here when the packhouse is."
     },
     {
       "place": "YBHNL",
-      "days": "Mon-Sat",
-      "open": "00:00",
-      "close": "23:59",
+      "days": "Mon-Fri",
+      "open": "07:00",
+      "close": "16:00",
       "after_arrival": 0,
-      "note": "Young Brothers Honolulu; hours not confirmed"
+      "note": "Young Brothers Honolulu. Same window as Kawaihae."
     },
     {
       "place": "Customer truck",
       "days": "Sun-Sat",
-      "open": "00:00",
-      "close": "23:59",
+      "open": "06:00",
+      "close": "19:00",
       "after_arrival": 0,
-      "note": "the customer's own truck; hours not confirmed"
+      "note": "They collect while we are here."
     }
   ],
   "sailings": [
