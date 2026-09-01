@@ -119,6 +119,10 @@ journey is a column.
 The day carries over to the stop unless the stop names its own, because most
 steps finish on the day they start: `Sun 10:00-14:00`, but `Tue 18:00-Wed 12:00`.
 
+**Every step is a row, always** — whether or not the journeys on screen use
+one. The rows then stay put as journeys are switched on and off, and an empty
+row says what an empty cell says: this one skips it.
+
 **Where a step runs between is not in the sheet.** It is the same on every
 journey, so it lives in `reference.json` under `steps` — and where it does
 depend on the journey, `transport` or `fob` overrides it. Every place named

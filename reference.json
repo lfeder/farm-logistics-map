@@ -214,7 +214,7 @@
     }
   },
   "steps": {
-    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it. Every place named here needs a row in hours.",
+    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it. Every place named here needs a row in hours. A step may list what it was called before under was, so renaming one does not have to happen in two places at once.",
     "order": [
       {
         "step": "Pack/Store 1",
@@ -239,13 +239,26 @@
       },
       {
         "step": "Load",
-        "places": [
-          "Storage",
-          "Container"
-        ]
+        "transport": {
+          "Truck": [
+            "Storage",
+            "Storage"
+          ],
+          "Air": [
+            "Storage",
+            "Storage"
+          ],
+          "Barge": [
+            "Storage",
+            "Container"
+          ]
+        }
       },
       {
-        "step": "Drayage",
+        "step": "Trucking",
+        "was": [
+          "Drayage"
+        ],
         "transport": {
           "Air": [
             "Storage",
@@ -258,7 +271,10 @@
         }
       },
       {
-        "step": "Transport",
+        "step": "Inter-Island",
+        "was": [
+          "Transport"
+        ],
         "transport": {
           "Air": [
             "KOA",

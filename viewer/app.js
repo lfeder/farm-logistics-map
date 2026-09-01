@@ -177,7 +177,14 @@
     var steps = (((window.REF || {}).steps || {}).order) || [];
     if (!steps.length) throw new Error('reference.json names no steps');
     var byStep = {};
-    steps.forEach(function (st) { byStep[String(st.step).toLowerCase()] = st; });
+    steps.forEach(function (st) {
+      byStep[String(st.step).toLowerCase()] = st;
+      // A step that has been renamed answers to what it used to be called, so
+      // the sheet can catch up in its own time instead of losing a row.
+      [].concat(st.was || []).forEach(function (old) {
+        byStep[String(old).toLowerCase()] = st;
+      });
+    });
 
     // One journey per column, read top to bottom.
     var out = [];
@@ -193,7 +200,10 @@
         if (!started && has(GRID_KEYS, key)) { head[GRID_KEYS[key]] = cell; return; }
         if (!has(byStep, key)) return;
         started = true;
-        if (cell) legs.push({ st: byStep[key], cell: cell, name: name });
+        // Named by the steps table, not by the sheet's row label. They are
+        // usually the same word; when a step has been renamed they are not,
+        // and the canonical one is the one the chart should say.
+        if (cell) legs.push({ st: byStep[key], cell: cell, name: String(byStep[key].step) });
       });
       if (!head.crop && !head.fob) continue;
       if (!legs.length) continue;
@@ -523,13 +533,23 @@
   function places(flow) { return laneScan(flow).order; }
   function laneScan(flow) {
     var seen = {}, out = [];
+    function lane(p, b) {
+      if (!has(seen, p)) { seen[p] = { b: b, i: out.length }; out.push(p); }
+      else if (b < seen[p].b) seen[p].b = b;
+    }
+    // Every step there is, whether or not this selection uses one. The rows
+    // then stay put as journeys are switched on and off, and a blank row says
+    // the same thing a blank cell in the sheet says: this one skips it.
+    var ref = window.REF || {};
+    ((ref.steps || {}).order || []).forEach(function (st) { lane(String(st.step), '1'); });
+    var hb = String((ref.hold || {}).branch || '2');
+    var recipes = (ref.hold || {}).recipes || {};
+    Object.keys(recipes).forEach(function (k) {
+      (recipes[k] || []).forEach(function (st) { lane(String(st.place), hb); });
+    });
     flow.tasks.forEach(function (t) {
       var b = t.branch || '1';
-      [t.from, t.place].forEach(function (p) {
-        p = p || 'Somewhere';
-        if (!has(seen, p)) { seen[p] = { b: b, i: out.length }; out.push(p); }
-        else if (b < seen[p].b) seen[p].b = b;
-      });
+      [t.from, t.place].forEach(function (p) { lane(p || 'Somewhere', b); });
     });
     // Branch 1 is the pallet and branch 2 is the clock running beside it, so
     // the places only the clock touches go underneath -- the product's own
