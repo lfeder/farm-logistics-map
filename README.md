@@ -39,6 +39,10 @@ descent. There is no key: a bar sits on a row that names it, and the only other
 thing on the chart is the line between two of them. The waiting is the point, because it is what nobody can see in a list
 of steps.
 
+Each run also gets its own hair's breadth of the lane, fanned about the middle,
+so two threads sharing a step are two lines rather than one. The fan narrows as
+more threads are shown, because the lane does not grow.
+
 Colour is a **hue per journey and a shade per run of it** — the earlier cut
 takes the stronger shade. Ten threads cross each other in a week, and sharing a
 hue still says two of them are the same journey.

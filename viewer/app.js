@@ -663,6 +663,25 @@
       return ' j' + (hue[d] % 5) + (shade[run] % 2 ? 'b' : 'a');
     }
 
+    // Threads that share a step share a row, and two lines on one row are one
+    // line. Each run gets its own hair's breadth of the lane -- fanned about
+    // the middle, so nothing is on the row and everything is near it. The fan
+    // narrows as more threads are shown, because the lane does not grow.
+    var slot = {}, slots = 0;
+    flow.tasks.forEach(function (t) {
+      var run = t.journey || t.def || flow.name;
+      if (!has(slot, run)) slot[run] = slots++;
+    });
+    var SPREAD = Math.min(3.5, 16 / Math.max(1, slots - 1));
+    function dy(t) {
+      var run = t.journey || t.def || flow.name;
+      return (slot[run] - (slots - 1) / 2) * SPREAD;
+    }
+    function at(place, t) {
+      var y = yOf[place];
+      return (y === undefined ? 0 : y) + dy(t);
+    }
+
     var scan = laneScan(flow), lanes = scan.order, yOf = {};
     lanes.forEach(function (l, i) { yOf[l] = PAD_T + i * LANE_H + LANE_H / 2; });
     var H = PAD_T + lanes.length * LANE_H + PAD_B;
@@ -703,19 +722,19 @@
     // comes after has finished, which is allowed and is worth seeing.
     var link = '';
     r.edges.forEach(function (e) {
-      var a = yOf[e.p0], b = yOf[e.p1] === undefined ? a : yOf[e.p1];
+      var t0 = r.byId[e.to] || r.byId[e.from];
+      var a = at(e.p0, t0), b = yOf[e.p1] === undefined ? a : at(e.p1, t0);
       if (Math.abs(e.h1 - e.h0) <= .01 && a === b) return;
       // In the thread's own colour: it is part of the thread, and the descent
       // between two steps is where a busy week is hardest to follow.
-      var t = r.byId[e.to] || r.byId[e.from];
-      link += '<line class="link' + (t ? jc(t) : '') + (e.h1 < e.h0 ? ' back' : '') +
+      link += '<line class="link' + (t0 ? jc(t0) : '') + (e.h1 < e.h0 ? ' back' : '') +
         '" x1="' + X(e.h0) + '" y1="' + a + '" x2="' + X(e.h1) + '" y2="' + b + '"/>';
     });
 
     var move = '', wait = '';
     r.pts.forEach(function (p) {
-      var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
-      var seg = 'x1="' + X(p.s) + '" y1="' + y1 + '" x2="' + X(p.e) + '" y2="' + yOf[p.place] + '"';
+      var y1 = at(p.from === undefined ? p.place : p.from, p.t), y2 = at(p.place, p.t);
+      var seg = 'x1="' + X(p.s) + '" y1="' + y1 + '" x2="' + X(p.e) + '" y2="' + y2 + '"';
       // Every leg is a step being done, so every leg is drawn solid. What is
       // dotted is the link between them, which is the waiting. A lane per step
       // means the old test -- did it change place? -- now only ever catches
@@ -738,7 +757,7 @@
           esc(who) + ' \u00b7 ' + esc(p.t.name) + ' ' + when + ' ' + stamp(h) +
           '</title></circle>';
       }
-      svg += dot(X(p.s), y1, 'starts', p.s) + dot(X(p.e), yOf[p.place], 'stops', p.e);
+      svg += dot(X(p.s), y1, 'starts', p.s) + dot(X(p.e), y2, 'stops', p.e);
     });
     svg += link + wait + move;
 
@@ -763,8 +782,7 @@
     var ROW = 14, GAP = 7;   // a name's height, and the air between two of them
 
     function box(p, nm, step) {
-      var y1 = yOf[p.from] === undefined ? yOf[p.place] : yOf[p.from];
-      var y2 = yOf[p.place];
+      var y1 = at(p.from === undefined ? p.place : p.from, p.t), y2 = at(p.place, p.t);
       var wpc = (12 + nm.length * 5.6) / PLOT_PX * 100;
       // Sloped, the name sits on the row the step comes down from. Flat, it
       // sits clear above the dot. Either way it hangs off the start, so it
