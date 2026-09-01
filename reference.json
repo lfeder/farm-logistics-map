@@ -144,32 +144,27 @@
     }
   ],
   "hold": {
-    "_": "Test and hold. The same four steps on every journey, so they are written here once and generated onto each one. The clock starts when packing ends. Branch 2 rows in the sheet are ignored: two definitions of one clock would drift apart.",
+    "_": "Test and hold. The same chain on every journey, so it is written here once and grown onto each one. The clock starts when packing ends. Each stage is a lane, and hours is how long it takes to reach that stage from the one before it. Branch 2 rows in the sheet are ignored: two definitions of one clock would drift apart.",
     "branch": "2",
     "starts_after": [
       "Packing",
       "BOL"
     ],
-    "steps": [
+    "stages": [
       {
-        "leg": "Incubate",
-        "hours": 6,
-        "place": "Lab"
+        "place": "Incubate"
       },
       {
-        "leg": "Reader",
-        "hours": 1.5,
-        "place": "Lab"
+        "place": "Reader",
+        "hours": 6
       },
       {
-        "leg": "Submit",
-        "hours": 0,
-        "place": "Azzule"
+        "place": "Azzule Submit",
+        "hours": 1.5
       },
       {
-        "leg": "Approval",
-        "hours": 3,
-        "place": "Cleared"
+        "place": "Cleared for Delivery",
+        "hours": 3
       }
     ]
   }

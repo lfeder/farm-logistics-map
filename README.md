@@ -88,10 +88,16 @@ are in order, and that is the whole dependency story — there is no `after`
 column because the file already says it.
 
 **Branch 2 is not written in the sheet.** Test and hold is the same chain on
-every journey, so it lives once in `reference.json` under `hold` — four steps
-with a duration each — and is grown onto every journey from the moment packing
-ends. Branch 2 rows in the sheet are ignored. Change a step's length there and
-it changes everywhere, which is the point.
+every journey, so it lives once in `reference.json` under `hold` and is grown
+onto every journey from the moment packing ends. Branch 2 rows in the sheet are
+ignored. Change a stage's length there and it changes everywhere, which is the
+point.
+
+Each stage is a **lane**, and `hours` is how long it takes to reach that stage
+from the one before it — so the chain draws as a staircase whose steps are the
+waits. A generated leg is named after the stage it arrives at, and a leg named
+after the place it arrives at is not labelled on the chart: the lane already
+says it.
 
 Days are `Sun, 10:00` or `M 06:00` — any longer form of the weekday works. A
 bare `S` is rejected: it could be either end of the week.

@@ -209,7 +209,7 @@
       // than merged: two definitions of one clock would drift apart, and the
       // sheet's were already inconsistent about when the clock starts.
       var hold = (window.REF || {}).hold;
-      if (hold && hold.steps && hold.steps.length) {
+      if (hold && hold.stages && hold.stages.length > 1) {
         var hb = String(hold.branch || '2');
         tasks = tasks.filter(function (t) { return t.branch !== hb; });
         // The leg the clock hangs off: the last one by that name, since a
@@ -223,15 +223,17 @@
         });
         if (seed) {
           if (branches.indexOf(hb) < 0) branches.push(hb);
-          var run = seed.e, was = null;
-          hold.steps.forEach(function (st, n) {
+          // Each stage is a lane and each leg is the wait to reach the next
+          // one, so the chain draws as a staircase and its name is the stage
+          // it arrives at. The first stage is where the clock starts.
+          var run = seed.e, was = hold.stages[0].place || 'Hold';
+          hold.stages.slice(1).forEach(function (st, n) {
             var pl = st.place || 'Hold';
             var ic = String(st.icon || '').toLowerCase();
             var len = +st.hours || 0;
-            tasks.push({ id: 'h' + n, name: st.leg, branch: hb,
-              from: was === null ? pl : was, place: pl,
-              s: run, e: run + len,
-              icon: ICONS.indexOf(ic) < 0 ? iconFor(st.leg) : ic,
+            tasks.push({ id: 'h' + n, name: pl, branch: hb,
+              from: was, place: pl, s: run, e: run + len,
+              icon: ICONS.indexOf(ic) < 0 ? iconFor(pl) : ic,
               note: st.note || '' });
             run += len;
             was = pl;
@@ -477,6 +479,11 @@
       // A name wraps at every word, so it is as wide as its longest word and
       // as tall as it has words. Time is the scarce axis here and place is
       // not, which is the whole reason to spend height to buy width.
+      // A leg named after the place it arrives at is already labelled, by the
+      // lane it lands on. Saying it twice is how the hold's staircase ended up
+      // with a word beside every step.
+      if (nm === (p.place || '')) return;
+
       // Several journeys share the same first legs -- one packing run feeds
       // both the air and the barge picture -- so the same name at the same
       // place and hour is one event, said once.
