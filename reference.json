@@ -290,7 +290,10 @@
         }
       },
       {
-        "step": "Retrieve",
+        "step": "HFA retrieve",
+        "was": [
+          "Retrieve"
+        ],
         "transport": {
           "Air": [
             "HNL",

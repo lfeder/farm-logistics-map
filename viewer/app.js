@@ -794,70 +794,12 @@
     });
     svg += link + wait + move;
 
-    // ── Naming the threads ────────────────────────────────────────────────
-    // Not one name per leg. A leg's name was the same word on every journey --
-    // Packing, BOL, Drayage -- so on a busy week it said nothing while filling
-    // the chart. What is worth saying is which thread this is, and that is
-    // worth saying once, where there is room for it.
-    //
-    // Room is found ALONG the thread, not above and below it. Five journeys
-    // leave the same morning, so stacking their names at the start piles them
-    // into a column; walking each one forward to its next step instead spreads
-    // them across the page, and a name still sits on the thread it names.
-    var dots = '', taken = [];
-    var threads = {}, order = [];
-    r.pts.forEach(function (p) {
-      var d = p.t.journey || p.t.def || flow.name;
-      if (!has(threads, d)) { threads[d] = { def: p.t.def || flow.name, pts: [] }; order.push(d); }
-      threads[d].pts.push(p);
-    });
-
-    var ROW = 14, GAP = 7;   // a name's height, and the air between two of them
-
-    function box(p, nm, step) {
-      var y1 = at(p.from === undefined ? p.place : p.from, p.t), y2 = at(p.place, p.t);
-      var wpc = (12 + nm.length * 5.6) / PLOT_PX * 100;
-      // Sloped, the name sits on the row the step comes down from. Flat, it
-      // sits clear above the dot. Either way it hangs off the start, so it
-      // reads as the beginning of the thread.
-      var base = y1 === y2 ? -(ROW / 2 + 2) : 0;
-      var ly = y1 + base + (step || 0) * (ROW + GAP);
-      return { lo: PCT(p.s) + .6, hi: PCT(p.s) + .6 + wpc, ly: ly,
-               t: ly - ROW / 2, b: ly + ROW / 2, x: PCT(p.s), p: p };
-    }
-    function free(k) {
-      // A name may not leave the plot. Stepping off the top used to put it
-      // over the day and hour labels, where it read as part of the axis.
-      if (k.t < 0 || k.b > H) return false;
-      for (var i = 0; i < taken.length; i++) {
-        var o = taken[i];
-        if (k.t < o.b && o.t < k.b && k.lo < o.hi + .4 && o.lo < k.hi + .4) return false;
-      }
-      return true;
-    }
-
-    order.forEach(function (d) {
-      var th = threads[d], nm = threadName(th.def);
-      var list = th.pts.slice().sort(function (x, y) { return x.s - y.s; });
-      var best = null, i;
-      // Walk the thread from its start and take the first step with room.
-      for (i = 0; i < list.length && !best; i++) {
-        var k = box(list[i], nm, 0);
-        if (free(k)) best = k;
-      }
-      // Only if the whole thread is crowded does a name step off its row, and
-      // then at the start, where the thread begins.
-      var STEPS = [-1, 1, -2, 2, -3, 3];
-      for (i = 0; i < STEPS.length && !best; i++) {
-        var k2 = box(list[0], nm, STEPS[i]);
-        if (free(k2)) best = k2;
-      }
-      if (!best) best = box(list[0], nm, 0);
-      taken.push(best);
-      dots += '<div class="ln' + jc(best.p.t) + '" style="left:' + best.x +
-        '%;top:' + best.ly + 'px" title="' + esc(d) + '">' +
-        '<span class="nw">' + esc(nm) + '</span></div>';
-    });
+    // No names along the threads. Each was the journey's own name, printed
+    // once where the thread had room for it -- useful when a line's only
+    // identity was its shade. The journey chips are colour-fast now and carry
+    // the same hue, so the chart can be read against the bar above it and the
+    // names were repeating what the colour already said. threadName stays: it
+    // is still what a dot's tooltip leads with.
 
     var lbl = lanes.map(function (l) {
       return '<div class="lane-lbl" style="height:' + LANE_H + 'px">' + esc(l) + '</div>';
@@ -866,7 +808,7 @@
     return '<div class="chart"><div class="gut" style="padding-top:' + PAD_T + 'px">' + lbl + '</div>' +
       '<div class="plot" style="height:' + H + 'px">' +
       '<svg class="svg" viewBox="0 0 1000 ' + H + '" preserveAspectRatio="none">' + svg + '</svg>' +
-      dots + '</div></div>';
+      '</div></div>';
   }
 
 
@@ -1426,10 +1368,14 @@
     var host = document.getElementById('pick-jrns');
     if (!host) return;
     var crops = uniq(F.map(function (f) { return f.crop || ''; }));
+    // The day count rides inside the row rather than beside it. As a sibling
+    // of .picks it was a second flex item after one that fills the line, so it
+    // wrapped to a line of its own however short it got; inside, it is the item
+    // after the last chip and breaks only when the chips themselves do.
     host.innerHTML = crops.map(function (c, n) {
       return '<span class="lbl">' + esc(c) + '</span><span class="seg" id="pick-c' + n +
         '"></span>';
-    }).join('');
+    }).join('') + '<span class="res" id="jdays"></span>';
     crops.forEach(function (c, n) {
       var mine = F.filter(function (f) { return (f.crop || '') === c; });
       // Journeys to the same customer sit together: 140 twice over is one
