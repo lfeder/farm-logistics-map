@@ -1,61 +1,55 @@
 {
   "_": "Hand-edited. Everything here changes rarely: what a journey is, who is open when, and which boat goes where. The legs themselves live in legs.csv.",
   "legs_sheet": "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv&gid=578288022",
+  "sites": {
+    "_": "Places we own. They do not gate: we are there when we are there, so they carry no days and no window, and a leg that runs between two of them can never be 'outside hours'. Every place named in steps must appear either here or in hours.",
+    "places": [
+      {
+        "place": "PH",
+        "note": "Hawaii Farming packhouse. The whole journey starts here."
+      },
+      {
+        "place": "Storage",
+        "note": "Always open — it is our own cooler."
+      },
+      {
+        "place": "Lettuce loading dock",
+        "note": ""
+      },
+      {
+        "place": "Lab",
+        "note": "The incubation runs whether or not anyone is watching it."
+      },
+      {
+        "place": "Container",
+        "note": "Our yard. We are here when the packhouse is."
+      },
+      {
+        "place": "Customer truck",
+        "note": "They collect while we are here."
+      }
+    ]
+  },
   "hours": [
-    {
-      "place": "PH",
-      "days": "Sun-Sat",
-      "open": "06:00",
-      "close": "19:00",
-      "after_arrival": 0,
-      "note": "Hawaii Farming packhouse. Nobody is here to load a truck outside these hours."
-    },
-    {
-      "place": "Storage",
-      "days": "Sun-Sat",
-      "open": "00:00",
-      "close": "23:59",
-      "after_arrival": 0,
-      "note": "Always open \u2014 it is our own cooler."
-    },
-    {
-      "place": "Lettuce loading dock",
-      "days": "Sun-Sat",
-      "open": "06:00",
-      "close": "19:00",
-      "after_arrival": 0,
-      "note": ""
-    },
     {
       "place": "140",
       "days": "Mon-Sat",
       "open": "04:00",
       "close": "11:00",
-      "after_arrival": 0,
       "note": "Receiving. The only gate on-island."
-    },
-    {
-      "place": "Lab",
-      "days": "Sun-Sat",
-      "open": "00:00",
-      "close": "23:59",
-      "after_arrival": 0,
-      "note": "The incubation runs whether or not anyone is watching it."
     },
     {
       "place": "KOA",
       "days": "Sun-Fri",
       "open": "06:00",
       "close": "17:00",
-      "after_arrival": 0,
-      "note": "Aloha Air Cargo counter. Six days \u2014 dark Saturday."
+      "note": "Aloha Air Cargo counter. Six days — dark Saturday."
     },
     {
       "place": "KWH",
       "days": "Mon-Fri",
       "open": "07:00",
       "close": "16:00",
-      "after_arrival": 0,
       "note": "Young Brothers. Cargo acceptance ahead of the sailing."
     },
     {
@@ -63,7 +57,6 @@
       "days": "Sun-Fri",
       "open": "06:00",
       "close": "17:00",
-      "after_arrival": 0,
       "note": "Aloha Air Cargo Honolulu. Six days — dark Saturday, same counter hours as KOA. The barge's Honolulu end is YBHNL, not this."
     },
     {
@@ -71,7 +64,6 @@
       "days": "Mon-Sat",
       "open": "07:00",
       "close": "15:00",
-      "after_arrival": 24,
       "note": "Young Brothers. Available the next business day after arrival."
     },
     {
@@ -79,7 +71,6 @@
       "days": "Mon-Fri",
       "open": "06:00",
       "close": "15:00",
-      "after_arrival": 0,
       "note": "Collects, then runs the route."
     },
     {
@@ -87,7 +78,6 @@
       "days": "Mon-Fri",
       "open": "06:00",
       "close": "15:00",
-      "after_arrival": 0,
       "note": "Collects, then runs the route."
     },
     {
@@ -95,39 +85,20 @@
       "days": "Mon-Sat",
       "open": "05:00",
       "close": "12:00",
-      "after_arrival": 0,
       "note": "The back door at the other end."
-    },
-    {
-      "place": "Container",
-      "days": "Sun-Sat",
-      "open": "06:00",
-      "close": "19:00",
-      "after_arrival": 0,
-      "note": "Our yard. We are here when the packhouse is."
     },
     {
       "place": "YBHNL",
       "days": "Mon-Fri",
       "open": "07:00",
       "close": "16:00",
-      "after_arrival": 0,
       "note": "Young Brothers Honolulu. Same window as Kawaihae."
-    },
-    {
-      "place": "Customer truck",
-      "days": "Sun-Sat",
-      "open": "06:00",
-      "close": "19:00",
-      "after_arrival": 0,
-      "note": "They collect while we are here."
     },
     {
       "place": "Nawiliwili",
       "days": "Mon-Fri",
       "open": "07:00",
       "close": "16:00",
-      "after_arrival": 0,
       "note": "Young Brothers Kauai. Same window as KWH."
     },
     {
@@ -135,7 +106,6 @@
       "days": "Mon-Fri",
       "open": "06:00",
       "close": "15:00",
-      "after_arrival": 0,
       "note": "Collects, then runs the route."
     }
   ],
@@ -180,7 +150,7 @@
       "departs": "Thu",
       "arrives": "Fri",
       "connects": "the Tuesday sailing",
-      "note": "Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday \u2014 level with Oahu."
+      "note": "Kauai. A Wednesday Honolulu arrival is not available until Thursday, so it makes this boat with hours to spare and lands Friday — level with Oahu."
     }
   ],
   "hold": {
@@ -230,7 +200,7 @@
     }
   },
   "steps": {
-    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it -- fob first, then transport, then the plain pair. An override that has no entry for this journey falls through to the next, so a step can be told apart by island where it needs to be and by vehicle everywhere else. Every place named here needs a row in hours. A step may list what it was called before under was, so renaming one does not have to happen in two places at once. A step marked sticks:next keeps the gap it was written with to the step after it, so that when a later step is pushed it comes along rather than being left to sit. The order here is the fallback; where the sheet names a step, the sheet's row order wins, so the chart's rows are the sheet's rows.",
+    "_": "The order of the steps is the order of the lanes. A step names the places it runs between; where that depends on the journey, transport or fob overrides it -- fob first, then transport, then the plain pair. An override that has no entry for this journey falls through to the next, so a step can be told apart by island where it needs to be and by vehicle everywhere else. Every place named here needs a row in hours (a gate) or in sites (ours). A step may list what it was called before under was, so renaming one does not have to happen in two places at once. A step marked sticks:next keeps the gap it was written with to the step after it, so that when a later step is pushed it comes along rather than being left to sit. The order here is the fallback; where the sheet names a step, the sheet's row order wins, so the chart's rows are the sheet's rows.",
     "order": [
       {
         "step": "Pack/Store 1",

@@ -1062,19 +1062,28 @@
   // the ones this product waits at whether or not the journey on screen goes
   // through them.
   function hoursView() {
-    var R = window.REF || { hours: [], sailings: [] };
+    var R = window.REF || { hours: [], sites: [], sailings: [] };
     var out = '';
     if (R.hours.length) {
       out += '<h4>Who will take it, and when</h4>' +
         '<table class="otbl hrs"><thead><tr><th>Place</th><th>Days</th><th>Opens</th>' +
-        '<th>Closes</th><th>After arrival</th><th>Note</th></tr></thead><tbody>' +
+        '<th>Closes</th><th>Note</th></tr></thead><tbody>' +
         R.hours.map(function (w) {
           return '<tr><th class="hf">' + esc(w.place) + '</th>' +
             '<td class="dcell">' + dayCells(w.days) + '</td>' +
             '<td class="mono">' + clock(num(w.open)) + '</td>' +
             '<td class="mono">' + clock(num(w.close)) + '</td>' +
-            '<td class="mono">' + (w.lead ? w.lead + ' h' : '<u>—</u>') + '</td>' +
             '<td class="nt">' + esc(w.note || '') + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    // Ours. No days and no window on purpose -- a leg between two of these is
+    // bounded by the schedule and nothing else, so it can never read as late.
+    if ((R.sites || []).length) {
+      out += '<h4>Our own places</h4>' +
+        '<table class="otbl hrs"><thead><tr><th>Place</th><th>Note</th></tr></thead><tbody>' +
+        R.sites.map(function (s) {
+          return '<tr><th class="hf">' + esc(s.place) + '</th>' +
+            '<td class="nt">' + esc(s.note || '') + '</td></tr>';
         }).join('') + '</tbody></table>';
     }
     if (R.sailings.length) {
@@ -1108,11 +1117,10 @@
             '<td class="mono">' + clock(num(w.close)) + '</td><td></td></tr>';
         }).join('') + '</tbody></table>';
     }
-    return out + '<p class="hint">All of this is set in <code>hours.csv</code> and ' +
-      '<code>sailings.csv</code>. Days here are real weekdays, the same as in ' +
-      '<code>legs.csv</code>.' + '<span hidden>' +
-      'tables at the top of the file, and each journey&rsquo;s own <b>Hours</b> table. Days here are ' +
-      '</span></p>';
+    return out + '<p class="hint">All of this is set in <code>reference.json</code> — ' +
+      'gates under <code>hours</code>, ours under <code>sites</code>, boats under ' +
+      '<code>sailings</code>. Only a gate has a window, so only a gate can make a leg ' +
+      'late. Days here are real weekdays, the same as in <code>legs.csv</code>.</p>';
   }
   function dayCells(days) {
     return DOW.map(function (dn, d) {

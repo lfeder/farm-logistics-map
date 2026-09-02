@@ -114,6 +114,11 @@ def days_mask(spec, f, where):
 # ── hours, keyed by place ────────────────────────────────────────────────────
 # A window belongs to a place, and the place names in legs.csv are the same
 # names, so there is one namespace and a leg's lane picks up its own hours.
+#
+# Only GATES live here -- somebody else's door, which opens when they say. Our
+# own places are in `sites` below and carry no window at all, because the
+# viewer treats a place with no window as one that can never be late: it is the
+# absence of a row here, not a value in it, that turns the gating off.
 hours, hours_order = {}, []
 for r in REF.get("hours", []):
     p = (r.get("place") or "").strip()
@@ -124,9 +129,22 @@ for r in REF.get("hours", []):
     hours[p] = {"place": p, "days": days_mask(r.get("days"), "reference.json", p),
                 "open": hhmm(r.get("open"), "reference.json", p),
                 "close": hhmm(r.get("close"), "reference.json", p),
-                "lead": int(r.get("after_arrival") or 0),
                 "note": (r.get("note") or "").strip()}
     hours_order.append(p)
+
+# ── sites: the places we own ────────────────────────────────────────────────
+# Name and note only. A leg between two of them is bounded by the schedule in
+# legs.csv and by nothing else, which is the point: when the packhouse works is
+# a decision, not a door, so it does not belong in a table of other people's
+# opening times where it would drift into four copies of one fact.
+sites = []
+for r in REF.get("sites", {}).get("places", []):
+    p = (r.get("place") or "").strip()
+    if not p:
+        continue
+    if p in hours:
+        die("reference.json", "sites: %r is also a gate in hours" % p)
+    sites.append({"place": p, "note": (r.get("note") or "").strip()})
 
 sailings = []
 for r in REF.get("sailings", []):
@@ -145,7 +163,7 @@ for r in REF.get("sailings", []):
 legs_text = open(os.path.join(HERE, "legs.csv")).read()
 
 data = json.load(open(os.path.join(HERE, "orders.json")))
-ref = {"hours": [hours[p] for p in hours_order], "sailings": sailings,
+ref = {"hours": [hours[p] for p in hours_order], "sites": sites, "sailings": sailings,
        "hold": REF.get("hold", {}), "steps": REF.get("steps", {})}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
@@ -162,6 +180,6 @@ path = os.path.join(HERE, "index.html")
 with open(path, "w") as fh:
     fh.write(out)
 
-print("%d places with hours, %d sailings" % (len(hours), len(sailings)))
+print("%d gates with hours, %d sites, %d sailings" % (len(hours), len(sites), len(sailings)))
 print("%d order rows, %s to %s" % (len(data["sales"]), data["window"]["first"], data["window"]["last"]))
 print("wrote %s (%.0f KB)" % (path, len(out) / 1024))
