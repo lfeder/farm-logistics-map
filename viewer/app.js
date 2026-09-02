@@ -392,7 +392,7 @@
         // comparable at a glance. Where it physically is rides along on `at`,
         // because that is what has opening hours.
         tasks.push({ id: 't' + tasks.length, name: r.leg, branch: br,
-          place: r.leg, at: r.place || 'Somewhere', atFrom: r.from || 'Somewhere',
+          place: rowOf(r.leg), at: r.place || 'Somewhere', atFrom: r.from || 'Somewhere',
           s: at(r.s), e: at(r.e),
           icon: ICONS.indexOf(ic) < 0 ? iconFor(r.leg) : ic,
           note: r.note || '' });
@@ -487,6 +487,30 @@
         hold: rs[0].hold || '',
         branches: branches, tasks: tasks, windows: wins };
     });
+  }
+
+  // A step draws on the row it names, or on its own name when it names none.
+  // Two steps that share a row share a line of the chart and keep everything
+  // else -- their names, their cells in the sheet, their own bars.
+  function rowOf(step) {
+    var order = (((window.REF || {}).steps || {}).order) || [], k = String(step).toLowerCase();
+    for (var i = 0; i < order.length; i++) {
+      if (String(order[i].step).toLowerCase() === k) return order[i].row || order[i].step;
+    }
+    return step;
+  }
+
+  // Five hues for however many journeys there are, handed out in the order the
+  // sheet lists them, so a journey's colour is a fact about the journey. Every
+  // run of it shares the hue and differs only by shade -- the earlier cut takes
+  // the stronger one -- which is what says Sunday and Wednesday are one journey
+  // gone twice.
+  function hueOf(def) {
+    var seen = {}, n = 0, i;
+    for (i = 0; i < F.length; i++) {
+      if (!has(seen, F[i].name)) seen[F[i].name] = n++;
+    }
+    return (has(seen, def) ? seen[def] : 0) % 5;
   }
 
   var F = [], DATA = window.DATA || {};
@@ -600,7 +624,7 @@
     // then stay put as journeys are switched on and off, and a blank row says
     // the same thing a blank cell in the sheet says: this one skips it.
     var ref = window.REF || {};
-    ((ref.steps || {}).order || []).forEach(function (st) { lane(String(st.step), '1'); });
+    ((ref.steps || {}).order || []).forEach(function (st) { lane(rowOf(String(st.step)), '1'); });
     var hb = String((ref.hold || {}).branch || '2');
     var recipes = (ref.hold || {}).recipes || {};
     Object.keys(recipes).forEach(function (k) {
@@ -618,9 +642,12 @@
     // Reaching them is not the same thing: the 140 journey reaches Customer
     // third, but Customer is still the last step there is.
     var rank = {}, r = 0;
-    SHEET_ORDER.forEach(function (name) { rank[String(name).toLowerCase()] = r++; });
+    SHEET_ORDER.forEach(function (name) {
+      var k = String(rowOf(name)).toLowerCase();
+      if (!has(rank, k)) rank[k] = r++;
+    });
     ((((window.REF || {}).steps || {}).order) || []).forEach(function (st) {
-      var k = String(st.step).toLowerCase();
+      var k = String(rowOf(String(st.step))).toLowerCase();
       if (!has(rank, k)) rank[k] = r++;
     });
     function rk(p) {
@@ -652,15 +679,20 @@
     // other in a week; five colours made the Sunday barge and the Wednesday
     // barge the same line. Sharing a hue still says they are the same journey,
     // and the earlier cut takes the stronger shade.
-    var hue = {}, hues = 0, shade = {}, next = {};
+    //
+    // The hue comes from hueOf, which counts every journey there is rather than
+    // the ones on screen. Counted from the selection it moved: switching one
+    // journey off renumbered the rest, so a thread changed colour without
+    // changing, and no swatch anywhere else could be trusted to match it.
+    var shade = {}, next = {};
     flow.tasks.forEach(function (t) {
       var d = t.def || flow.name, run = t.journey || d;
-      if (!has(hue, d)) { hue[d] = hues++; next[d] = 0; }
+      if (!has(next, d)) next[d] = 0;
       if (!has(shade, run)) shade[run] = next[d]++;
     });
     function jc(t) {
       var d = t.def || flow.name, run = t.journey || d;
-      return ' j' + (hue[d] % 5) + (shade[run] % 2 ? 'b' : 'a');
+      return ' j' + hueOf(d) + (shade[run] % 2 ? 'b' : 'a');
     }
 
     // Threads that share a step share a row, and two lines on one row are one
@@ -1401,9 +1433,12 @@
         var ga = rank[fa.fob || ''], gb = rank[fb.fob || ''];
         return ga !== gb ? ga - gb : mine.indexOf(fa) - mine.indexOf(fb);
       });
+      // In the journey's own colour, and in the stronger of its two shades: a
+      // chip is the journey, not one run of it. Colour is the whole point of
+      // the chip -- it is how you find that thread again in the chart.
       seg('pick-c' + n, opts.map(function (k) {
         var f = jrnFor(k);
-        return [k, f ? jrnLabel(f) : k];
+        return [k, f ? jrnLabel(f) : k, f ? 'j' + hueOf(f.name) + 'a' : ''];
       }), S.sel.jrn || [], function (v) { toggle('jrn', v); });
     });
   }
@@ -1415,8 +1450,9 @@
     var chosen = Object.prototype.toString.call(sel) === '[object Array]' ? sel : [sel];
     el.innerHTML = opts.map(function (o) {
       var on = chosen.some(function (c) { return String(o[0]) === String(c); });
-      return '<a data-v="' + esc(o[0]) + '"' + (on ? ' class="on"' : '') +
-        '>' + esc(o[1]) + '</a>';
+      var tone = o[2] ? ' ' + o[2] : '';
+      return '<a data-v="' + esc(o[0]) + '" class="' + esc((on ? 'on' : '') + tone) +
+        '">' + esc(o[1]) + '</a>';
     }).join('');
     [].slice.call(el.querySelectorAll('a')).forEach(function (a) {
       a.onclick = function () { cb(a.getAttribute('data-v')); };

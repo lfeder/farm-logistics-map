@@ -36,6 +36,22 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .seg a.on{background:var(--accent); color:#fff; font-weight:600}
 .seg a:hover:not(.on){background:var(--card-2)}
 
+/* A journey chip wears its thread's colour: off, as the swatch that finds the
+   line in the chart; on, as the line itself. The hue is pinned to the journey,
+   so what a chip shows is what the chart draws. */
+.seg a.j0a,.seg a.j1a,.seg a.j2a,.seg a.j3a,.seg a.j4a{font-weight:600}
+.seg a.j0a{color:var(--j0a)} .seg a.j1a{color:var(--j1a)} .seg a.j2a{color:var(--j2a)}
+.seg a.j3a{color:var(--j3a)} .seg a.j4a{color:var(--j4a)}
+.seg a.on.j0a{background:var(--j0a)} .seg a.on.j1a{background:var(--j1a)}
+.seg a.on.j2a{background:var(--j2a)} .seg a.on.j3a{background:var(--j3a)}
+.seg a.on.j4a{background:var(--j4a)}
+.seg a.on.j0a,.seg a.on.j1a,.seg a.on.j2a,.seg a.on.j3a,.seg a.on.j4a{color:#fff}
+
+/* The cut day is a different question from which journey, so it stays out of
+   the thread palette entirely: the two days are one grey and a lighter one. */
+#pick-when a.on{background:#4a5257; color:#fff}
+#pick-when a.on + a.on{background:#9aa3a8}
+
 /* ---------- the chart: time across, place down ---------- */
 .body{padding:14px 18px 14px}
 /* Two rows: the day names, then the hour each four-hour mark stands for, so a
