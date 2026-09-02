@@ -262,7 +262,11 @@
       // on a Sunday -- and then it waits for the next open day and everything
       // behind it waits with it. That is the whole difference between the two
       // runs, so only one of them is worth typing.
-      var days = String(head.start_day || '0').split(/[,;]+/)
+      // The sheet may still name its own; reference.json says what they are
+      // when it does not, because every journey said 0, 3 and the barge is not
+      // going to start sailing on different days.
+      var days = String(head.start_day || (window.REF || {}).start_days || '0')
+        .split(/[,;]+/)
         .map(function (x) { return x.trim(); })
         .filter(function (x) { return x !== ''; });
       if (!days.length) days = ['0'];

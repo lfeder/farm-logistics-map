@@ -1,6 +1,8 @@
 {
   "_": "Hand-edited. Everything here changes rarely: what a journey is, who is open when, and which boat goes where. The legs themselves live in legs.csv.",
   "legs_sheet": "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv&gid=578288022",
+  "_start_days": "Which cutting days a journey runs on, as offsets from the first. '0, 3' is the cut day and again three days later: the barge sails twice a week and everything is built around it. Every journey in the sheet said the same thing, so it lives here and the sheet no longer carries a Start Day row. A journey that ever breaks the pattern can still say so -- a Start Day in the sheet wins over this.",
+  "start_days": "0, 3",
   "sites": {
     "_": "Places we own. They do not gate: we are there when we are there, so they carry no days and no window, and a leg that runs between two of them can never be 'outside hours'. Every place named in steps must appear either here or in hours.",
     "places": [
