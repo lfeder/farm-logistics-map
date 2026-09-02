@@ -152,10 +152,9 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 
 /* The day count, in the corner of the journey bar. Only ever filled for a
    single journey -- see app.js. */
-.res{margin-left:auto; display:flex; align-items:baseline; gap:5px}
+.res{display:flex; align-items:baseline; gap:5px; margin-left:4px}
 .res b{font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; line-height:1}
 .res small{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
-.res em{font-style:normal; font-size:10.5px; color:var(--ink-3)}
 
 /* ---------- the task list, now a reading rather than a form ---------- */
 .grid{display:grid; gap:0 10px; align-items:center;

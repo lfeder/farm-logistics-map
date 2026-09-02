@@ -1237,13 +1237,12 @@
         }).join('; ') + '.</div>';
     }
     // How long it takes is a fact about one journey. Several of them have no
-    // single duration between them, so the corner is empty rather than
-    // averaged -- which is why this went away the first time, and why it comes
-    // back beside the journey chips instead of over the chart: an empty right
-    // end of a bar you are already reading explains itself.
+    // single duration between them, so it is blank rather than averaged. The
+    // hours are on the task list a scroll below, so the chip row carries the
+    // one number you cannot get by looking at the chart -- reading five days
+    // off the axis means counting the midnight rules.
     document.getElementById('jdays').innerHTML = flow.many ? '' :
-      '<b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') + '</small>' +
-      '<em>' + dur(r.hrs) + ' end to end, ' + dur(r.still) + ' waiting</em>';
+      '<b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') + '</small>';
 
     document.getElementById('warn').innerHTML = warn;
     document.getElementById('tnote').textContent =
