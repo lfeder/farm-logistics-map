@@ -60,11 +60,11 @@
     },
     {
       "place": "HNL",
-      "days": "Mon-Sat",
-      "open": "07:00",
-      "close": "15:00",
-      "after_arrival": 24,
-      "note": "Young Brothers. Available the next business day after arrival."
+      "days": "Sun-Fri",
+      "open": "06:00",
+      "close": "17:00",
+      "after_arrival": 0,
+      "note": "Aloha Air Cargo Honolulu. Six days — dark Saturday, same counter hours as KOA. The barge's Honolulu end is YBHNL, not this."
     },
     {
       "place": "Kahului",
