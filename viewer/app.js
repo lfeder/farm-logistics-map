@@ -899,7 +899,12 @@
   }
 
   // ── The task list, which is a reading of the Markdown ─────────────────────
-  var COLS = ['', '', 'Task', 'Place', 'Starts', 'Stops', 'Takes', 'After', 'Note'];
+  // No After column. It listed what a task came after -- its predecessor --
+  // under a heading that reads as what comes next, so it was routinely taken
+  // backwards. The order it described is already the order of the rows, and
+  // the chart draws the same dependency as a link. The data behind it is
+  // untouched: t.after still feeds the links and the scheduling.
+  var COLS = ['', '', 'Task', 'Place', 'Starts', 'Stops', 'Takes', 'Note'];
   function taskTable(flow, r) {
     var head = '';
     var body = flow.tasks.map(function (t, i) {
@@ -914,7 +919,6 @@
       r.pts.forEach(function (x) { if (x.id === t.id) p = x; });
       var len = num(t.e) - num(t.s);
       var still = false;   // see the chart: a leg is a step, not a place change
-      var pre = (t.after || []).filter(function (id) { return r.byId[id]; });
       var where = t.at || t.place || 'Somewhere';
       var badS = outside(flow, where, num(t.s));
       var badE = outside(flow, where, num(t.e));
@@ -929,8 +933,6 @@
         (badE ? ' title="' + esc(where) + ' is shut then."' : '') + '>' + stamp(num(t.e)) + '</div>' +
         '<div class="cell dur' + (len < 0 ? ' bad' : still && len > .01 ? ' still' : '') + '">' +
         (len < 0 ? 'backwards' : dur(len)) + '</div>' +
-        '<div class="cell aft">' + (pre.length
-          ? pre.map(function (id) { return esc(r.byId[id].name); }).join(', ') : '—') + '</div>' +
         '<div class="cell nt">' + esc(t.note || '') + '</div>' +
         '</div>';
     }).join('');
