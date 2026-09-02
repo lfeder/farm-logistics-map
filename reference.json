@@ -60,11 +60,11 @@
       "note": "Aloha Air Cargo Honolulu. Six days — dark Saturday, same counter hours as KOA. The barge's Honolulu end is YBHNL, not this."
     },
     {
-      "place": "Kahului",
-      "days": "Mon-Sat",
+      "place": "YBHNL",
+      "days": "Mon-Fri",
       "open": "07:00",
-      "close": "15:00",
-      "note": "Young Brothers. Available the next business day after arrival."
+      "close": "16:00",
+      "note": "Young Brothers Honolulu. Same window as Kawaihae."
     },
     {
       "place": "HFA",
@@ -74,25 +74,18 @@
       "note": "Collects, then runs the route."
     },
     {
+      "place": "Kahului",
+      "days": "Mon-Sat",
+      "open": "07:00",
+      "close": "15:00",
+      "note": "Young Brothers. Available the next business day after arrival."
+    },
+    {
       "place": "HFA Kahului",
       "days": "Mon-Fri",
       "open": "06:00",
       "close": "15:00",
       "note": "Collects, then runs the route."
-    },
-    {
-      "place": "Customer receiving",
-      "days": "Mon-Sat",
-      "open": "05:00",
-      "close": "12:00",
-      "note": "The back door at the other end."
-    },
-    {
-      "place": "YBHNL",
-      "days": "Mon-Fri",
-      "open": "07:00",
-      "close": "16:00",
-      "note": "Young Brothers Honolulu. Same window as Kawaihae."
     },
     {
       "place": "Nawiliwili",
@@ -107,6 +100,13 @@
       "open": "06:00",
       "close": "15:00",
       "note": "Collects, then runs the route."
+    },
+    {
+      "place": "Customer receiving",
+      "days": "Mon-Sat",
+      "open": "05:00",
+      "close": "12:00",
+      "note": "The back door at the other end."
     }
   ],
   "sailings": [
