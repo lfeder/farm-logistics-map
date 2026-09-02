@@ -1268,9 +1268,15 @@
 
   // We cut on the anchor day and the day after, and both feed the same
   // departure, so the pair is the honest label for the choice.
+  //
+  // The pair named is the two days the journeys START, which is the day after
+  // the anchor and the one after that -- Sun anchors Mon/Tue, Wed anchors
+  // Thu/Fri. A label only: `start` stays the anchor day everywhere it is used,
+  // which is what the chart is drawn from and what the sheet's Start Day counts
+  // from. Change this and you change what the chips read, nothing else.
   function cutLabel(day) {
     var i = DOW.indexOf(day);
-    return i < 0 ? day : day + '/' + DOW[(i + 1) % 7];
+    return i < 0 ? day : DOW[(i + 1) % 7] + '/' + DOW[(i + 2) % 7];
   }
 
   function uniq(list) {
