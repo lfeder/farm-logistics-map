@@ -539,10 +539,12 @@
   // ── Clock ─────────────────────────────────────────────────────────────────
   var SPAN = 3, ANCHOR = 'Sun';
   var dowIdx = function (n) { return DOW.indexOf(n); };
+  // Always HH:MM, twenty-four hour. The sheet, reference.json and the chart's
+  // own axis all say 18:00; a task list that said 6 PM beside them made the
+  // reader convert, and a column of 10 AM / 6:30 PM / 12:30 AM does not line up
+  // under itself the way four digits do.
   function clock(h) {
-    var t = ((Math.round(h * 4) / 4 % 24) + 24) % 24, hh = Math.floor(t);
-    var mn = Math.round((t - hh) * 60), m = mn ? ':' + (mn < 10 ? '0' : '') + mn : '';
-    return (hh % 12 === 0 ? 12 : hh % 12) + m + ' ' + (hh < 12 ? 'AM' : 'PM');
+    return hhmm(Math.round(h * 4) / 4);
   }
   function dayOf(h) { return Math.floor(h / 24); }
   function dayName(d) { return DOW[((dowIdx(ANCHOR) + d) % 7 + 7) % 7]; }
@@ -556,11 +558,11 @@
     return isNaN(h) ? 0 : Math.max(0, Math.min(23.99, h + (isNaN(m) ? 0 : m / 60)));
   }
   function num(v, d) { var n = parseFloat(v); return isNaN(n) ? (d || 0) : n; }
+  // Always x.x h. A column that switched to minutes under the hour could not be
+  // compared down its own length -- 30 m sorted and read as larger than 4 h.
   function dur(h) {
-    var v = Math.round(h * 4) / 4;
-    if (v <= 0) return '0 h';
-    if (v < 1) return Math.round(v * 60) + ' m';
-    return (Math.abs(v - Math.round(v)) < .01 ? Math.round(v) : v.toFixed(2).replace(/0$/, '')) + ' h';
+    var v = h > 0 ? h : 0;
+    return v.toFixed(1) + ' h';
   }
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -665,8 +667,7 @@
   }
   function winOf(flow, place) { return (flow.windows || {})[place] || null; }
   function winSpan(w) {
-    var a = clock(num(w.open)), b = clock(num(w.close));
-    return a.slice(-2) === b.slice(-2) ? a.slice(0, -3) + '–' + b : a + '–' + b;
+    return clock(num(w.open)) + '–' + clock(num(w.close));
   }
 
   // ── Drawing ───────────────────────────────────────────────────────────────
@@ -1236,7 +1237,8 @@
     document.getElementById('warn').innerHTML = warn;
     document.getElementById('tnote').textContent =
       flow.tasks.length + ' legs · ' + (flow.branches || []).length + ' branches · ' +
-      places(flow).length + ' places · ' + r.hrs + ' h end to end, ' + r.still + ' waiting';
+      places(flow).length + ' places · ' + dur(r.hrs) + ' end to end, ' +
+      dur(r.still) + ' waiting';
     document.getElementById('tasks').innerHTML = taskTable(flow, r);
 
     // A bar or a dot finds its row, which is the only interaction left.
