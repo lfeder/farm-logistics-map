@@ -1,7 +1,10 @@
 :root{
   color-scheme: only light;
   --ground:#eef1f3; --card:#ffffff; --card-2:#f6f8f9;
-  --ink:#141b1f; --ink-2:#4a5860; --ink-3:#78878f;
+  /* Two steps down from the ink, each half the remaining distance to it.
+     They were far enough down that a table of them read as greyed out --
+     the times and places in the task list are the content, not an aside. */
+  --ink:#141b1f; --ink-2:#2f3a40; --ink-3:#465157;
   --line:#d8dfe3; --line-2:#e8edef;
   --accent:#d4541f; --accent-soft:#fbeee7;
   --good:#1d7a52; --bad:#b3341c;
