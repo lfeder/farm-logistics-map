@@ -48,7 +48,7 @@
       "note": "Aloha Air Cargo counter. Six days — dark Saturday."
     },
     {
-      "place": "KWH",
+      "place": "YB-KWH",
       "days": "Mon-Fri",
       "open": "07:00",
       "close": "11:00",
@@ -59,14 +59,14 @@
       "days": "Sun-Fri",
       "open": "06:00",
       "close": "17:00",
-      "note": "Aloha Air Cargo Honolulu. Six days — dark Saturday, same counter hours as KOA. The barge's Honolulu end is YBHNL, not this."
+      "note": "Aloha Air Cargo Honolulu. Six days — dark Saturday, same counter hours as KOA. The barge's Honolulu end is YB-HNL, not this."
     },
     {
-      "place": "YBHNL",
+      "place": "YB-HNL",
       "days": "Mon-Fri",
       "open": "07:00",
-      "close": "16:00",
-      "note": "Young Brothers Honolulu. Same window as Kawaihae."
+      "close": "11:00",
+      "note": "Young Brothers Honolulu."
     },
     {
       "place": "HFA",
@@ -76,7 +76,7 @@
       "note": "Collects, then runs the route."
     },
     {
-      "place": "Kahului",
+      "place": "YB-Kahului",
       "days": "Mon-Sat",
       "open": "07:00",
       "close": "15:00",
@@ -86,21 +86,21 @@
       "place": "HFA Kahului",
       "days": "Mon-Fri",
       "open": "06:00",
-      "close": "15:00",
+      "close": "18:00",
       "note": "Collects, then runs the route."
     },
     {
-      "place": "Nawiliwili",
+      "place": "YB-Nawiliwili",
       "days": "Mon-Fri",
       "open": "07:00",
-      "close": "16:00",
-      "note": "Young Brothers Kauai. Same window as KWH."
+      "close": "11:00",
+      "note": "Young Brothers Kauai."
     },
     {
       "place": "HFA Kauai",
       "days": "Mon-Fri",
       "open": "06:00",
-      "close": "15:00",
+      "close": "18:00",
       "note": "Collects, then runs the route."
     },
     {
@@ -113,42 +113,42 @@
   ],
   "sailings": [
     {
-      "route": "Kawaihae to Honolulu",
+      "route": "YB-KWH to YB-HNL",
       "departs": "Tue 18:00",
       "arrives": "Wed 06:00",
       "connects": "",
       "note": ""
     },
     {
-      "route": "Kawaihae to Honolulu",
+      "route": "YB-KWH to YB-HNL",
       "departs": "Fri 18:00",
       "arrives": "Sat 06:00",
       "connects": "",
       "note": ""
     },
     {
-      "route": "Honolulu to Kahului",
+      "route": "YB-HNL to YB-Kahului",
       "departs": "Wed 16:00",
       "arrives": "Thu 06:00",
       "connects": "the Tuesday sailing",
       "note": "Maui is level with Oahu off this one."
     },
     {
-      "route": "Honolulu to Kahului",
+      "route": "YB-HNL to YB-Kahului",
       "departs": "Mon 16:00",
       "arrives": "Tue 06:00",
       "connects": "the Friday sailing",
       "note": "Maui falls a day behind Oahu off this one."
     },
     {
-      "route": "Honolulu to Nawiliwili",
+      "route": "YB-HNL to YB-Nawiliwili",
       "departs": "Mon",
       "arrives": "Tue",
       "connects": "the Friday sailing",
       "note": "Kauai. Accepted in Honolulu Mon, Wed & Thu until 11am; available at Nawiliwili the next business day after arrival."
     },
     {
-      "route": "Honolulu to Nawiliwili",
+      "route": "YB-HNL to YB-Nawiliwili",
       "departs": "Thu",
       "arrives": "Fri",
       "connects": "the Tuesday sailing",
@@ -257,7 +257,7 @@
           ],
           "Barge": [
             "Storage",
-            "KWH"
+            "YB-KWH"
           ]
         }
       },
@@ -273,8 +273,8 @@
             "HNL"
           ],
           "Barge": [
-            "KWH",
-            "YBHNL"
+            "YB-KWH",
+            "YB-HNL"
           ]
         }
       },
@@ -282,12 +282,12 @@
         "step": "Inter-Island Outer",
         "fob": {
           "Maui": [
-            "YBHNL",
-            "Kahului"
+            "YB-HNL",
+            "YB-Kahului"
           ],
           "Kauai": [
-            "YBHNL",
-            "Nawiliwili"
+            "YB-HNL",
+            "YB-Nawiliwili"
           ]
         }
       },
@@ -302,17 +302,17 @@
             "HFA"
           ],
           "Barge": [
-            "YBHNL",
+            "YB-HNL",
             "HFA"
           ]
         },
         "fob": {
           "Maui": [
-            "Kahului",
+            "YB-Kahului",
             "HFA Kahului"
           ],
           "Kauai": [
-            "Nawiliwili",
+            "YB-Nawiliwili",
             "HFA Kauai"
           ]
         }

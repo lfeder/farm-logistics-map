@@ -207,7 +207,7 @@ in the sheet cannot blank the page and cannot hide either.
   running past it is a day that does not fit. The table's first row is the
   minutes each column needs at the average window.
 - **Hours** — everybody's clock, whether or not the journey on screen goes
-  through them: the farm, Aloha Air's Kona counter, Young Brothers at Kawaihae,
+  through them: the farm, Aloha Air's Kona counter, Young Brothers at YB-KWH,
   Honolulu and Kahului, HFA at both ends, Costco Kona receiving and the
   off-island docks — plus the Young Brothers sailing schedule and which boat
   connects to which. Set in the `# Hours` and `# Sailings` tables at the top of
