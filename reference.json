@@ -3,6 +3,13 @@
   "legs_sheet": "https://docs.google.com/spreadsheets/d/1JesEFq8X3tVDYi4_SbLs3u1lnG8Ch7NbiR7CvGlZS7Q/export?format=csv&gid=578288022",
   "_start_days": "Which cutting days a journey runs on, as offsets from the first. '0, 3' is the cut day and again three days later: the barge sails twice a week and everything is built around it. Every journey in the sheet said the same thing, so it lives here and the sheet no longer carries a Start Day row. A journey that ever breaks the pattern can still say so -- a Start Day in the sheet wins over this.",
   "start_days": "0, 3",
+  "_packed_from": "How far ahead of the journey a crop may already have been packed, as the earliest weekday it could have come off the line, keyed by the cut the journey runs on. Cucumbers hold, so a case leaving on the Mon/Tue journeys may have been packed as long ago as the Thursday before, and one leaving on Thu/Fri as long ago as the Tuesday. It widens the day count on the chips only -- the chart draws the legs the sheet gives it, and the sheet does not know which day any particular case was packed. A crop with no entry here is counted from its first step, as everything was before.",
+  "packed_from": {
+    "Cukes": {
+      "Sun": "Thu",
+      "Wed": "Tue"
+    }
+  },
   "sites": {
     "_": "Places we own. They do not gate: we are there when we are there, so they carry no days and no window, and a leg that runs between two of them can never be 'outside hours'. Every place named in steps must appear either here or in hours.",
     "places": [

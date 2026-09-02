@@ -1339,22 +1339,39 @@
   }
 
 
-  // Every run behind a chip that the cut-day choice lets through, measured the
-  // way the corner used to measure the selection: first start to last stop, in
-  // days. Distinct values collapse to a range.
+  // How much of a run happened before its first step: a crop that holds may
+  // already have been packed days earlier, and the sheet has no column for
+  // which day any particular case was. reference.json names the earliest
+  // weekday per crop and cut; the gap between that and where the run starts is
+  // what the count could stretch back by. Nothing here moves a bar -- the chart
+  // still draws the legs it was given.
+  function packBack(f, r) {
+    var by = ((window.REF || {}).packed_from || {})[f.crop || ''];
+    if (!by) return 0;
+    var from = DOW.indexOf(by[f.start] || '');
+    if (from < 0) return 0;
+    var first = (dowIdx(f.start) + dayOf(r.start) % 7 + 7) % 7;
+    return ((first - from) % 7 + 7) % 7;
+  }
+
+  // Every run behind a chip that the cut-day choice lets through: first step to
+  // last stop in days, widened at the far end by however long the crop may
+  // already have been sitting. The runs collapse to one span, lowest start to
+  // longest end -- the two cuts wait different lengths for the same boat, so a
+  // journey reads as the whole of what it can be rather than one of its halves.
   function daysOf(key) {
     var when = (S.sel || {}).when || [];
     var runs = F.filter(function (f) {
       return jrnKey(f) === key && (!when.length || when.indexOf(f.start) >= 0);
     });
-    var out = [];
+    var lo = null, hi = null;
     runs.forEach(function (f) {
-      var d = read(f).days;
-      if (out.indexOf(d) < 0) out.push(d);
+      var r = read(f), a = r.days, b = r.days + packBack(f, r);
+      if (lo === null || a < lo) lo = a;
+      if (hi === null || b > hi) hi = b;
     });
-    if (!out.length) return '';
-    out.sort(function (a, b) { return a - b; });
-    return '(' + (out.length > 1 ? out[0] + '\u2013' + out[out.length - 1] : out[0]) + ')';
+    if (lo === null) return '';
+    return '(' + (hi > lo ? lo + '\u2013' + hi : lo) + ')';
   }
 
   function jrnFor(key) {

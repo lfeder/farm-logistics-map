@@ -166,7 +166,8 @@ legs_text = open(os.path.join(HERE, "legs.csv")).read()
 data = json.load(open(os.path.join(HERE, "orders.json")))
 ref = {"hours": [hours[p] for p in hours_order], "sites": sites, "sailings": sailings,
        "hold": REF.get("hold", {}), "steps": REF.get("steps", {}),
-       "start_days": str(REF.get("start_days") or "0")}
+       "start_days": str(REF.get("start_days") or "0"),
+       "packed_from": REF.get("packed_from", {})}
 
 shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell
