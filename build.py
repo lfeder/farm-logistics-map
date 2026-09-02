@@ -23,6 +23,7 @@ Reads the sheet over the network; needs no credentials.
 """
 import csv
 import io
+import datetime
 import json
 import os
 import re
@@ -170,6 +171,8 @@ shell = open(os.path.join(HERE, "viewer", "index.html")).read()
 out = (shell
        .replace("/*__LEGS__*/", json.dumps(legs_text))
        .replace("/*__SHEET__*/", json.dumps(sheet_url))
+       .replace("/*__BUILT__*/",
+                datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z"))
        .replace("/*__REF__*/", json.dumps(ref, separators=(",", ":")))
        .replace("/*__DATA__*/", json.dumps(data, separators=(",", ":")))
        .replace("<style>/*__CSS__*/</style>",
