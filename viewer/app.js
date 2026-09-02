@@ -1104,7 +1104,7 @@
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
-  var TABS = [['flow', 'Flow'], ['orders', 'Orders'], ['hours', 'Hours']];
+  var TABS = [['flow', 'Map'], ['orders', 'Orders'], ['hours', 'Hours']];
   function paint() {
     seg('tabs', TABS, S.tab, function (v) { S.tab = v; save(); paint(); });
     TABS.forEach(function (t) {
@@ -1178,14 +1178,6 @@
                  winSpan(winOf(flow, o.pl));
         }).join('; ') + '.</div>';
     }
-    // How long it takes is a fact about one journey. Several of them have no
-    // single duration between them, so it is blank rather than averaged. The
-    // hours are on the task list a scroll below, so the chip row carries the
-    // one number you cannot get by looking at the chart -- reading five days
-    // off the axis means counting the midnight rules.
-    document.getElementById('jdays').innerHTML = flow.many ? '' :
-      '<b>' + r.days + '</b><small>' + (r.days === 1 ? 'day' : 'days') + '</small>';
-
     document.getElementById('warn').innerHTML = warn;
     document.getElementById('tnote').textContent =
       flow.tasks.length + ' legs · ' + (flow.branches || []).length + ' branches · ' +
@@ -1343,6 +1335,24 @@
   }
 
 
+  // Every run behind a chip that the cut-day choice lets through, measured the
+  // way the corner used to measure the selection: first start to last stop, in
+  // days. Distinct values collapse to a range.
+  function daysOf(key) {
+    var when = (S.sel || {}).when || [];
+    var runs = F.filter(function (f) {
+      return jrnKey(f) === key && (!when.length || when.indexOf(f.start) >= 0);
+    });
+    var out = [];
+    runs.forEach(function (f) {
+      var d = read(f).days;
+      if (out.indexOf(d) < 0) out.push(d);
+    });
+    if (!out.length) return '';
+    out.sort(function (a, b) { return a - b; });
+    return '(' + (out.length > 1 ? out[0] + '\u2013' + out[out.length - 1] : out[0]) + ')';
+  }
+
   function jrnFor(key) {
     for (var i = 0; i < F.length; i++) if (jrnKey(F[i]) === key) return F[i];
     return null;
@@ -1374,14 +1384,10 @@
     var host = document.getElementById('pick-jrns');
     if (!host) return;
     var crops = uniq(F.map(function (f) { return f.crop || ''; }));
-    // The day count rides inside the row rather than beside it. As a sibling
-    // of .picks it was a second flex item after one that fills the line, so it
-    // wrapped to a line of its own however short it got; inside, it is the item
-    // after the last chip and breaks only when the chips themselves do.
     host.innerHTML = crops.map(function (c, n) {
       return '<span class="lbl">' + esc(c) + '</span><span class="seg" id="pick-c' + n +
         '"></span>';
-    }).join('') + '<span class="res" id="jdays"></span>';
+    }).join('');
     crops.forEach(function (c, n) {
       var mine = F.filter(function (f) { return (f.crop || '') === c; });
       // Journeys to the same customer sit together: 140 twice over is one
@@ -1400,9 +1406,16 @@
       // In the journey's own colour, and in the stronger of its two shades: a
       // chip is the journey, not one run of it. Colour is the whole point of
       // the chip -- it is how you find that thread again in the chart.
+      //
+      // Under the name, how many days it takes. It used to be one figure beside
+      // the row, which meant it existed only while exactly one journey was on;
+      // per chip it is there for all of them at once, which is the comparison
+      // the row is for. A chip covers both cut days, so a journey whose two
+      // runs differ -- Kauai catches a different boat off each -- reads as a
+      // range rather than picking one.
       seg('pick-c' + n, opts.map(function (k) {
         var f = jrnFor(k);
-        return [k, f ? jrnLabel(f) : k, f ? 'j' + hueOf(f.name) + 'a' : ''];
+        return [k, f ? jrnLabel(f) : k, f ? 'j' + hueOf(f.name) + 'a' : '', daysOf(k)];
       }), S.sel.jrn || [], function (v) { toggle('jrn', v); });
     });
   }
@@ -1415,8 +1428,9 @@
     el.innerHTML = opts.map(function (o) {
       var on = chosen.some(function (c) { return String(o[0]) === String(c); });
       var tone = o[2] ? ' ' + o[2] : '';
+      var sub = o[3] ? '<small>' + esc(o[3]) + '</small>' : '';
       return '<a data-v="' + esc(o[0]) + '" class="' + esc((on ? 'on' : '') + tone) +
-        '">' + esc(o[1]) + '</a>';
+        '">' + esc(o[1]) + sub + '</a>';
     }).join('');
     [].slice.call(el.querySelectorAll('a')).forEach(function (a) {
       a.onclick = function () { cb(a.getAttribute('data-v')); };

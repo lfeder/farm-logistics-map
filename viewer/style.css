@@ -16,11 +16,11 @@ body{margin:0; background:var(--ground); color:var(--ink); font-size:15px; line-
   font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   -webkit-font-smoothing:antialiased}
 .wrap{max-width:1240px; margin:0 auto; padding:32px 24px 80px; display:flex; flex-direction:column; gap:24px}
-header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 28px;
-  border-bottom:2px solid var(--ink); padding-bottom:16px}
+header{display:flex; flex-wrap:wrap; align-items:center; gap:10px 20px;
+  border-bottom:2px solid var(--ink); padding-bottom:10px}
 h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .sub{color:var(--ink-2); font-size:14px; margin:2px 0 0}
-.built{margin:3px 0 0; font-family:"IBM Plex Mono",monospace; font-size:10.5px;
+.built{margin:0 0 0 auto; font-family:"IBM Plex Mono",monospace; font-size:10.5px;
   letter-spacing:.02em; color:var(--ink-3)}
 .panel{background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow)}
 .panel-hd{display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:13px 18px;
@@ -35,7 +35,8 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 .btn.solid{background:var(--ink); border-color:var(--ink); color:var(--card); font-weight:600}
 .btn.solid:hover{background:var(--accent); border-color:var(--accent); color:#fff}
 .seg{display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden}
-.seg a{padding:5px 12px; font-size:12.5px; color:var(--ink-2); cursor:pointer; white-space:nowrap;
+.seg a{padding:4px 12px; font-size:12.5px; color:var(--ink-2); cursor:pointer; white-space:nowrap;
+  display:flex; flex-direction:column; align-items:center; line-height:1.25;
   border-left:1px solid var(--line)}
 .seg a:first-child{border-left:none}
 .seg a.on{background:var(--accent); color:#fff; font-weight:600}
@@ -146,7 +147,7 @@ h1{margin:0; font-size:30px; font-weight:700; letter-spacing:-.02em}
 @media (max-width:1150px){ .tasks{overflow-x:auto} .grid{min-width:1120px} }
 
 /* ---------- tabs ---------- */
-.tabs{margin-left:auto}
+.tabs{margin-left:0}
 .page{display:flex; flex-direction:column; gap:24px}
 .page[hidden]{display:none}
 code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--card-2);
@@ -154,9 +155,8 @@ code{font-family:"IBM Plex Mono",monospace; font-size:.92em; background:var(--ca
 
 /* The day count, in the corner of the journey bar. Only ever filled for a
    single journey -- see app.js. */
-.res{display:flex; align-items:baseline; gap:5px; margin-left:4px}
-.res b{font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; line-height:1}
-.res small{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.seg a small{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:500;
+  opacity:.72; letter-spacing:.02em}
 
 /* ---------- the task list, now a reading rather than a form ---------- */
 .grid{display:grid; gap:0 10px; align-items:center;

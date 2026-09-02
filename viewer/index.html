@@ -11,22 +11,22 @@
 </head>
 <body>
 <div class="wrap">
+  <!-- One row: the name, what you are looking at, and which build it is. The
+       title had a line of its own and the tabs a line of their own, which cost
+       two rows of the window to four words and three buttons. -->
   <header>
-    <div>
-      <h1>Logistics Map</h1>
-      <!-- Which build you are looking at. GitHub Pages serves this with a ten
-           minute max-age and the dashboard is iframed inside aloha.ag, so a
-           stale copy is easy to mistake for a change that did not take. -->
-      <p class="built">built /*__BUILT__*/</p>
-    </div>
+    <h1>Logistics</h1>
     <nav class="seg tabs" id="tabs"></nav>
+    <!-- GitHub Pages serves this with a ten minute max-age and the dashboard is
+         iframed inside aloha.ag, so a stale copy is easy to mistake for a
+         change that did not take. -->
+    <p class="built">built /*__BUILT__*/</p>
   </header>
 
   <!-- Flow -->
   <section class="page" id="page-flow">
     <div class="panel">
       <div class="panel-hd">
-        <h2>Journey</h2>
         <span class="seg" id="pick-when"></span>
         <span class="picks" id="pick-jrns"></span>
         <span class="note" id="src"></span>
