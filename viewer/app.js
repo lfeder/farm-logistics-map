@@ -1246,6 +1246,30 @@
     return [f.crop || '', f.fob || '', f.transport || '', f.hold || ''].join('|');
   }
 
+  // Journeys that are in the sheet but that we do not want offered. Named by
+  // the columns that tell them apart -- the lettuce 140 that waits forty-eight
+  // hours, and the lettuce that flies to Oahu -- so a journey stays hidden
+  // through an edit to a column it is not named by.
+  //
+  // Hidden here rather than cut from legs.csv: the page reads the sheet itself
+  // on every load and the snapshot is only the fallback, so deleting a column
+  // would hide them until the next refresh and no longer.
+  var HIDDEN = [
+    { crop: 'lettuce', fob: '140', hold: '48h' },
+    { crop: 'lettuce', fob: 'oahu', transport: 'air' }
+  ];
+  function isHidden(f) {
+    for (var i = 0; i < HIDDEN.length; i++) {
+      var want = HIDDEN[i], all = true, k;
+      for (k in want) {
+        if (!Object.prototype.hasOwnProperty.call(want, k)) continue;
+        if (String(f[k] || '').trim().toLowerCase() !== want[k]) { all = false; break; }
+      }
+      if (all) return true;
+    }
+    return false;
+  }
+
   // A journey is named by its customer, plus whatever actually varies between
   // the journeys that share that customer. 140 always goes on our truck and
   // differs only by hold; off-island always holds fast and differs only by
@@ -1487,7 +1511,7 @@
         r.forEach(function (c) { if (c.trim().toLowerCase() === 'start dt') rowish = true; });
       });
       var legs = rowish ? legRows(text) : gridRows(text);
-      built = buildFlows(legs);
+      built = buildFlows(legs).filter(function (f) { return !isHidden(f); });
       built.hurt = legs.hurt || [];
     } catch (err) {
       why = String((err && err.message) || err);
